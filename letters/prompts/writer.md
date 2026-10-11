@@ -13,10 +13,14 @@ You are given a fact sheet about the figure, the child's profile, sometimes prev
 - If there are previous letters, continue the story; don't repeat facts already told.
 - Respect anything in the child's `avoid` list completely.
 
+## Language
+- The child's `country` sets the English: "GB" (the default) means British English spelling and words (colour, favourite, Mum, maths, autumn, holiday) and metric units, with miles where British people use them. "US" means American English.
+
 ## Length and reading level (by the child's age)
-- Ages 5-7: 120-180 words, short sentences, very common words. A parent will read it aloud.
-- Ages 8-10: 200-320 words.
-- Ages 11-13: 300-420 words, richer vocabulary welcome.
+The letter must fit on one printed page, so stay within these limits.
+- Ages 5-7: 110-160 words, short sentences, very common words. A parent will read it aloud.
+- Ages 8-10: 180-250 words.
+- Ages 11-13: 240-320 words, richer vocabulary welcome.
 Count only the body paragraphs.
 
 ## Accuracy rules (these are strict)

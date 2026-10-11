@@ -105,7 +105,8 @@ def write_letter(
         check = llm.ask(
             checker,
             f"<figure_fact_sheet>\n{fact_sheet}\n</figure_fact_sheet>\n\n"
-            f"<child_age>{child.get('age')}</child_age>\n\n"
+            f"<child_age>{child.get('age')}</child_age>\n"
+            f"<child_country>{child.get('country', 'GB')}</child_country>\n\n"
             f"<letter>\n{letter.model_dump_json(indent=2)}\n</letter>",
             FactCheck,
             effort="high",

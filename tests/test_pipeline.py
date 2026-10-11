@@ -136,3 +136,32 @@ class FigureSheetTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class UkPrintTests(unittest.TestCase):
+    def test_a4_with_clear_address_window_by_default(self):
+        html = render.render_html(make_letter(), "einstein", "Leo")
+        self.assertIn("size: A4", html)
+        self.assertIn('class="window"></div>', html)  # left clear for the print service
+        self.assertIn("with-window", html)
+
+    def test_home_print_fills_window_and_us_letter_has_none(self):
+        html = render.render_html(make_letter(), "einstein", "Leo", address_lines=["Leo's Family", "1 Example St"])
+        self.assertIn("Leo&#x27;s Family<br>1 Example St", html)
+        us = render.render_html(make_letter(), "einstein", "Leo", paper="LETTER", window=False)
+        self.assertIn("size: 8.5in 11in", us)
+        self.assertNotIn('class="window"', us)
+
+    def test_stannp_request_is_test_mode_unless_live(self):
+        from letters import mail
+        to = {"name": "Maya Smith", "line1": "1 Example Street", "town": "Bristol", "postcode": "BS1 4ST"}
+        fields = mail.stannp_fields(b"%PDF-1.4", to, live=False, first_class=False)
+        self.assertEqual(fields["test"], "true")
+        self.assertEqual(fields["size"], "A4")
+        self.assertEqual(fields["recipient[firstname]"], "Maya")
+        self.assertEqual(fields["recipient[lastname]"], "Smith")
+        self.assertEqual(fields["recipient[country]"], "GB")
+        self.assertNotIn("addons", fields)
+        live = mail.stannp_fields(b"%PDF-1.4", to, live=True, first_class=True)
+        self.assertEqual(live["test"], "false")
+        self.assertEqual(live["addons"], "FIRST_CLASS")

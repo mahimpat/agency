@@ -1,5 +1,7 @@
 # Market Research: "Letters from History"
 
+> **Launching in the UK?** This report covers the US market, where most competitors are. UK market, pricing and posting are in [`uk-launch.md`](uk-launch.md).
+
 *Research date: October 2026. This is desk research from public sources; figures marked (unverified) come from secondary or self-reported sources.*
 
 ## The idea

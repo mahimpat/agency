@@ -1,8 +1,12 @@
-"""Render a Letter as a printable, mail-ready HTML page (US Letter, front + back).
+"""Render a Letter as a printable, mail-ready HTML page (A4 or US Letter, front + back).
 
 Each figure gets stationery that fits their era, so a letter looks like a real
 object: a typed page from 1950s Princeton, an airmail note, papyrus, parchment.
-Fonts are embedded so the file prints identically anywhere (including Lob).
+Fonts are embedded so the file prints identically anywhere.
+
+UK print-and-post services (e.g. Stannp) mail A4 letters folded into window
+envelopes and print the recipient's address into a zone at the top left of the
+first page, so by default that zone is kept clear, like a real letter's layout.
 """
 
 import base64
@@ -101,12 +105,18 @@ def _font_faces() -> str:
 
 
 STYLE = """
-@page { size: 8.5in 11in; margin: 0; }
+@page { size: PAGE_SIZE; margin: 0; }
 * { box-sizing: border-box; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body { margin: 0; background: #d9d4c8; }
-.page { width: 8.5in; min-height: 11in; margin: 0 auto; position: relative;
-  padding: 0.95in 1in 0.85in; page-break-after: always; break-after: page; }
+.page { width: var(--pw); height: var(--ph); overflow: hidden; margin: 0 auto; position: relative;
+  padding: 0.9in 0.85in 0.75in; page-break-after: always; break-after: page; }
+/* Address window: kept clear for the print service, or filled for home printing.
+   Matches a UK DL/C5 window envelope position; check against your provider's guide. */
+.window { position: absolute; left: 20mm; top: 45mm; width: 95mm; height: 38mm;
+  font: 10.5pt/1.35 Georgia, 'Times New Roman', serif; color: #222; padding: 3mm 4mm; }
+.with-window { padding-top: 92mm; }
+.with-window .place { position: absolute; top: 48mm; right: 0.85in; max-width: 70mm; margin: 0; }
 .page + .page { margin-top: 0.3in; }
 @media print { body { background: none; } .page + .page { margin-top: 0; } }
 
@@ -125,7 +135,7 @@ body { margin: 0; background: #d9d4c8; }
 .typed .body, .typed .greeting, .typed .closing, .typed .place { text-shadow: 0 0 0.6px rgba(30,25,20,.55); }
 .typed .signature, .typed .ps { color: #1e2a55; }
 .typed .ps { font-family: 'Hand', cursive; font-size: 1.45em; line-height: 1.2; }
-.pencil { position: absolute; top: 1.55in; right: 0.38in; font-family: 'Hand', cursive; font-size: 22pt;
+.pencil { position: absolute; top: 0.75in; right: 0.38in; font-family: 'Hand', cursive; font-size: 22pt;
   color: #6f6c68; transform: rotate(8deg); opacity: .85; }
 
 /* 2. Amelia Earhart: handwritten in ink on airmail stationery */
@@ -159,11 +169,11 @@ body { margin: 0; background: #d9d4c8; }
     radial-gradient(ellipse at center, transparent 60%, rgba(120,80,30,.25) 100%),
     #eddcb6; }
 .parchment .signature { color: #4a2c14; }
-.sketch { position: absolute; right: 0.45in; bottom: 0.55in; width: 2.1in; color: #6b4524; opacity: .45; transform: rotate(-6deg); }
+.sketch { position: absolute; right: 0.4in; bottom: 0.3in; width: 1.7in; color: #6b4524; opacity: .45; transform: rotate(-6deg); }
 .mirror { font-family: 'Hand', cursive; font-size: 1.25em; transform: scaleX(-1); text-align: right; margin-top: 0.15in; color: #6b4524; }
 
 /* Back page: an archive index card with the real history, and room to write back */
-.back { height: 11in; display: flex; flex-direction: column; overflow: hidden; background: #fbfaf6; font-family: 'Typewriter', 'Courier New', monospace; color: #26231f; font-size: 11.5pt; line-height: 1.55; }
+.back { display: flex; flex-direction: column; overflow: hidden; background: #fbfaf6; font-family: 'Typewriter', 'Courier New', monospace; color: #26231f; font-size: 11.5pt; line-height: 1.55; }
 .card { background: #fffef9; border: 1px solid #d9d2c0; box-shadow: 0 1px 0 #ece6d6; padding: 0.28in 0.35in 0.2in; }
 .card h2 { font: inherit; font-size: 13pt; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 0.12in;
   padding-bottom: 0.1in; border-bottom: 1.5px solid #d65b5b; }
@@ -196,7 +206,32 @@ def _split_signoff(signoff: str) -> tuple[str, str]:
     return "", lines[0] if lines else ""
 
 
-def render_html(letter: Letter, figure: str, child_name: str) -> str:
+PAPER = {"A4": ("210mm", "297mm", "A4"), "LETTER": ("8.5in", "11in", "8.5in 11in")}
+
+# Shrinks the type a little at a time until the front fits on one sheet (runs at PDF time).
+FIT_SCRIPT = """<script>
+document.fonts.ready.then(() => {
+  const page = document.querySelector('.front');
+  let size = parseFloat(getComputedStyle(page).getPropertyValue('--size'));
+  while (page.scrollHeight > page.clientHeight + 1 && size > 8.5) {
+    size -= 0.25;
+    page.style.setProperty('--size', size + 'pt');
+  }
+});
+</script>"""
+
+
+def render_html(
+    letter: Letter,
+    figure: str,
+    child_name: str,
+    paper: str = "A4",
+    window: bool = True,
+    address_lines: list[str] | None = None,
+) -> str:
+    """paper: "A4" (UK) or "LETTER" (US). window: keep the envelope address zone clear.
+    address_lines: print this address in the window yourself (for printing at home)."""
+    pw, ph, page_size = PAPER[paper]
     theme = THEMES.get(figure) or {
         "name": figure.replace("-", " ").title(), "place": "", "class": "typed",
         "margin_note": "", "flourish": "",
@@ -206,7 +241,11 @@ def render_html(letter: Letter, figure: str, child_name: str) -> str:
     body = "\n".join(f"<p>{escape(p)}</p>" for p in letter.body)
     notes = "\n".join(f"<li>{escape(n)}</li>" for n in letter.real_history)
     ps = escape(letter.postscript.removeprefix("P.S.").strip())
-    style = STYLE.replace("GRAIN", GRAIN).replace("FIBERS_H", FIBERS_H).replace("FIBERS_V", FIBERS_V)
+    style = (STYLE.replace("PAGE_SIZE", page_size).replace("GRAIN", GRAIN)
+             .replace("FIBERS_H", FIBERS_H).replace("FIBERS_V", FIBERS_V))
+    window_html = ""
+    if window:
+        window_html = '<div class="window">' + "<br>".join(escape(x) for x in (address_lines or [])) + "</div>"
 
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -214,8 +253,9 @@ def render_html(letter: Letter, figure: str, child_name: str) -> str:
 <title>A letter from {escape(theme["name"])} to {escape(child_name)}</title>
 <style>{_font_faces()}
 {style}</style></head>
-<body>
-<section class="page {theme["class"]}" style="--size: {_font_size(letter)}">
+<body style="--pw: {pw}; --ph: {ph}">
+<section class="page front {theme["class"]}{" with-window" if window else ""}" style="--size: {_font_size(letter)}">
+  {window_html}
   {theme["margin_note"]}
   <div class="place">{escape(theme["place"])}</div>
   <div class="greeting">{escape(letter.greeting)}</div>
@@ -236,5 +276,6 @@ def render_html(letter: Letter, figure: str, child_name: str) -> str:
   </div>
   <div class="fine">Letters from History · Written with the help of AI, from verified historical facts, and checked for accuracy before printing.</div>
 </section>
+{FIT_SCRIPT}
 </body></html>
 """

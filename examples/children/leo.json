@@ -1,7 +1,14 @@
 {
   "name": "Leo",
   "age": 7,
-  "interests": ["airplanes", "Lego", "dinosaurs"],
+  "interests": [
+    "airplanes",
+    "Lego",
+    "dinosaurs"
+  ],
   "reading_level": "early reader; a parent reads aloud with him",
-  "avoid": ["anything scary about crashes"]
+  "avoid": [
+    "anything scary about crashes"
+  ],
+  "country": "GB"
 }
