@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Cancel subscription · {{ PRODUCT }}{% endblock %}
+{% block width %}narrow{% endblock %}
+{% block content %}
+<h1>Cancel {{ sub.child.first_name }}'s subscription?</h1>
+<div class="card">
+  <p><b>{{ PLANS[sub.plan].name }}</b>, {{ PLANS[sub.plan].price_label }}.</p>
+  <ul>
+    <li>You won't be charged again.</li>
+    <li>Letters already due for the month you've paid for are still written and posted.</li>
+    <li>You can change your mind until the end of that month.</li>
+  </ul>
+  <form method="post" action="/subscriptions/{{ sub.id }}/cancel" style="margin-top:16px">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button class="btn" type="submit">Cancel subscription</button>
+    <a class="btn ghost" href="/account" style="margin-left:8px">Keep it</a>
+  </form>
+</div>
+{% endblock %}

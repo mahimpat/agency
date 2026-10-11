@@ -8,7 +8,16 @@
   {% if sub.gift_id %}
   <p class="small">{% if trial_end %}The gift has already paid for this month, so your first payment is on <b>{{ trial_end.strftime('%-d %B %Y') }}</b>, when it runs out.{% else %}Letters carry on straight away.{% endif %}</p>
   {% endif %}
-  <p class="muted small">You'll pay securely with Stripe. We never see or store your card details. Your subscription renews monthly until you cancel, and you can cancel any time from your account.</p>
+  <h2 style="font-size:17px;margin-top:18px">Before you pay</h2>
+  <table class="small">
+    <tr><th>Price</th><td>{{ PLANS[sub.plan].price_label }}, including printing and UK postage</td></tr>
+    <tr><th>Each month</th><td>{% if PLANS[sub.plan].reply %}Two letters. When {{ sub.child.first_name }} writes back, the next letter answers them (up to 4 replies a month).{% else %}One personalised letter.{% endif %}</td></tr>
+    <tr><th>Payments</th><td>{% if trial_end %}First payment on {{ trial_end.strftime('%-d %B %Y') }}, then{% else %}Today, then{% endif %} on the same day each month until you cancel.</td></tr>
+    <tr><th>Cancelling</th><td>One click from your account, any time. You won't be charged again, and letters already paid for are still posted.</td></tr>
+    <tr><th>Reminders</th><td>We'll email you every 6 months to remind you the subscription is running and how to cancel.</td></tr>
+    <tr><th>14-day right</th><td>Cancel within 14 days of first subscribing, before any letter is posted, for a full refund. <a href="/terms" target="_blank">Terms</a></td></tr>
+  </table>
+  <p class="muted small">You'll pay securely with Stripe. We never see or store your card details.</p>
   {% if not user.email_verified_at %}
   <div class="flash">Please confirm your email first: open the link we sent to <b>{{ user.email }}</b>, then come back here.
     <form method="post" action="/verify/resend" style="margin:8px 0 0"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small" type="submit">Send the link again</button></form>

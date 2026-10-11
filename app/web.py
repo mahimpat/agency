@@ -6,8 +6,9 @@ Run locally:  uvicorn app.web:app --reload
 
 import json
 import logging
+import re
 import secrets
-from datetime import timedelta
+from datetime import date, timedelta
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, UploadFile
@@ -21,7 +22,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from letters import render
 
 from . import billing, gifts, google_auth, jobs, ratelimit
-from .config import COMPANY, FIGURE_ORDER, GIFT_OPTIONS, PLANS, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
+from .seasonal import christmas_notice
+from .config import COMPANY, FIGURE_ORDER, GIFT_OPTIONS, GIFT_SEND_AHEAD_DAYS, PLANS, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
 from .emails import send_email
 from .models import Child, Gift, Letter, Reply, SafeguardingRecord, Subscription, User, make_sessionmaker
 from .models import now as models_now
@@ -30,6 +32,7 @@ from .security import (csrf_ok, csrf_token, hash_password, make_reset_token, mak
 from .storage import content_type, get_storage
 
 log = logging.getLogger("letters.web")
+SOURCE_CHARS = re.compile(r"[^a-z0-9_.\-]+")
 HERE = Path(__file__).parent
 MAX_UPLOAD = 10 * 1024 * 1024
 PHOTO_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
@@ -133,14 +136,33 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if not csrf_ok(request.session, form.get("csrf")):
             raise HTTPException(400, "Your session expired. Go back, refresh the page and try again.")
 
+    def remember_source(request: Request) -> None:
+        """First visit only: note which link brought this person (?ref= or utm_source), so the admin can
+        see which channels lead to paying families. Kept in the session cookie until they sign up."""
+        if "src" in request.session:
+            return
+        q = request.query_params
+        source = SOURCE_CHARS.sub("-", (q.get("ref") or q.get("utm_source") or "").lower()).strip("-")[:100]
+        if not source:
+            return
+        campaign = "/".join(SOURCE_CHARS.sub("-", (q.get(k) or "").lower()).strip("-")
+                            for k in ("utm_medium", "utm_campaign") if q.get(k))[:200]
+        request.session["src"] = {"source": source, "campaign": campaign, "landing": request.url.path[:200]}
+
+    def source_fields(request: Request) -> dict:
+        src = request.session.get("src") or {}
+        return {"source": src.get("source", ""), "campaign": src.get("campaign", "")}
+
     def page(request: Request, template: str, status_code: int = 200, **context) -> HTMLResponse:
+        remember_source(request)
         db = SessionLocal()
         try:
             user = current_user(request, db)
             flashes = request.session.pop("flash", [])
             return templates.TemplateResponse(request, template, {
                 "user": user, "csrf": csrf_token(request.session), "flashes": flashes,
-                "redeeming": request.session.get("gift_code"), **context},
+                "redeeming": request.session.get("gift_code"),
+                "christmas": christmas_notice(models_now().date()), **context},
                 status_code=status_code)
         finally:
             db.close()
@@ -228,7 +250,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if errors:
             return page(request, "signup.html", 400, errors=errors, plan=plan, name=name, email=email)
         user = User(email=email, name=name.strip()[:120], password_hash=hash_password(password),
-                    marketing_opt_in=marketing)
+                    marketing_opt_in=marketing, landing=(request.session.get("src") or {}).get("landing", ""),
+                    **source_fields(request))
         db.add(user)
         db.commit()
         send_verification(user)
@@ -323,7 +346,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             flash(request, "You already have an account. Please sign in.")
             return RedirectResponse("/login", status_code=303)
         user = User(email=profile["email"], name=(name.strip() or profile["name"] or "there")[:120], password_hash="",
-                    google_sub=profile["sub"], email_verified_at=models_now(), marketing_opt_in=marketing)
+                    google_sub=profile["sub"], email_verified_at=models_now(), marketing_opt_in=marketing,
+                    landing=(request.session.get("src") or {}).get("landing", ""), **source_fields(request))
         db.add(user)
         db.commit()
         login(request, user)
@@ -399,14 +423,15 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     def gift_form(request: Request, cancelled: str = ""):
         if cancelled:
             flash(request, "Payment was cancelled, so nothing was charged. You can try again below.")
-        return page(request, "gift.html", options=GIFT_OPTIONS, form={"months": 6})
+        return page(request, "gift.html", options=GIFT_OPTIONS, form={"months": 6, "delivery": "me"})
 
     @app.post("/gift", dependencies=[Depends(check_csrf)])
     def gift_buy(request: Request, db: Session = Depends(db_session), months: int = Form(0),
                  buyer_name: str = Form(""), buyer_email: str = Form(""), child_first_name: str = Form(""),
-                 message: str = Form(""), agree: bool = Form(False)):
-        form = dict(months=months, buyer_name=buyer_name, buyer_email=buyer_email,
-                    child_first_name=child_first_name, message=message)
+                 message: str = Form(""), agree: bool = Form(False), delivery: str = Form("me"),
+                 recipient_email: str = Form(""), send_on: str = Form("")):
+        form = dict(months=months, buyer_name=buyer_name, buyer_email=buyer_email, child_first_name=child_first_name,
+                    message=message, delivery=delivery, recipient_email=recipient_email, send_on=send_on)
         if limited(request, db, "gift_ip", client_ip(request)):
             return too_many(request)
         email = buyer_email.strip().lower()
@@ -419,11 +444,25 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             errors.append("Enter a valid email address: we send the gift certificate there.")
         if len(message) > 300:
             errors.append("Keep the message to 300 characters so it fits on the certificate.")
+        send_date = None
+        if delivery == "email":
+            recipient = recipient_email.strip().lower()
+            if "@" not in recipient or "." not in recipient.split("@")[-1]:
+                errors.append("Enter the family's email address, or choose to send the gift yourself.")
+            try:
+                send_date = date.fromisoformat(send_on)
+            except ValueError:
+                errors.append("Choose the day we should email the gift.")
+            else:
+                if not models_now().date() <= send_date <= models_now().date() + timedelta(days=GIFT_SEND_AHEAD_DAYS):
+                    errors.append(f"Choose a day between today and {GIFT_SEND_AHEAD_DAYS} days from now.")
         if not agree:
             errors.append("Please confirm you've read the privacy policy and agree to the terms.")
         if errors:
             return page(request, "gift.html", 400, errors=errors, options=GIFT_OPTIONS, form=form)
-        gift = gifts.create_gift(db, months, buyer_name, email, child_first_name, message)
+        gift = gifts.create_gift(db, months, buyer_name, email, child_first_name, message,
+                                 recipient_email=recipient_email if send_date else "", send_on=send_date,
+                                 **source_fields(request))
         try:
             url = gifts.checkout_url(settings, db, gift)
         except Exception:  # noqa: BLE001
@@ -606,6 +645,54 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             flash(request, "We couldn't start checkout just now. Please try again in a moment.")
             return RedirectResponse(f"/checkout/{sub_id}", status_code=303)
         return RedirectResponse(url, status_code=303)
+
+    def _own_paid_sub(db: Session, user: User, sub_id: int) -> Subscription:
+        sub = db.get(Subscription, sub_id)
+        if not sub or sub.user_id != user.id or not sub.stripe_subscription_id:
+            raise HTTPException(404)
+        return sub
+
+    @app.get("/subscriptions/{sub_id}/cancel", response_class=HTMLResponse)
+    def cancel_page(request: Request, sub_id: int, user: User = Depends(require_user),
+                    db: Session = Depends(db_session)):
+        return page(request, "cancel.html", sub=_own_paid_sub(db, user, sub_id))
+
+    @app.post("/subscriptions/{sub_id}/cancel", dependencies=[Depends(check_csrf)])
+    def cancel_subscription(request: Request, sub_id: int, user: User = Depends(require_user),
+                            db: Session = Depends(db_session)):
+        sub = _own_paid_sub(db, user, sub_id)
+        if sub.status not in ("canceled", "incomplete_expired") and not sub.cancel_at:
+            try:
+                ends = billing.set_cancel_at_period_end(settings, sub, True)
+            except Exception:  # noqa: BLE001
+                log.exception("Cancel failed")
+                flash(request, "We couldn't cancel just now. Please try again, or email us and we'll do it for you.")
+                return RedirectResponse("/account", status_code=303)
+            db.commit()
+            when = f"{ends:%-d %B %Y}" if ends else "the end of the month you've paid for"
+            send_email(settings, user.email, f"{sub.child.first_name}'s subscription is cancelled",
+                       f"Hello {user.name},\n\nYou've cancelled {sub.child.first_name}'s {PLANS[sub.plan]['name']} "
+                       f"subscription. You won't be charged again. Letters already due are still posted, and the "
+                       f"subscription ends on {when}.\n\nChanged your mind? You can keep it from your account "
+                       f"before then: {settings.base_url}/account\n\nLetters from History")
+            flash(request, f"Cancelled. You won't be charged again. {sub.child.first_name}'s subscription ends on {when}. "
+                           "We've emailed you a confirmation.")
+        return RedirectResponse("/account", status_code=303)
+
+    @app.post("/subscriptions/{sub_id}/keep", dependencies=[Depends(check_csrf)])
+    def keep_subscription(request: Request, sub_id: int, user: User = Depends(require_user),
+                          db: Session = Depends(db_session)):
+        sub = _own_paid_sub(db, user, sub_id)
+        if sub.cancel_at and sub.cancel_at > models_now():
+            try:
+                billing.set_cancel_at_period_end(settings, sub, False)
+            except Exception:  # noqa: BLE001
+                log.exception("Undo cancel failed")
+                flash(request, "We couldn't do that just now. Please try again in a moment.")
+                return RedirectResponse("/account", status_code=303)
+            db.commit()
+            flash(request, f"Great, {sub.child.first_name}'s letters will carry on.")
+        return RedirectResponse("/account", status_code=303)
 
     @app.post("/billing", dependencies=[Depends(check_csrf)])
     def billing_portal(request: Request, user: User = Depends(require_user), db: Session = Depends(db_session)):
@@ -936,6 +1023,42 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         except Exception as e:  # noqa: BLE001
             flash(request, f"Couldn't resend letter {letter.id}: {e}")
         return RedirectResponse("/admin", status_code=303)
+
+    @app.get("/admin/sources", response_class=HTMLResponse)
+    def sources_report(request: Request, days: int = 90, admin: User = Depends(require_admin),
+                       db: Session = Depends(db_session)):
+        """Which links bring paying families: sign-ups, paying and still-paying, and gifts, by source."""
+        since = models_now() - timedelta(days=days) if days > 0 else None
+        users = db.scalars(select(User).where(User.is_admin.is_(False))).all()
+        gifts_sold = db.scalars(select(Gift).where(Gift.status.in_(["paid", "redeemed", "expired"]))).all()
+        rows: dict[str, dict] = {}
+
+        def row(source: str) -> dict:
+            return rows.setdefault(source or "(direct or unknown)", {
+                "signups": 0, "paying": 0, "active": 0, "monthly_pence": 0, "gifts": 0, "gift_pence": 0, "campaigns": set()})
+
+        for u in users:
+            if since and u.created_at < since:
+                continue
+            r = row(u.source)
+            r["signups"] += 1
+            if u.campaign:
+                r["campaigns"].add(u.campaign)
+            paid = [sub for sub in u.subscriptions if sub.started_at]
+            if paid:
+                r["paying"] += 1
+            live = [sub for sub in paid if sub.status in ("active", "trialing", "past_due") and not sub.cancel_at]
+            if live:
+                r["active"] += 1
+                r["monthly_pence"] += sum(PLANS[sub.plan]["pence"] for sub in live)
+        for g in gifts_sold:
+            if since and g.created_at < since:
+                continue
+            r = row(g.source)
+            r["gifts"] += 1
+            r["gift_pence"] += g.price_pence
+        table = sorted(rows.items(), key=lambda kv: (-kv[1]["paying"] - kv[1]["gifts"], -kv[1]["signups"]))
+        return page(request, "sources.html", table=table, days=days)
 
     @app.get("/admin/safeguarding", response_class=HTMLResponse)
     def safeguarding_log(request: Request, admin: User = Depends(require_admin), db: Session = Depends(db_session)):

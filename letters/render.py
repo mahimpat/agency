@@ -137,6 +137,16 @@ MOON_SKETCH = """<svg class="sketch tall" viewBox="0 0 140 140" aria-hidden="tru
 <path d="M8 128 H132" stroke-width=".7"/>
 </g></svg>"""
 
+CHEESE_SKETCH = """<svg class="sketch" viewBox="0 0 200 130" aria-hidden="true">
+<g fill="none" stroke="currentColor" stroke-linecap="round">
+<ellipse cx="80" cy="56" rx="54" ry="16" stroke-width="1.5"/>
+<path d="M26 56 v28 c 0 9, 24 16, 54 16 s 54 -7, 54 -16 v-28" stroke-width="1.5"/>
+<path d="M80 56 L 128 46 M80 56 L 116 68" stroke-width="1.1"/>
+<path d="M40 74 q 6 2 10 0 M96 86 q 6 2 10 0 M62 90 q 4 2 8 0" stroke-width=".7"/>
+<path d="M150 18 L 176 104 M146 20 q 4 -10 14 -4 M168 96 l 18 -6 l 6 18 l -18 6 z" stroke-width="1.2"/>
+<path d="M10 116 q 40 -8 90 -2 t 90 0" stroke-width=".7" stroke-dasharray="3 4"/>
+</g></svg>"""
+
 THEMES = {
     "einstein": {
         "name": "Albert Einstein",
@@ -210,6 +220,10 @@ THEMES = {
     "al-khwarizmi": {
         "name": "Al-Khwarizmi", "place": "The House of Wisdom, Baghdad", "class": "parchment",
         "margin_note": '<div class="translated">Translated from the Arabic</div>', "flourish": "",
+    },
+    "samuel-pepys": {
+        "name": "Samuel Pepys", "place": "Seething Lane, London", "class": "parchment",
+        "margin_note": CHEESE_SKETCH, "flourish": "",
     },
     "walter-tull": {
         "name": "Walter Tull", "place": "Northampton", "class": "victorian",

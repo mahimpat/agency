@@ -8,7 +8,7 @@ and then the family can carry on with a normal monthly subscription.
 
 import secrets
 import tempfile
-from datetime import timedelta
+from datetime import date, datetime, time, timedelta
 from html import escape
 from pathlib import Path
 
@@ -48,10 +48,14 @@ def months_label(months: int) -> str:
 # --- Buying -------------------------------------------------------------------
 
 def create_gift(db: Session, months: int, buyer_name: str, buyer_email: str, child_first_name: str,
-                message: str) -> Gift:
+                message: str, recipient_email: str = "", send_on: date | None = None, source: str = "",
+                campaign: str = "") -> Gift:
     gift = Gift(code=new_code(db), months=months, price_pence=GIFT_OPTIONS[months],
                 buyer_name=buyer_name.strip()[:120], buyer_email=buyer_email.strip().lower()[:320],
-                child_first_name=child_first_name.strip()[:60], message=message.strip()[:300])
+                child_first_name=child_first_name.strip()[:60], message=message.strip()[:300],
+                recipient_email=recipient_email.strip().lower()[:320] if send_on else "",
+                send_on=datetime.combine(send_on, time(0, 0)) if send_on and recipient_email else None,
+                source=source, campaign=campaign)
     db.add(gift)
     db.commit()
     return gift
@@ -105,10 +109,41 @@ def mark_paid(settings: Settings, db: Session, gift: Gift, payment_intent: str |
                f"{' to ' + gift.child_first_name if gift.child_first_name else ''}!\n\n"
                f"Your printable gift certificate: {link}\n\nGift code: {gift.code}\n"
                f"{months_label(gift.months)} of Pen Pal from History. Redeem by {gift.expires_at:%d %B %Y} at "
-               f"{settings.base_url}/redeem\n\nPrint the certificate for a card, or forward this email to the "
-               "child's parent. They'll add the child's details when they redeem it; no card is needed.\n\n"
-               "Letters from History")
+               f"{settings.base_url}/redeem\n\n"
+               + (f"We'll email the gift to {gift.recipient_email} on {gift.send_on:%A %-d %B}."
+                  " You can print the certificate too, if you'd like to give it in a card.\n\n"
+                  if gift.send_on else
+                  "Print the certificate for a card, or forward this email to the child's parent. They'll add the "
+                  "child's details when they redeem it; no card is needed.\n\n")
+               + "Letters from History")
+    send_due_to_recipients(settings, db)
     return True
+
+
+def send_due_to_recipients(settings: Settings, db: Session) -> int:
+    """Email gifts to the families on the day the buyer chose. The address is cleared once sent."""
+    sent = 0
+    due = db.scalars(select(Gift).where(Gift.status == "paid", Gift.send_on.is_not(None),
+                                        Gift.sent_to_recipient_at.is_(None), Gift.send_on <= now())).all()
+    for gift in due:
+        if not gift.recipient_email:
+            continue
+        link = f"{settings.base_url}/gift/certificate/{certificate_token(settings, gift)}"
+        who = gift.child_first_name or "your child"
+        send_email(settings, gift.recipient_email, f"A gift for {who} from {gift.buyer_name}",
+                   f"Hello,\n\n{gift.buyer_name} has given {who} {months_label(gift.months)} of Letters from History: "
+                   "real letters through the letterbox from history's great minds, written just for them. When "
+                   "they write back, the next letter answers.\n\n"
+                   + (f"Their message: \"{gift.message}\"\n\n" if gift.message else "")
+                   + f"The gift certificate (print it if you like): {link}\n\nGift code: {gift.code}\n"
+                   f"To start, a parent or guardian redeems the code at {settings.base_url}/redeem and adds the child's "
+                   f"details and a UK address. No card is needed. Please redeem by {gift.expires_at:%d %B %Y}.\n\n"
+                   "Letters from History")
+        gift.sent_to_recipient_at = now()
+        gift.recipient_email = ""
+        sent += 1
+    db.commit()
+    return sent
 
 
 def confirm_from_stripe(settings: Settings, db: Session, session_id: str, to_pdf) -> Gift | None:
@@ -217,9 +252,10 @@ def redeem(db: Session, gift: Gift, sub: Subscription, user_id: int) -> None:
 # --- The daily job ---------------------------------------------------------------
 
 def run_gift_months(db: Session, settings: Settings) -> None:
-    """Add each gift month's letters; email before the last month; end gifts that are used up;
-    expire codes that were never redeemed."""
+    """Send gifts scheduled for today; add each gift month's letters; email before the last month;
+    end gifts that are used up; expire codes that were never redeemed."""
     from .billing import grant_credits
+    send_due_to_recipients(settings, db)
     subs = db.scalars(select(Subscription).where(Subscription.gift_id.is_not(None),
                                                  Subscription.stripe_subscription_id.is_(None),
                                                  Subscription.status == "active",

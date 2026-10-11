@@ -41,6 +41,14 @@
   {% elif sub and sub.status in ['pending', 'canceled', 'incomplete_expired'] %}
     <p><a class="btn" href="/checkout/{{ sub.id }}">{% if sub.status == 'pending' %}Finish setting up{% else %}Restart{% endif %} {{ PLANS[sub.plan].name }}</a></p>
   {% endif %}
+  {% if sub and sub.stripe_subscription_id and sub.status in ['active', 'trialing', 'past_due'] %}
+    {% if sub.cancel_at %}
+    <div class="flash" style="margin:12px 0">Cancelled: {{ child.first_name }}'s subscription ends on {{ sub.cancel_at.strftime('%-d %B %Y') }} and you won't be charged again.
+      <form method="post" action="/subscriptions/{{ sub.id }}/keep" style="display:inline;margin:0 0 0 8px"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small" type="submit">Keep it going</button></form></div>
+    {% else %}
+    <p class="small"><a href="/subscriptions/{{ sub.id }}/cancel">Cancel subscription</a></p>
+    {% endif %}
+  {% endif %}
   {% if sub and sub.status == 'past_due' %}
     <p class="small">Your last payment didn't go through. Update your card under "Manage billing" below so letters keep coming.</p>
   {% endif %}

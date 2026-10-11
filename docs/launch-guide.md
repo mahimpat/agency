@@ -81,7 +81,7 @@ Run the tests any time: `python -m unittest discover -s tests` (no API keys need
 |---|---|---|
 | Web app | Render, Railway or Fly.io, deployed from the `Dockerfile` | The image includes Chromium for PDFs. Attach a **persistent disk at `/data`**, which holds uploads and letter PDFs |
 | Database | **Supabase Postgres (London region)** or the host's Postgres | Set `DATABASE_URL` to the connection string. Gives managed backups. Tables are created on first start |
-| Daily job | The host's cron, or a free scheduler such as cron-job.org | Once a day: `curl -X POST https://YOUR-DOMAIN/internal/run-due -H "Authorization: Bearer $CRON_SECRET"` |
+| Daily job | The host's cron, or a free scheduler such as cron-job.org | Once a day, early morning UK time (e.g. 6am, so scheduled gift emails arrive on the morning of the chosen day): `curl -X POST https://YOUR-DOMAIN/internal/run-due -H "Authorization: Bearer $CRON_SECRET"` |
 | Email | Postmark, Resend or Brevo (SMTP) | Fill in the `SMTP_*` settings. Without them, password-reset links only appear in the server log |
 
 Production settings that matter:
@@ -128,6 +128,9 @@ Fix anything marked FAIL before going live. Run it again after every deploy.
 - [ ] Set `LIVE_MAIL=true`. Approved letters are now really printed and posted.
 - [ ] Keep `REVIEW_ALL=true` until you trust the letters. Then set it to `false`, and only letters the fact-checker flags (and held replies) will wait for you.
 - [ ] Check `/admin` every day: letters to check, held replies, failed sends.
+- [ ] Put a label on every link you share, e.g. `https://YOUR-DOMAIN/?ref=fb-homeed-1` or `?utm_source=meta&utm_campaign=xmas`. **Admin → Where families come from** shows sign-ups, paying families and gifts for each one. Divide what you spent on a channel by its paying families: stop channels above £35.
+- [ ] Each autumn, check Royal Mail's last 2nd class posting date for Christmas and set `CHRISTMAS_LAST_ORDER` about 6 working days before it. The notice shows on the site from 1 November.
+- [ ] UK subscription rules (DMCC Act, expected from January 2027): the app already shows the key terms before payment, offers one-click cancel with an email confirmation, and sends a reminder every 6 months. When the final regulations and guidance are published, check the wording and timing (`app/reminders.py`, `checkout.html`).
 
 ## Safeguarding (before the first real child's letter)
 

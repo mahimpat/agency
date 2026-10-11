@@ -25,7 +25,7 @@ from letters import llm, mail, pdf, pipeline, render
 
 from .config import (FIGURE_ORDER, LETTERS_PER_FIGURE, PARENT_REWRITES_PER_MONTH, PLANS, PREVIEW_HOURS,
                      REPLY_WAIT_DAYS, RETENTION_DAYS, Settings)
-from . import gifts, ratelimit
+from . import gifts, ratelimit, reminders
 from .emails import send_email
 from .models import Child, JobLock, Letter, Reply, SafeguardingRecord, Subscription, User, now
 from .storage import get_storage
@@ -426,6 +426,7 @@ def _run_due(db: Session, settings: Settings, services: Services) -> RunSummary:
     ratelimit.prune(db)
     apply_retention(db, settings)
     gifts.run_gift_months(db, settings)  # gift subscriptions get each month's letters here
+    reminders.run_reminders(db, settings)  # 6-monthly "your subscription continues" emails
     # Letters whose parent preview window has ended are posted, as promised.
     overdue = db.scalars(select(Letter).where(Letter.status == "awaiting_parent", Letter.preview_deadline <= now())).all()
     for letter in overdue:

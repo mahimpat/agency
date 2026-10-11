@@ -19,7 +19,7 @@ from .config import PLANS, Settings
 from .models import make_sessionmaker
 from .storage import get_storage
 
-EXPECTED_PENCE = {"story": 700, "penpal": 1200}
+EXPECTED_PENCE = {plan: p["pence"] for plan, p in PLANS.items()}
 
 
 @dataclass

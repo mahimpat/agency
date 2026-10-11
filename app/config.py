@@ -10,9 +10,9 @@ PRODUCT = "Letters from History"
 # Letters each paid billing period buys. Pen Pal's second letter answers the
 # child's reply, or becomes a follow-up story letter if no reply comes in time.
 PLANS = {
-    "story": {"name": "Story Letters", "price_label": "£7 a month", "story": 1, "reply": 0,
+    "story": {"name": "Story Letters", "price_label": "£7 a month", "pence": 700, "story": 1, "reply": 0,
               "price_env": "STRIPE_PRICE_STORY"},
-    "penpal": {"name": "Pen Pal from History", "price_label": "£12 a month", "story": 1, "reply": 1,
+    "penpal": {"name": "Pen Pal from History", "price_label": "£12 a month", "pence": 1200, "story": 1, "reply": 1,
                "price_env": "STRIPE_PRICE_PENPAL"},
 }
 
@@ -20,13 +20,14 @@ PLANS = {
 GIFT_OPTIONS = {3: 3600, 6: 6900, 12: 13200}
 GIFT_VALID_DAYS = 365
 GIFT_MONTH_DAYS = 30  # each gift month adds a month of Pen Pal letters
+GIFT_SEND_AHEAD_DAYS = 120  # buyers can schedule the gift email up to this far ahead
 
 # Each child spends a few months with one pen pal, then meets the next.
 # Starts with UK curriculum favourites; the first pen pal is a fossil hunter, because dinosaurs.
 # Mixed so that science, engineering, exploration, leaders and the arts take turns.
 FIGURE_ORDER = [
     "mary-anning", "isambard-kingdom-brunel", "ada-lovelace", "grace-darling", "neil-armstrong",
-    "florence-nightingale", "charles-darwin", "elizabeth-i", "george-stephenson", "mary-seacole",
+    "florence-nightingale", "samuel-pepys", "charles-darwin", "elizabeth-i", "george-stephenson", "mary-seacole",
     "isaac-newton", "william-shakespeare", "walter-tull", "al-khwarizmi", "emmeline-pankhurst",
     "einstein", "amelia-earhart", "leonardo-da-vinci", "cleopatra",
 ]

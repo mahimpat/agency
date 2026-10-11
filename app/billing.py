@@ -6,7 +6,7 @@ period that has been paid for.
 """
 
 import logging
-from datetime import timedelta, timezone
+from datetime import datetime, timedelta, timezone
 
 import stripe
 from sqlalchemy import select
@@ -80,6 +80,26 @@ def portal_url(settings: Settings, db: Session, user: User) -> str:
     customer = ensure_customer(settings, db, user)
     portal = stripe.billing_portal.Session.create(customer=customer, return_url=f"{settings.base_url}/account")
     return portal.url
+
+
+def _from_timestamp(value) -> datetime | None:
+    return datetime.fromtimestamp(value, timezone.utc).replace(tzinfo=None) if value else None
+
+
+def set_cancel_at_period_end(settings: Settings, sub: Subscription, cancel: bool) -> datetime | None:
+    """One-click cancel (or undo): letters continue until the end of the month already paid for.
+    Returns when the subscription ends, or None if it will carry on."""
+    _configure(settings)
+    if not sub.stripe_subscription_id:
+        raise RuntimeError("This subscription isn't billed through Stripe.")
+    result = stripe.Subscription.modify(sub.stripe_subscription_id, cancel_at_period_end=cancel)
+    result = result.to_dict() if hasattr(result, "to_dict") else result
+    sub.cancel_at = _from_timestamp(result.get("cancel_at")) if cancel else None
+    if cancel and not sub.cancel_at:
+        # Newer API versions keep the period end on the subscription item.
+        items = (result.get("items") or {}).get("data") or [{}]
+        sub.cancel_at = _from_timestamp(result.get("current_period_end") or items[0].get("current_period_end"))
+    return sub.cancel_at
 
 
 def cancel_all(settings: Settings, user: User) -> None:
@@ -183,6 +203,8 @@ def handle_event(db: Session, event: dict, settings_prices: dict | None = None, 
             if stripe_id and not sub.stripe_subscription_id:
                 sub.stripe_subscription_id = stripe_id
             sub.status = "active"
+            if not sub.started_at:
+                sub.started_at = now()  # paid billing starts: the 6-monthly reminders count from here
             grant_credits(sub)
             outcome = f"credited subscription {sub.id}"
 
@@ -198,6 +220,8 @@ def handle_event(db: Session, event: dict, settings_prices: dict | None = None, 
         if sub:
             sub.stripe_subscription_id = obj.get("id")
             sub.status = "canceled" if kind.endswith("deleted") else obj.get("status", sub.status)
+            # A cancellation booked for the end of the paid month (from our account page or Stripe's portal).
+            sub.cancel_at = None if kind.endswith("deleted") else _from_timestamp(obj.get("cancel_at"))
             outcome = f"status {sub.status} {sub.id}"
             # The parent may have switched plan in the billing portal: follow the price.
             new_plan = _plan_for(settings_prices, _subscription_price(obj)) if settings_prices else None

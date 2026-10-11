@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Where families come from · {{ PRODUCT }}{% endblock %}
+{% block content %}
+<h1>Where families come from</h1>
+<p class="small muted">Recorded from the first link someone used (<code>?ref=</code> or <code>utm_source</code>, plus <code>utm_medium</code>/<code>utm_campaign</code>).
+  Divide what you spent on a channel by its "Paying" number to get cost per paying family. The marketing plan stops a channel above £35.</p>
+<p class="small">Show:
+  {% for d, label in [(30, 'last 30 days'), (90, 'last 90 days'), (0, 'all time')] %}
+  {% if d == days %}<b>{{ label }}</b>{% else %}<a href="/admin/sources?days={{ d }}">{{ label }}</a>{% endif %}{% if not loop.last %} · {% endif %}
+  {% endfor %}</p>
+<table>
+  <tr><th>Source</th><th>Sign-ups</th><th>Paying</th><th>% paying</th><th>Still paying</th><th>Monthly income</th><th>Gifts sold</th><th>Gift income</th></tr>
+  {% for source, r in table %}
+  <tr><td><b>{{ source }}</b>{% if r.campaigns %}<br><span class="small muted">{{ r.campaigns|sort|join(', ') }}</span>{% endif %}</td>
+    <td>{{ r.signups }}</td><td>{{ r.paying }}</td>
+    <td>{{ ((r.paying / r.signups * 100)|round|int ~ '%') if r.signups else '' }}</td>
+    <td>{{ r.active }}</td><td>£{{ '%.2f' % (r.monthly_pence / 100) }}</td>
+    <td>{{ r.gifts }}</td><td>£{{ '%.2f' % (r.gift_pence / 100) }}</td></tr>
+  {% else %}<tr><td colspan="8" class="muted">No sign-ups in this period.</td></tr>{% endfor %}
+</table>
+<p class="small muted">Example links: <code>/?ref=fb-homeed-1</code>, <code>/gift?utm_source=meta&amp;utm_medium=paid&amp;utm_campaign=xmas-grandparents</code>. <a href="/admin">Back to admin</a></p>
+{% endblock %}

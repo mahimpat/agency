@@ -26,6 +26,10 @@ class User(Base):
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     # Google account ID for "Sign in with Google" (the stable "sub" claim, not the email).
     google_sub: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    # Which link brought them (first visit): ?ref= or utm_source, the campaign, and the page they landed on.
+    source: Mapped[str] = mapped_column(String(100), default="", index=True)
+    campaign: Mapped[str] = mapped_column(String(200), default="")
+    landing: Mapped[str] = mapped_column(String(200), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     children: Mapped[list["Child"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -88,6 +92,11 @@ class Subscription(Base):
     gift_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     gift_months_left: Mapped[int] = mapped_column(Integer, default=0)
     next_credit_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    # Subscription rules (DMCC Act): when paid billing started, a cancellation that takes effect at
+    # the end of the paid month, and when we last sent the "your subscription continues" reminder.
+    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    cancel_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_reminder_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now, onupdate=now)
     user: Mapped[User] = relationship(back_populates="subscriptions")
@@ -155,6 +164,13 @@ class Gift(Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     redeemed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     redeemed_by_user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Optional: email the certificate to the family on a chosen day (e.g. Christmas morning).
+    # The address is cleared once it's sent.
+    recipient_email: Mapped[str] = mapped_column(String(320), default="")
+    send_on: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    sent_to_recipient_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    source: Mapped[str] = mapped_column(String(100), default="", index=True)
+    campaign: Mapped[str] = mapped_column(String(200), default="")
 
 
 class SafeguardingRecord(Base):

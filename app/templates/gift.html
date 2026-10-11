@@ -3,6 +3,7 @@
 {% block width %}narrow{% endblock %}
 {% block content %}
 <h1>Give Letters from History</h1>
+{% if christmas %}<div class="flash" role="note">{{ christmas.text }}</div>{% endif %}
 <p class="muted">A gift of Pen Pal from History: real letters through the letterbox from history's great minds, and when the child writes back, they answer. Pay once, with nothing to renew.</p>
 <form method="post" action="/gift" class="card">
   <input type="hidden" name="csrf" value="{{ csrf }}">
@@ -17,6 +18,17 @@
   <h2 style="margin-top:26px">The certificate</h2>
   <div class="field"><label for="child_first_name">Child's first name <span class="hint">(optional, printed on the certificate)</span></label><input type="text" id="child_first_name" name="child_first_name" value="{{ form.child_first_name or '' }}" maxlength="60"></div>
   <div class="field"><label for="message">A short message <span class="hint">(optional, up to 300 characters)</span></label><textarea id="message" name="message" maxlength="300">{{ form.message or '' }}</textarea></div>
+
+  <h2 style="margin-top:26px">How should it reach them?</h2>
+  <div class="choice field">
+    <label><input type="radio" name="delivery" value="me" {% if form.delivery != 'email' %}checked{% endif %}> <span><b>Send it to me</b>. I'll print the certificate or forward the email.</span></label>
+    <label><input type="radio" name="delivery" value="email" {% if form.delivery == 'email' %}checked{% endif %}> <span><b>Email it to the family on a day I choose</b>, e.g. a birthday or Christmas morning. You'll get a copy straight away too.</span></label>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="recipient_email">Parent's email <span class="hint">(only if we're emailing it)</span></label><input type="email" id="recipient_email" name="recipient_email" value="{{ form.recipient_email or '' }}" autocomplete="off"></div>
+    <div class="field"><label for="send_on">Day to send it</label><input type="date" id="send_on" name="send_on" value="{{ form.send_on or '' }}"></div>
+  </div>
+  <p class="small muted">We use the family's email only to send the gift, then delete it.</p>
 
   <h2 style="margin-top:26px">About you</h2>
   <div class="field"><label for="buyer_name">Your name <span class="hint">(as it should appear: "Granny and Grandpa" is fine)</span></label><input type="text" id="buyer_name" name="buyer_name" value="{{ form.buyer_name or '' }}" maxlength="120" required></div>
