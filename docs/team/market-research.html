@@ -1,0 +1,445 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><title>Letters from History: Market Research</title>
+<link rel="stylesheet" href="../../app/static/fonts.css">
+<style>
+@page { size: A4; margin: 16mm 17mm 18mm; @bottom-left { content: "Letters from History · Market research · Forem Innovations"; font: 8pt Lora, Georgia, serif; color: #8a8174; } @bottom-right { content: counter(page); font: 8pt Lora, Georgia, serif; color: #8a8174; } }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { color: #26221d; font: 10pt/1.5 'Lora', Georgia, serif; margin: 0; }
+h1 { font-family: 'IM Fell English', serif; font-weight: 400; font-size: 32pt; line-height: 1.05; margin: 0 0 3mm; }
+.part { break-before: page; }
+h2 { font-family: 'IM Fell English', serif; font-weight: 400; font-size: 19pt; margin: 8mm 0 3mm; break-after: avoid; border-top: 0.6pt solid #d6cbb5; padding-top: 5mm; }
+h3 { font-size: 11.5pt; margin: 5mm 0 1.5mm; color: #9f3328; break-after: avoid; }
+p { margin: 0 0 2.5mm; } ul, ol { margin: 0 0 3mm; padding-left: 5mm; } li { margin-bottom: 1mm; }
+blockquote { margin: 3mm 0 6mm; padding: 4mm 5mm; background: #f7f3ea; border-left: 2pt solid #9f3328; }
+blockquote p { margin: 0; }
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 8.6pt; }
+th, td { text-align: left; padding: 1.7mm 2.2mm; border-bottom: 0.6pt solid #d6cbb5; vertical-align: top; }
+th { border-bottom: 1.2pt solid #26221d; } tr { break-inside: avoid; }
+pre { background: #f7f3ea; padding: 3mm 4mm; font-size: 8.5pt; white-space: pre-wrap; }
+code { font-family: 'Special Elite', monospace; font-size: 8.8pt; }
+a { color: #9f3328; word-break: break-word; }
+</style></head><body>
+<h1>Market Research: Letters from History</h1><blockquote>
+<p><strong>About this document.</strong> Part 1 is our first market research (October 2026), done before we chose to launch in the UK. It looks mostly at US competitors and prices, which are still useful as a guide. <strong>Part 2 covers the UK</strong>, where we're launching: market size, printing and posting, costs in pounds, and UK rules. Current UK prices are <strong>£7</strong> (Story Letters) and <strong>£12</strong> (Pen Pal from History), replacing the US prices in Part 1.</p>
+</blockquote>
+
+<p><em>Research date: October 2026. This is desk research from public sources; figures marked (unverified) come from secondary or self-reported sources.</em></p>
+<h2>The idea</h2>
+<p>Kids receive real paper letters by mail from historical figures (Cleopatra, Einstein, Amelia Earhart...). AI agents write each letter for the child's age and interests, a print-and-mail API sends it, and the child can write back.</p>
+<h2>Verdict</h2>
+<p><strong>Demand: yes, proven. Market: niche but real. Opportunity: only with a clear differentiator.</strong></p>
+<ul>
+<li>Several small companies already sell history letters by mail to kids and families, and parents and homeschool reviewers like them. That proves people pay for this.</li>
+<li>But they compete at <strong>$6-9/month</strong>, so a "me too" version would struggle.</li>
+<li>Almost all existing services are <strong>one-way and the same letter for every child</strong>. A historical figure who <strong>actually reads your child's letter and answers their questions</strong> is something AI makes cheap and human-written services can't easily copy. That's the gap.</li>
+</ul>
+<p><strong>Recommendation: GO, but validate first</strong> with a landing page and 20 founding families before building the full system (see "Validation plan").</p>
+<h2>1. Competitors</h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>What it is</th>
+<th>Price</th>
+<th>Personalized?</th>
+<th>Kids can write back?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Heritage Letter</td>
+<td>Monthly letter from an American historical figure + card/artifact; homeschool focus</td>
+<td>~$5.50-6/mo</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Letters From Afar</td>
+<td>Monthly illustrated letters from a world-traveling explorer; loved by homeschoolers</td>
+<td>~$6-8/mo</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>History By Mail</td>
+<td>Replicas of real historical letters/documents</td>
+<td>$6.99/mo, $71.99/yr</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Post from the Past</td>
+<td>Illustrated letters from figures like Einstein, Curie, Earhart (also sold as Etsy PDFs)</td>
+<td>~$9/mo</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Noah's Letters</td>
+<td>World history letters, ages 7-11, with maps and activities</td>
+<td>n/a</td>
+<td>Partly</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Pen Pals from the Past</td>
+<td>"Personalized, history-inspired letters for kids"</td>
+<td>$1 first month, then $12/mo</td>
+<td>Yes</td>
+<td>Unclear</td>
+</tr>
+<tr>
+<td>Snailbox</td>
+<td>Personalized letters + stickers (not history)</td>
+<td>$19.95/mo</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Banjo Robinson (UK)</td>
+<td>Personalized pen-pal cat, ages 5-8; 88% satisfaction in a Mumsnet test</td>
+<td>n/a</td>
+<td>Yes (questionnaire)</td>
+<td>Encouraged, unclear if answered</td>
+</tr>
+<tr>
+<td>History Unboxed</td>
+<td>Hands-on history kits (box, not letters)</td>
+<td>from ~$44.95/mo</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Little Passports</td>
+<td>Geography subscription kits; reached Target, acquired by BEGiN in 2021</td>
+<td>~$25/mo</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Signals:</strong></p>
+<ul>
+<li><strong>Demand is proven:</strong> many small players survive, and homeschool review sites (The Old Schoolhouse, Homeschool Fanatic, Snap Happy Mom) regularly feature them.</li>
+<li><strong>Scale is possible in letter clubs:</strong> The Flower Letters (an adult story-letter club) grew from 38 to 31,000 subscribers at $12/mo, per USPS. Letters From Afar claims 12,000+ readers and 850,000+ letters delivered (unverified).</li>
+<li><strong>It's not easy:</strong> Time Trekker Academy's "Kids Who Made America" letter subscription is discontinued. Small one-way clubs can stall.</li>
+</ul>
+<h2>2. Market size</h2>
+<ul>
+<li><strong>US homeschool students:</strong> about 3.4 million (estimates range from 3 to 3.7 million). Growth was about 4.9% in 2024-25, nearly triple the pre-pandemic rate (Johns Hopkins Homeschool Hub, via secondary sources).</li>
+<li><strong>Homeschool curriculum spend:</strong> estimated at $7.5B+ in the US (low-confidence market-research figure).</li>
+<li><strong>Other buyers:</strong> grandparents (gifts), classroom teachers, and schooled kids whose parents want enrichment.</li>
+<li><strong>Bottom-up:</strong> reaching just 0.1% of US homeschool students is about 3,400 subscribers, or roughly $40k/month at $12. A realistic year-1 goal is <strong>300-1,000 subscribers, about $3.6k-12k/month</strong>.</li>
+</ul>
+<h2>3. Customer segments (in priority order)</h2>
+<ol>
+<li><strong>Homeschool parents.</strong> They actively look for history supplements, are already used to buying them, and read and trust review blogs.</li>
+<li><strong>Grandparents buying gifts.</strong> They pay upfront for 6 or 12 months, which solves churn, and they peak around Christmas and birthdays.</li>
+<li><strong>Parents trying to cut screen time.</strong> They respond strongly to the "real mail, no screens" pitch.</li>
+<li><strong>Teachers (later).</strong> A classroom edition with one letter for the whole class plus individual replies.</li>
+</ol>
+<h2>4. Differentiation: what only AI makes possible</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Competitors</th>
+<th>Us</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Child's name, age, interests woven in</td>
+<td>Rare</td>
+<td>Every letter</td>
+</tr>
+<tr>
+<td><strong>Figure answers the child's actual reply</strong></td>
+<td>None found</td>
+<td>Core feature: a parent photographs the child's handwritten letter and the figure responds to it in the next letter</td>
+</tr>
+<tr>
+<td>Reading level matched to the child</td>
+<td>One level, or two age tiers</td>
+<td>Adjusted per child</td>
+</tr>
+<tr>
+<td>Story arc across months</td>
+<td>Rare</td>
+<td>"Travel through time": each figure hands off to the next</td>
+</tr>
+<tr>
+<td>Accuracy</td>
+<td>Human-written</td>
+<td>Every letter fact-checked by a second agent against vetted sources, with a "Real history" note on the back</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Positioning line:</strong> <em>"History writes back."</em></p>
+<h2>5. Unit economics (estimates)</h2>
+<p>Assumption: $14/month for 2 letters a month (one story letter plus one reply to the child's letter).</p>
+<table>
+<thead>
+<tr>
+<th>Cost per subscriber per month</th>
+<th>Estimate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Print + postage (Lob, ~$0.83/letter base, plus color/extra page/insert) × 2</td>
+<td>~$2.50-3.00</td>
+</tr>
+<tr>
+<td>AI (writing + fact-check + handwriting reading)</td>
+<td>~$0.20-0.50</td>
+</tr>
+<tr>
+<td>Payments (Stripe ~3% + 30¢)</td>
+<td>~$0.70</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>~$3.50-4.20</strong></td>
+</tr>
+<tr>
+<td><strong>Gross margin</strong></td>
+<td><strong>~$10/mo (~70-75%)</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Churn:</strong> subscription boxes typically lose 5-15% of subscribers per month (vendor benchmarks). Assuming about 10%, a subscriber stays about 10 months, worth roughly <strong>$100 in gross margin</strong>.</li>
+<li><strong>So you can afford to spend up to ~$30-40 to win a customer.</strong> Paid ads for kids' subscriptions can exceed that, so lean on organic channels and prepaid gift plans.</li>
+<li><strong>Lob pricing:</strong> the base rate rose about 3-6% in July 2026 (third-party report). Volume plans are cheaper.</li>
+</ul>
+<h2>6. Go-to-market</h2>
+<ol>
+<li><strong>Homeschool reviewers and bloggers:</strong> send free 3-month subscriptions. They review this category constantly.</li>
+<li><strong>Homeschool communities:</strong> Facebook groups, r/homeschool, co-ops, curriculum fairs.</li>
+<li><strong>Marketplaces:</strong> Cratejoy and Etsy, where competitors already sell.</li>
+<li><strong>Gift season:</strong> a "12 letters from history" prepaid gift for grandparents, launched for the holidays.</li>
+<li><strong>Content and search:</strong> free printable "letter from Abraham Lincoln" PDFs as an entry point that leads to the subscription.</li>
+<li><strong>Shareable moment:</strong> encourage parents to post "my kid got a letter back from Einstein". That reaction is the marketing.</li>
+</ol>
+<h2>7. Risks and how to handle them</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Historical inaccuracy (AI making things up)</td>
+<td>A fact-check agent, a curated fact sheet per figure, and a "Real history" note citing sources. A human spot-checks a sample</td>
+</tr>
+<tr>
+<td>Sensitive history (war, slavery, colonialism)</td>
+<td>Age-appropriate guidelines for each figure; a parent can choose topics to avoid</td>
+</tr>
+<tr>
+<td>Children's privacy (COPPA in the US, the Age Appropriate Design Code in the UK)</td>
+<td>Collect from <strong>parents only</strong>, keep data minimal, and delete reply photos after processing. Write a privacy policy before launch</td>
+</tr>
+<tr>
+<td>Parents wary of "AI letters"</td>
+<td>Be transparent ("crafted with AI, checked for accuracy") and lead with the experience and the reply feature</td>
+</tr>
+<tr>
+<td>Low price anchor ($6-9)</td>
+<td>Price for the two-way feature and offer a one-way tier at $8</td>
+</tr>
+<tr>
+<td>Churn after the novelty wears off</td>
+<td>Story arcs, letters that build on each other, and prepaid 6/12-month plans</td>
+</tr>
+<tr>
+<td>US-only mail at first</td>
+<td>The Lob API covers the US. Add the UK later through a UK print-mail provider</td>
+</tr>
+</tbody>
+</table>
+<h2>8. Validation plan (2-3 weeks, under $150)</h2>
+<ol>
+<li><strong>Landing page:</strong> "History writes back", with a real sample letter, two tiers ($8 one-way, $14 two-way), and a "Reserve a founding spot" waitlist or $1 pre-order.</li>
+<li><strong>Send 5-10 real sample letters</strong> (generated by the agents and mailed through Lob) to friends with kids. Record the reactions, with permission.</li>
+<li><strong>Share</strong> in 5 homeschool Facebook groups or subreddits (where rules allow), and run a ~$50-100 Meta ads test aimed at homeschool parents and grandparents.</li>
+<li><strong>Success criteria:</strong></li>
+<li>3% or more of visitors join the waitlist, and</li>
+<li>10 or more people pay a deposit or pre-order, and</li>
+<li>30% or more pick the two-way tier, which tests the differentiator.</li>
+<li><strong>If it passes:</strong> build the full agent system. If it fails, try the grandparent-gift angle, then move on.</li>
+</ol>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://snaphappymom.com/letter-subscriptions-for-kids/">8 Letter Subscriptions for Kids Who Love Mail (Snap Happy Mom)</a></li>
+<li><a href="https://heritageletter.com/pages/heritagelettersubscription">Heritage Letter</a></li>
+<li><a href="https://www.thehomeschoolfront.com/post-from-the-past/">Post from the Past review (The Homeschool Front)</a></li>
+<li><a href="https://penpalspost.com/">Pen Pals from the Past</a></li>
+<li><a href="https://noahsletters.com/">Noah's Letters</a></li>
+<li><a href="https://historybymail.com/">History By Mail</a></li>
+<li><a href="https://www.letterjoy.co/">Letterjoy</a></li>
+<li><a href="https://www.aarp.org/events-history/historic-figures-letters-service-2024/">AARP: Letters from historic figures</a></li>
+<li><a href="https://www.theoldschoolhouse.com/product-reviews/?rid=7401">The Old Schoolhouse reviews (Heritage Letter / History by Mail)</a></li>
+<li><a href="https://homeschoolfanatic.com/2025/11/letters-from-afar-review/">Letters From Afar review (Homeschool Fanatic)</a></li>
+<li><a href="https://letterclubs.com/club/letters-from-afar/reviews">Letters From Afar reviews (Letter Clubs)</a></li>
+<li><a href="https://letterclubs.com/directory">Letter club directory</a></li>
+<li><a href="https://www.mysubscriptionaddiction.com/category/subscription-boxes-for-kids/history-unboxed-reviews">History Unboxed reviews (My Subscription Addiction)</a></li>
+<li><a href="https://cratejoy.com/products/monthly-kids-who-made-america-letter-timetrekkeracademy">Kids Who Made America letter (Cratejoy, discontinued)</a></li>
+<li><a href="https://www.giftoftheyear.co.uk/2020-entries/design-and-craft/banjo-robinson">Banjo Robinson (Gift of the Year)</a></li>
+<li><a href="https://cloud.mumsnet.com/talk/mumsnet_product_tests/3887741-Read-what-Mumsnet-users-and-their-children-thought-of-Banjo-Robinson-s-personalised-pen-pal-experience?page=2">Banjo Robinson Mumsnet product test</a></li>
+<li><a href="https://news.usps.com/2021/02/08/love-at-first-read/">The Flower Letters (USPS News)</a></li>
+<li><a href="https://kidscreen.com/2021/12/03/begin-buys-little-passports">BEGiN acquires Little Passports (Kidscreen)</a></li>
+<li><a href="https://www.kuraplan.com/blog/homeschool-statistics-2026">Homeschool statistics 2026 (Kuraplan)</a></li>
+<li><a href="https://marketintelo.com/report/homeschooling-market/amp">Homeschooling market report (Market Intelo)</a></li>
+<li><a href="https://lob.com/pricing">Lob pricing</a></li>
+<li><a href="https://pricingsaas.com/companies/lob/diffs/2026W29">Lob pricing change log, July 2026 (PricingSaaS)</a></li>
+<li><a href="https://eightx.co/blog/average-ecommerce-aov-subscription-vs-onetime-2026">Subscription box churn benchmarks (Eightx)</a></li>
+<li><a href="https://www.arka.com/blogs/news/how-to-decrease-subscription-box-churn-rates">How to decrease subscription box churn (Arka)</a></li>
+</ul><div class="part"><h1>Part 2: UK Market and Launch Economics</h1>
+<p><em>Researched October 2026. Prices change, so confirm current rates before relying on them. Each print-and-post service below has a test mode or free trial you can use to check.</em></p>
+<h2>How a letter gets to a child</h2>
+<p><code>Agents write and fact-check → render an A4 PDF (letter front, Real history card back)
+   → print-and-post API prints it double-sided, folds it into a window envelope,
+     prints the child's address in the window zone, and hands it to Royal Mail
+   → it arrives through the letterbox (2nd class: usually 2-3 working days)</code></p>
+<p>The letters are designed for this. Page 1 keeps the <strong>address-window zone clear</strong> at the top left, with the figure's place line opposite it, just like a real letter.</p>
+<h2>Print-and-post options</h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>What it is</th>
+<th>Price per A4 letter incl. postage</th>
+<th>API</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Stannp</strong> (recommended, built in)</td>
+<td>UK print-and-post platform</td>
+<td>Advertised from <strong>£0.38</strong> at high volume. The Free plan lists <strong>£0.88</strong>, falling to £0.44-0.48 on paid plans at volume</td>
+<td>Yes. <strong>Test mode makes a free PDF proof</strong> without posting</td>
+<td>Built into <code>letters send</code>. Accepts PDF, A4, double-sided, white-out address zone, 1st-class add-on</td>
+</tr>
+<tr>
+<td>Intelliprint</td>
+<td>UK hybrid mail, printed in Leeds</td>
+<td>From <strong>84p</strong> incl. 2nd class</td>
+<td>Yes (REST, Zapier, n8n)</td>
+<td>Good backup. The price source is a few years old</td>
+</tr>
+<tr>
+<td>Docmail</td>
+<td>UK hybrid mail</td>
+<td><strong>£1.05</strong> colour A4, economy postage (ex VAT)</td>
+<td>Yes</td>
+<td>Pay as you go, no minimums</td>
+</tr>
+<tr>
+<td>PostGrid UK</td>
+<td>International print-and-mail API</td>
+<td>Quoted in USD</td>
+<td>Yes</td>
+<td>Ask for a UK quote</td>
+</tr>
+<tr>
+<td>Do it yourself</td>
+<td>Home printer + window envelope + stamp</td>
+<td>~15p print and envelope + <strong>91p</strong> 2nd class stamp (<strong>£1.80</strong> 1st class)</td>
+<td>n/a</td>
+<td><strong>Best for the first 5-10 test letters</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Royal Mail stamp prices from 7 April 2026: 2nd class letter 91p, 1st class letter £1.80. A folded A4 sheet in a DL or C5 envelope is a standard "letter" (up to 100g).</p>
+<p><strong>Recommendation:</strong></p>
+<ol>
+<li><strong>Validation (first 5-10 letters):</strong> print at home and post them yourself. Run <code>letters write ... --print-address address.json</code> so the address prints in the window position, then use a DL window envelope and a 2nd class stamp. No accounts, no integration risk, about £1 a letter.</li>
+<li><strong>Before launch:</strong> make a Stannp account and send a few <strong>test-mode</strong> letters (<code>letters send letter.pdf --to address.json</code>). Check that the address lands in the window and nothing important is hidden by the white-out zone. Stannp publishes exact template measurements, so compare against them.</li>
+<li><strong>Launch:</strong> <code>letters send ... --live</code>. The <code>cost</code> field in each response shows exactly what you paid.</li>
+</ol>
+<h2>Unit economics in pounds (estimates)</h2>
+<table>
+<thead>
+<tr>
+<th>Per subscriber per month</th>
+<th>Story Letters, £7 (1 letter)</th>
+<th>Pen Pal from History, £12 (2 letters)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Print + envelope + 2nd class postage (~£0.88 each on Stannp's Free plan)</td>
+<td>£0.88</td>
+<td>£1.76</td>
+</tr>
+<tr>
+<td>AI (writing, fact-check, reading replies)</td>
+<td>~£0.15</td>
+<td>~£0.30</td>
+</tr>
+<tr>
+<td>Card payments (Stripe UK cards ~1.5% + 20p)</td>
+<td>~£0.31</td>
+<td>~£0.38</td>
+</tr>
+<tr>
+<td><strong>Total cost</strong></td>
+<td><strong>~£1.34</strong></td>
+<td><strong>~£2.44</strong></td>
+</tr>
+<tr>
+<td><strong>Gross margin</strong></td>
+<td><strong>~£5.66 (81%)</strong></td>
+<td><strong>~£9.56 (80%)</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>VAT:</strong> you only register once turnover passes <strong>£90,000</strong> a year. After that, 20% VAT comes out of your prices (£12 becomes £10 net), so plan your prices with that in mind.</li>
+<li><strong>Volume:</strong> paid Stannp plans bring postage-inclusive letters down to about £0.44-0.48 at higher volumes.</li>
+<li><strong>1st class</strong> costs more and isn't needed. Letters aren't urgent, and 2nd class adds to the "real post" feel.</li>
+</ul>
+<h2>Market (UK)</h2>
+<ul>
+<li><strong>126,000 children were electively home educated in England</strong> on census day in autumn 2025, up from 111,700 a year earlier. <strong>175,900</strong> were home educated at some point during 2024/25 (DfE). Add Scotland, Wales and Northern Ireland, plus school-going children whose parents want enrichment.</li>
+<li><strong>Grandparents buying gifts</strong> are a big UK segment. Christmas and birthdays favour prepaid 6- or 12-month plans.</li>
+<li><strong>UK competitor to watch: Banjo Robinson.</strong> It's a personalised pen-pal cat for ages 5-8, and 88% of parents were satisfied in a Mumsnet product test. It proves UK parents pay for personalised letters for children. It isn't history, and it doesn't answer each child's own letter the way ours does.</li>
+</ul>
+<h2>UK rules checklist (before taking money)</h2>
+<p>This is a checklist, not legal advice. Check the current guidance for each item.</p>
+<ul>
+<li>[ ] <strong>Data protection (UK GDPR):</strong> register with the ICO and pay the data protection fee (about £50 a year for most small businesses). Publish a privacy notice. Collect data <strong>from parents only</strong>, keep it to the minimum, and delete reply photos after reading.</li>
+<li>[ ] <strong>Children's data:</strong> the service is bought and run by parents, so children never get accounts. Review the ICO's Age Appropriate Design Code ("Children's Code") anyway, because children's letters pass through the service.</li>
+<li>[ ] <strong>Consumer law:</strong> online subscriptions normally carry a 14-day cancellation right under the Consumer Contracts Regulations. Show clear prices including postage, and make cancelling easy. <strong>New subscription rules under the DMCC Act 2024</strong> (reminder notices, easy exit) are being phased in, so check their status before launch.</li>
+<li>[ ] <strong>Advertising (ASA/CAP code):</strong> you must be able to back up claims like "every fact checked". Keep fact-check records (the <code>.json</code> file saved with each letter). Be open that letters are written with AI help.</li>
+<li>[ ] <strong>Business setup:</strong> start as a sole trader (register for Self Assessment with HMRC) or a limited company. Choose a trading name and check the domain.</li>
+<li>[ ] <strong>Inserts:</strong> if you later add stickers or small items to envelopes, check toy-safety rules first. Paper-only letters keep this simple.</li>
+</ul>
+<h2>UK marketing channels</h2>
+<ul>
+<li><strong>Mumsnet and Netmums:</strong> read the self-promotion rules. Mumsnet also runs paid product tests, as Banjo Robinson did.</li>
+<li><strong>UK home-education Facebook groups</strong> and local home-ed co-ops. Many have resource-sharing days.</li>
+<li><strong>Instagram home-ed and "screen-free childhood" accounts:</strong> offer founding families free months in return for honest posts.</li>
+<li><strong>Grandparent gifting:</strong> run a Christmas campaign (October to early December) for a prepaid "12 letters from history" plan.</li>
+<li><strong>Subreddits</strong> for UK parenting and home education, only where promotion is allowed.</li>
+</ul>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://www.stannp.com/uk/letters">Stannp UK letters</a></li>
+<li><a href="https://www.stannp.com/uk/detailed-pricing">Stannp detailed pricing</a></li>
+<li><a href="https://www.stannp.com/uk/direct-mail-api/letters">Stannp letters API</a></li>
+<li><a href="https://knowledge.stannp.com/eu/how-to-send-a-letter-through-api">Stannp: how to send a letter through the API</a></li>
+<li><a href="https://knowledge.stannp.com/eu/webhook-make-letter">Stannp: sending letters with Make.com</a></li>
+<li><a href="https://www.intelliprint.net/pricing">Intelliprint pricing</a></li>
+<li><a href="https://www.docmail.co.uk/prices/">Docmail prices</a></li>
+<li><a href="https://www.postgrid.co.uk/hybrid-mail-api/">PostGrid UK hybrid mail API</a></li>
+<li><a href="https://becleverwithyourcash.com/royal-mail-stamp-price-hike">Royal Mail 2026 stamp prices (Be Clever With Your Cash)</a></li>
+<li><a href="https://www.mailcoms.co.uk/current-royal-mail-postage-rates/">Current Royal Mail postage rates 2026 (Mailcoms)</a></li>
+<li><a href="https://explore-education-statistics.service.gov.uk/find-statistics/elective-home-education">DfE: Elective home education, autumn term 2025/26</a></li>
+<li><a href="https://www.gov.uk/government/statistics/elective-home-education-autumn-term-2025">GOV.UK: Elective home education statistics</a></li>
+<li><a href="https://cloud.mumsnet.com/talk/mumsnet_product_tests/3887741-Read-what-Mumsnet-users-and-their-children-thought-of-Banjo-Robinson-s-personalised-pen-pal-experience?page=2">Banjo Robinson, Mumsnet product test</a></li>
+</ul></div></body></html>
