@@ -15,19 +15,20 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Callable
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from letters import mail, pdf, pipeline, render
 
-from .config import FIGURE_ORDER, LETTERS_PER_FIGURE, PLANS, REPLY_WAIT_DAYS, Settings
+from .config import (FIGURE_ORDER, LETTERS_PER_FIGURE, PARENT_REWRITES_PER_MONTH, PLANS, PREVIEW_HOURS,
+                     REPLY_WAIT_DAYS, Settings)
 from .emails import send_email
 from .models import Child, Letter, Reply, Subscription, now
 
 log = logging.getLogger("letters.jobs")
 
 STORY_KINDS = ("intro", "story", "farewell")
-DEAD = ("rejected", "failed")
+DEAD = ("rejected", "parent_rewrite", "failed")
 
 
 @dataclass
@@ -46,6 +47,7 @@ class RunSummary:
     letters_written: int = 0
     letters_sent: int = 0
     to_review: int = 0
+    sent_to_parents: int = 0
     errors: list[str] = field(default_factory=list)
 
 
@@ -149,7 +151,7 @@ def create_letter(db: Session, settings: Settings, sub: Subscription, kind: str,
     child_reply = pipeline.ChildReply.model_validate_json(reply.transcription_json) if reply else None
     try:
         result = services.write_letter(child.profile(), figure, reply=child_reply,
-                                       history=history_text(stint), kind=kind)
+                                       history=history_text(stint), kind=kind, parent_note=child.next_letter_note)
     except Exception as e:  # noqa: BLE001 - credits are kept, so the next run tries again
         summary.errors.append(f"child {child.id} {kind}: {e}")
         return None
@@ -175,12 +177,49 @@ def create_letter(db: Session, settings: Settings, sub: Subscription, kind: str,
             if letter.status == "approved":
                 letter.status = "needs_review"
     summary.letters_written += 1
+    child.next_letter_note = ""  # the parent's request has been used
     db.commit()
     if letter.status == "approved":
-        send_letter(db, settings, letter, services, summary)
+        release_letter(db, settings, letter, services, summary)
     elif letter.status in ("needs_review", "held"):
         summary.to_review += 1
     return letter
+
+
+def release_letter(db: Session, settings: Settings, letter: Letter, services: Services | None = None,
+                   summary: RunSummary | None = None) -> None:
+    """A letter has passed our checks. Post it, or first show it to a parent who previews letters."""
+    child = letter.child
+    if not child.parent_preview:
+        send_letter(db, settings, letter, services, summary)
+        return
+    letter.status = "awaiting_parent"
+    letter.preview_deadline = now() + timedelta(hours=PREVIEW_HOURS)
+    db.commit()
+    if summary:
+        summary.sent_to_parents += 1
+    name = render.FIGURE_NAMES.get(letter.figure, (letter.figure,))[0]
+    send_email(settings, child.user.email, f"Preview {child.first_name}'s letter from {name}",
+               f"Hello {child.user.name},\n\n{name} has written to {child.first_name}. You can read the letter "
+               f"before it's posted, and approve it or ask for changes:\n{settings.base_url}/letters/{letter.id}/preview\n\n"
+               f"If you're happy for it to go, you don't need to do anything: it will be posted automatically in "
+               f"{PREVIEW_HOURS // 24} days.\n\nLetters from History")
+
+
+def parent_rewrites_left(db: Session, child: Child) -> int:
+    since = now() - timedelta(days=30)
+    used = db.scalar(select(func.count(Letter.id)).where(
+        Letter.child_id == child.id, Letter.status == "parent_rewrite", Letter.created_at >= since))
+    return max(PARENT_REWRITES_PER_MONTH - (used or 0), 0)
+
+
+def parent_rewrite(db: Session, letter: Letter, note: str) -> None:
+    """The parent asked for changes: drop this letter, return the credit, and pass their note to the writer."""
+    reject_letter(db, letter)
+    letter.status = "parent_rewrite"
+    letter.note = (letter.note + f" Parent asked for changes: {note}").strip()
+    letter.child.next_letter_note = note
+    db.commit()
 
 
 def send_letter(db: Session, settings: Settings, letter: Letter, services: Services | None = None,
@@ -235,6 +274,11 @@ def reject_letter(db: Session, letter: Letter) -> None:
 def run_due(db: Session, settings: Settings, services: Services | None = None) -> RunSummary:
     services = services or Services()
     summary = RunSummary()
+    # Letters whose parent preview window has ended are posted, as promised.
+    overdue = db.scalars(select(Letter).where(Letter.status == "awaiting_parent", Letter.preview_deadline <= now())).all()
+    for letter in overdue:
+        letter.note = (letter.note + " Posted automatically after the preview window.").strip()
+        send_letter(db, settings, letter, services, summary)
     subs = db.scalars(select(Subscription).where(Subscription.status.in_(["active", "trialing"]))).all()
     for sub in subs:
         child = sub.child

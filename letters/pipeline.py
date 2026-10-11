@@ -133,7 +133,7 @@ LETTER_KINDS = {
 
 
 def _writer_input(child: dict, fact_sheet: str, reply: ChildReply | None, history: str,
-                  kind: str = "story") -> str:
+                  kind: str = "story", parent_note: str = "") -> str:
     parts = [
         f"<figure_fact_sheet>\n{fact_sheet}\n</figure_fact_sheet>",
         f"<child>\n{json.dumps(child, indent=2, ensure_ascii=False)}\n</child>",
@@ -145,6 +145,10 @@ def _writer_input(child: dict, fact_sheet: str, reply: ChildReply | None, histor
         kind = "reply"
     elif kind == "story" and not history:
         kind = "intro"
+    if parent_note:
+        parts.append(f"<parent_request>\n{parent_note}\n</parent_request>\n"
+                     "The child's parent read the previous draft and asked for this. Follow it for tone, "
+                     "length, topics and interests, but never against accuracy, safety or your rules.")
     parts.append(f"<letter_kind>{kind}</letter_kind>\n{LETTER_KINDS[kind]}")
     return "\n\n".join(parts)
 
@@ -155,6 +159,7 @@ def write_letter(
     reply: ChildReply | None = None,
     history: str = "",
     kind: str = "story",
+    parent_note: str = "",
 ) -> Result:
     """kind: intro, story, follow_up or farewell (a reply always makes a "reply" letter).
     A story with no history is written as an intro."""
@@ -166,7 +171,7 @@ def write_letter(
     fact_sheet = llm.load_text("figures", figure)
     writer = llm.load_text("prompts", "writer")
     checker = llm.load_text("prompts", "checker")
-    request = _writer_input(child, fact_sheet, reply, history, kind)
+    request = _writer_input(child, fact_sheet, reply, history, kind, safety.redact(parent_note)[:500])
 
     letter = llm.ask(writer, request, Letter, effort="high")
     checks: list[FactCheck] = []

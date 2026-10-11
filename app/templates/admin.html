@@ -85,6 +85,16 @@ P.S. {{ data.postscript }}</div>
 <p class="muted">None.</p>
 {% endfor %}
 
+<h2 style="margin-top:32px">With parents to preview ({{ with_parents|length }})</h2>
+<p class="small muted">Approved by us, waiting for the parent. Each posts automatically when its preview window ends.</p>
+<table>
+  <tr><th>#</th><th>Letter</th><th>Posts automatically</th></tr>
+  {% for l in with_parents %}
+  <tr><td>{{ l.id }}</td><td>{{ FIGURE_NAMES.get(l.figure, l.figure) }} → {{ l.child.first_name }} ({{ l.kind }})</td>
+    <td>{{ l.preview_deadline.strftime('%-d %b %H:%M') if l.preview_deadline else '' }}</td></tr>
+  {% else %}<tr><td colspan="3" class="muted">None.</td></tr>{% endfor %}
+</table>
+
 <h2 style="margin-top:32px">Recently posted</h2>
 <table>
   <tr><th>#</th><th>Letter</th><th>Posted</th><th>Cost</th><th>Proof</th></tr>

@@ -34,8 +34,9 @@ class FakeServices(jobs.Services):
         self.reply_result = reply_result
         super().__init__(write_letter=self._write, read_reply=self._read, to_pdf=self._pdf, send=self._send)
 
-    def _write(self, child, figure, reply=None, history="", kind="story"):
-        self.written.append({"figure": figure, "kind": "reply" if reply else kind, "child": child})
+    def _write(self, child, figure, reply=None, history="", kind="story", parent_note=""):
+        self.written.append({"figure": figure, "kind": "reply" if reply else kind, "child": child,
+                             "parent_note": parent_note})
         return pipeline.Result(fake_letter(), "ready", [pipeline.FactCheck(passes=True, issues=[])])
 
     def _read(self, photo=None, text=None):
@@ -352,6 +353,92 @@ class LetterFlowTests(AppTestCase):
         other.post("/signup", data={"csrf": token, "name": "B", "email": "b@example.com",
                                     "password": "a long password", "agree": "true"})
         self.assertEqual(other.get("/letters/1.pdf").status_code, 404)
+
+
+class ParentPreviewTests(AppTestCase):
+    def setUp(self):
+        super().setUp()
+        sub_id = self.signup()
+        db = self.db
+        child = db.query(Child).one()
+        child.parent_preview = True
+        db.commit()
+        db.close()
+        self.activate(sub_id)
+        self.admin = self.make_admin()
+        db = self.db
+        jobs.run_due(db, self.settings, self.services)
+        db.close()
+        self.admin_post(self.admin, "/admin/letters/1/approve")  # our check comes first
+
+    def letter(self, letter_id=1):
+        db = self.db
+        letter = db.get(Letter, letter_id)
+        db.close()
+        return letter
+
+    def test_letter_waits_for_the_parent_after_our_approval(self):
+        self.assertEqual(self.letter().status, "awaiting_parent")
+        self.assertEqual(self.services.sent, [])
+        page = self.client.get("/letters/1/preview")
+        self.assertIn("has written to Maya", page.text)
+        self.assertEqual(self.client.get("/letters/1.html").status_code, 200)
+        self.assertEqual(self.client.get("/letters/1.pdf").status_code, 200)
+
+    def test_parent_approves_and_it_posts(self):
+        token = re.search(r'name="csrf" value="([^"]+)"', self.client.get("/letters/1/preview").text).group(1)
+        self.client.post("/letters/1/approve", data={"csrf": token})
+        self.assertEqual(self.letter().status, "sent")
+        self.assertEqual(len(self.services.sent), 1)
+
+    def test_posts_automatically_when_the_window_ends(self):
+        db = self.db
+        db.get(Letter, 1).preview_deadline = now() - timedelta(minutes=1)
+        db.commit()
+        jobs.run_due(db, self.settings, self.services)
+        db.close()
+        self.assertEqual(self.letter().status, "sent")
+        self.assertIn("automatically", self.letter().note)
+
+    def test_changes_are_rewritten_with_the_note_and_capped(self):
+        from app.config import PARENT_REWRITES_PER_MONTH
+        for n in range(PARENT_REWRITES_PER_MONTH):
+            letter_id = n + 1
+            token = re.search(r'name="csrf" value="([^"]+)"', self.client.get(f"/letters/{letter_id}/preview").text).group(1)
+            self.client.post(f"/letters/{letter_id}/changes", data={"csrf": token, "note": f"shorter please {n}"})
+            self.assertEqual(self.letter(letter_id).status, "parent_rewrite")
+            db = self.db
+            self.assertEqual(db.get(Subscription, 1).story_credits, 1)  # the credit comes back, never more
+            jobs.run_due(db, self.settings, self.services)
+            db.close()
+            self.assertEqual(self.services.written[-1]["parent_note"], f"shorter please {n}")
+            self.admin_post(self.admin, f"/admin/letters/{letter_id + 1}/approve")  # rewrites are checked again
+        last = PARENT_REWRITES_PER_MONTH + 1
+        page = self.client.get(f"/letters/{last}/preview").text
+        self.assertIn("used this month's rewrites", page)
+        token = re.search(r'name="csrf" value="([^"]+)"', page).group(1)
+        self.client.post(f"/letters/{last}/changes", data={"csrf": token, "note": "again"})
+        self.assertEqual(self.letter(last).status, "awaiting_parent")  # refused
+        self.assertEqual(len(self.services.written), PARENT_REWRITES_PER_MONTH + 1)
+
+    def test_other_parents_cannot_preview_or_approve(self):
+        other = TestClient(self.app)
+        token = re.search(r'name="csrf" value="([^"]+)"', other.get("/signup").text).group(1)
+        other.post("/signup", data={"csrf": token, "name": "B", "email": "b@example.com",
+                                    "password": "a long password", "agree": "true"})
+        self.assertEqual(other.get("/letters/1/preview").status_code, 404)
+        self.assertEqual(other.get("/letters/1.html").status_code, 404)
+        token = re.search(r'name="csrf" value="([^"]+)"', other.get("/account").text).group(1)
+        self.assertEqual(other.post("/letters/1/approve", data={"csrf": token}).status_code, 404)
+        self.assertEqual(self.letter().status, "awaiting_parent")
+
+    def test_reply_uploads_are_capped(self):
+        from app.config import REPLY_UPLOADS_PER_MONTH
+        for i in range(REPLY_UPLOADS_PER_MONTH + 1):
+            self.client.post("/children/1/reply", data={"csrf": self.csrf("/account"), "text": f"letter {i}"})
+        db = self.db
+        self.assertEqual(db.query(Reply).count(), REPLY_UPLOADS_PER_MONTH)
+        db.close()
 
 
 class CronEndpointTests(AppTestCase):

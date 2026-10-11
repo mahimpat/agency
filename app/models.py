@@ -43,6 +43,10 @@ class Child(Base):
     line2: Mapped[str] = mapped_column(String(200), default="")
     town: Mapped[str] = mapped_column(String(100))
     postcode: Mapped[str] = mapped_column(String(12))
+    # Parent preview: read each letter (after our checks) before it's posted.
+    parent_preview: Mapped[bool] = mapped_column(Boolean, default=False)
+    # The parent's request for the next letter, after they asked for a rewrite.
+    next_letter_note: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     user: Mapped[User] = relationship(back_populates="children")
     subscription: Mapped["Subscription | None"] = relationship(back_populates="child", uselist=False)
@@ -102,8 +106,9 @@ class Letter(Base):
     child_id: Mapped[int] = mapped_column(ForeignKey("children.id"), index=True)
     figure: Mapped[str] = mapped_column(String(40))
     kind: Mapped[str] = mapped_column(String(20))  # story, reply, follow_up
-    # needs_review, held, approved, sent, rejected, failed
+    # needs_review, held, approved, awaiting_parent, sent, rejected, parent_rewrite, failed
     status: Mapped[str] = mapped_column(String(20), index=True)
+    preview_deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     letter_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     checks_json: Mapped[str] = mapped_column(Text, default="[]")
     note: Mapped[str] = mapped_column(Text, default="")

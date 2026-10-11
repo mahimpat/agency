@@ -16,6 +16,13 @@
     {% endif %}
   </div>
   <p class="small muted">Letters go to {{ child.recipient_name }}, {{ child.line1 }}, {{ child.town }} {{ child.postcode }}.</p>
+  {% set waiting = child.letters|selectattr('status', 'equalto', 'awaiting_parent')|list %}
+  {% for l in waiting %}
+  <div class="flash" style="margin:12px 0">
+    <b>{{ FIGURE_NAMES.get(l.figure, l.figure) }} has written to {{ child.first_name }}.</b>
+    Read it before it's posted. <a class="btn small" href="/letters/{{ l.id }}/preview" style="margin-left:8px">Preview the letter</a>
+  </div>
+  {% endfor %}
 
   {% if sub and sub.status in ['pending', 'canceled', 'incomplete_expired'] %}
     <p><a class="btn" href="/checkout/{{ sub.id }}">{% if sub.status == 'pending' %}Finish setting up{% else %}Restart{% endif %} {{ PLANS[sub.plan].name }}</a></p>
@@ -25,7 +32,7 @@
   {% endif %}
 
   <h3 style="margin-top:18px">Letters</h3>
-  {% set visible = child.letters|rejectattr('status', 'equalto', 'rejected')|list %}
+  {% set visible = child.letters|rejectattr('status', 'in', ['rejected', 'parent_rewrite'])|list %}
   {% if visible %}
   <table>
     <tr><th>From</th><th>Type</th><th>Status</th><th></th></tr>
@@ -34,13 +41,20 @@
       <td>{{ FIGURE_NAMES.get(l.figure, l.figure) }}</td>
       <td>{{ {'intro': 'Introduction', 'story': 'Story', 'reply': 'Answer to a letter', 'follow_up': 'Story', 'farewell': 'Goodbye'}[l.kind] }}</td>
       <td>{{ STATUS_LABELS.get(l.status, l.status) }}{% if l.sent_at %} · {{ l.sent_at.strftime('%-d %b %Y') }}{% endif %}</td>
-      <td>{% if l.status == 'sent' %}<a href="/letters/{{ l.id }}.pdf" target="_blank">View copy</a>{% endif %}</td>
+      <td>{% if l.status == 'sent' %}<a href="/letters/{{ l.id }}.pdf" target="_blank">View copy</a>{% elif l.status == 'awaiting_parent' %}<a href="/letters/{{ l.id }}/preview">Preview</a>{% endif %}</td>
     </tr>
     {% endfor %}
   </table>
   {% else %}
   <p class="small muted">{% if sub and sub.status == 'active' %}The first letter, an introduction, is being written and will be posted within a few days.{% else %}No letters yet.{% endif %}</p>
   {% endif %}
+
+  <form method="post" action="/children/{{ child.id }}/settings" style="margin-top:14px" class="small">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="check" style="display:inline-flex"><input type="checkbox" name="parent_preview" value="true" {% if child.parent_preview %}checked{% endif %} onchange="this.form.submit()">
+      Let me preview {{ child.first_name }}'s letters before they're posted</label>
+    <noscript><button class="btn ghost small" type="submit">Save</button></noscript>
+  </form>
 
   {% if sub and PLANS[sub.plan].reply and sub.status == 'active' %}
   <details style="margin-top:18px">

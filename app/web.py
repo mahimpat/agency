@@ -7,6 +7,7 @@ Run locally:  uvicorn app.web:app --reload
 import json
 import logging
 import secrets
+from datetime import timedelta
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, UploadFile
@@ -20,9 +21,10 @@ from starlette.middleware.sessions import SessionMiddleware
 from letters import render
 
 from . import billing, jobs
-from .config import COMPANY, FIGURE_ORDER, PLANS, PRODUCT, Settings
+from .config import COMPANY, FIGURE_ORDER, PLANS, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
 from .emails import send_email
 from .models import Child, Letter, Reply, Subscription, User, make_sessionmaker
+from .models import now as models_now
 from .security import (csrf_ok, csrf_token, hash_password, make_reset_token, read_reset_token,
                        verify_password)
 
@@ -33,6 +35,7 @@ PHOTO_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
 FIGURE_NAMES = {k: v[0] for k, v in render.FIGURE_NAMES.items()}
 STATUS_LABELS = {
     "needs_review": "Being checked", "held": "Being checked", "approved": "Ready to post",
+    "awaiting_parent": "Waiting for your OK", "parent_rewrite": "Rewritten at your request",
     "sent": "Posted", "rejected": "Rewritten", "failed": "Delayed",
 }
 
@@ -53,7 +56,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                        https_only=settings.secure_cookies, max_age=60 * 60 * 24 * 30)
     app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
     templates = Jinja2Templates(directory=HERE / "templates")
-    templates.env.globals.update(COMPANY=COMPANY, PRODUCT=PRODUCT, PLANS=PLANS, FIGURE_NAMES=FIGURE_NAMES,
+    templates.env.globals.update(PREVIEW_HOURS=PREVIEW_HOURS, COMPANY=COMPANY, PRODUCT=PRODUCT, PLANS=PLANS, FIGURE_NAMES=FIGURE_NAMES,
                                  STATUS_LABELS=STATUS_LABELS, contact_email=settings.contact_email,
                                  legal=settings, POLICY_DATE="11 October 2026")
 
@@ -235,7 +238,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                      first_name: str = Form(...), age: int = Form(...), interests: str = Form(""),
                      avoid: str = Form(""), recipient_name: str = Form(...), line1: str = Form(...),
                      line2: str = Form(""), town: str = Form(...), postcode: str = Form(...),
-                     plan: str = Form("penpal"), guardian: bool = Form(False)):
+                     plan: str = Form("penpal"), guardian: bool = Form(False), parent_preview: bool = Form(False)):
         form = dict(first_name=first_name, age=age, interests=interests, avoid=avoid,
                     recipient_name=recipient_name, line1=line1, line2=line2, town=town, postcode=postcode)
         errors = []
@@ -250,7 +253,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         user = db.merge(user)
         child = Child(user_id=user.id, first_name=first_name.strip()[:60], age=age, interests=interests[:500],
                       avoid=avoid[:500], recipient_name=recipient_name.strip()[:120], line1=line1.strip()[:200],
-                      line2=line2.strip()[:200], town=town.strip()[:100], postcode=postcode.strip().upper()[:12])
+                      line2=line2.strip()[:200], town=town.strip()[:100], postcode=postcode.strip().upper()[:12],
+                      parent_preview=parent_preview)
         db.add(child)
         db.flush()
         sub = Subscription(user_id=user.id, child_id=child.id, plan=plan, status="pending")
@@ -301,6 +305,11 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if not child.subscription or PLANS[child.subscription.plan]["reply"] == 0:
             flash(request, "Replies are part of the Pen Pal from History plan.")
             return RedirectResponse("/account", status_code=303)
+        month_ago = models_now() - timedelta(days=30)
+        if sum(1 for r in child.replies if r.created_at >= month_ago) >= REPLY_UPLOADS_PER_MONTH:
+            flash(request, f"You've sent {REPLY_UPLOADS_PER_MONTH} letters for {child.first_name} this month, which "
+                           "is the most we can answer. Please keep this one for next month.")
+            return RedirectResponse("/account", status_code=303)
         form = await request.form()
         photo: UploadFile | None = form.get("photo") if hasattr(form.get("photo"), "read") else None
         text = (form.get("text") or "").strip()[:5000]
@@ -329,11 +338,78 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         letter = db.get(Letter, letter_id)
         if not letter or (letter.child.user_id != user.id and not user.is_admin):
             raise HTTPException(404)
-        if not user.is_admin and letter.status != "sent":
+        if not user.is_admin and letter.status not in ("sent", "awaiting_parent"):
             raise HTTPException(404)
         if not letter.pdf_path or not Path(letter.pdf_path).exists():
             raise HTTPException(404)
         return FileResponse(letter.pdf_path, media_type="application/pdf")
+
+    # --- parent preview -----------------------------------------------------
+
+    def _parent_letter(db: Session, user: User, letter_id: int, statuses=("awaiting_parent",)) -> Letter:
+        letter = db.get(Letter, letter_id)
+        if not letter or letter.child.user_id != user.id or letter.status not in statuses:
+            raise HTTPException(404)
+        return letter
+
+    @app.get("/letters/{letter_id}.html", response_class=HTMLResponse)
+    def letter_html(letter_id: int, user: User = Depends(require_user), db: Session = Depends(db_session)):
+        letter = db.get(Letter, letter_id)
+        allowed = user.is_admin or (letter and letter.child.user_id == user.id and letter.status in ("sent", "awaiting_parent"))
+        if not letter or not allowed or not letter.html_path or not Path(letter.html_path).exists():
+            raise HTTPException(404)
+        return HTMLResponse(Path(letter.html_path).read_text(encoding="utf-8"),
+                            headers={"Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; "
+                                     "font-src data:; img-src data:; script-src 'unsafe-inline'"})
+
+    @app.get("/letters/{letter_id}/preview", response_class=HTMLResponse)
+    def preview(request: Request, letter_id: int, user: User = Depends(require_user), db: Session = Depends(db_session)):
+        letter = db.get(Letter, letter_id)
+        if not letter or letter.child.user_id != user.id:
+            raise HTTPException(404)
+        if letter.status != "awaiting_parent":
+            flash(request, "That letter has already been posted." if letter.status == "sent"
+                  else "That letter isn't waiting for you any more.")
+            return RedirectResponse("/account", status_code=303)
+        return page(request, "preview.html", letter=letter, rewrites_left=jobs.parent_rewrites_left(db, letter.child),
+                    hours_left=max(int((letter.preview_deadline - models_now()).total_seconds() // 3600), 0))
+
+    @app.post("/letters/{letter_id}/approve", dependencies=[Depends(check_csrf)])
+    def parent_approve(request: Request, letter_id: int, user: User = Depends(require_user),
+                       db: Session = Depends(db_session)):
+        letter = _parent_letter(db, user, letter_id)
+        jobs.send_letter(db, settings, letter, app.state.services)
+        flash(request, f"Thank you! {letter.child.first_name}'s letter is on its way." if letter.status == "sent"
+              else "We couldn't post that letter just now. We'll sort it out and post it shortly.")
+        return RedirectResponse("/account", status_code=303)
+
+    @app.post("/letters/{letter_id}/changes", dependencies=[Depends(check_csrf)])
+    def parent_changes(request: Request, letter_id: int, user: User = Depends(require_user),
+                       db: Session = Depends(db_session), note: str = Form("")):
+        letter = _parent_letter(db, user, letter_id)
+        note = note.strip()[:500]
+        if not note:
+            flash(request, "Tell us what you'd like changed, so the new letter gets it right.")
+            return RedirectResponse(f"/letters/{letter_id}/preview", status_code=303)
+        if jobs.parent_rewrites_left(db, letter.child) <= 0:
+            flash(request, "You've used this month's rewrites. Approve this letter, or reply to our email and we'll help.")
+            return RedirectResponse(f"/letters/{letter_id}/preview", status_code=303)
+        jobs.parent_rewrite(db, letter, note)
+        flash(request, "Thanks, we'll write a new letter with your changes. It will be checked again, and we'll email "
+                       "you to preview it within a couple of days.")
+        return RedirectResponse("/account", status_code=303)
+
+    @app.post("/children/{child_id}/settings", dependencies=[Depends(check_csrf)])
+    def child_settings(request: Request, child_id: int, user: User = Depends(require_user),
+                       db: Session = Depends(db_session), parent_preview: bool = Form(False)):
+        child = db.get(Child, child_id)
+        if not child or child.user_id != user.id:
+            raise HTTPException(404)
+        child.parent_preview = parent_preview
+        db.commit()
+        flash(request, f"Saved. You'll {'preview' if parent_preview else 'no longer preview'} "
+                       f"{child.first_name}'s letters before they're posted.")
+        return RedirectResponse("/account", status_code=303)
 
     @app.get("/account/export")
     def export(user: User = Depends(require_user)):
@@ -407,9 +483,12 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                             .order_by(Letter.created_at)).all()
         held_replies = db.scalars(select(Reply).where(Reply.status == "held").order_by(Reply.created_at)).all()
         recent = db.scalars(select(Letter).where(Letter.status == "sent").order_by(Letter.sent_at.desc()).limit(20)).all()
+        with_parents = db.scalars(select(Letter).where(Letter.status == "awaiting_parent")
+                                  .order_by(Letter.preview_deadline)).all()
         subs = db.scalars(select(Subscription)).all()
         counts = {s: sum(1 for x in subs if x.status == s) for s in ("active", "pending", "past_due", "canceled")}
         return page(request, "admin.html", review=review, held_replies=held_replies, recent=recent, counts=counts,
+                    with_parents=with_parents,
                     live_mail=settings.live_mail, review_all=settings.review_all,
                     checks={l.id: json.loads(l.checks_json or "[]") for l in review},
                     letters={l.id: json.loads(l.letter_json) if l.letter_json else None for l in review},
@@ -431,8 +510,9 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             return RedirectResponse("/admin", status_code=303)
         letter.status = "approved"
         db.commit()
-        jobs.send_letter(db, settings, letter, app.state.services)
-        flash(request, f"Letter {letter.id}: {letter.status}" + (f" (proof: {letter.proof_url})" if letter.proof_url else ""))
+        jobs.release_letter(db, settings, letter, app.state.services)
+        outcome = "sent to the parent to preview" if letter.status == "awaiting_parent" else letter.status
+        flash(request, f"Letter {letter.id}: {outcome}" + (f" (proof: {letter.proof_url})" if letter.proof_url else ""))
         return RedirectResponse("/admin", status_code=303)
 
     @app.post("/admin/letters/{letter_id}/reject", dependencies=[Depends(check_csrf)])

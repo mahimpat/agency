@@ -25,6 +25,10 @@ FIGURE_ORDER = [
 ]
 LETTERS_PER_FIGURE = 3
 REPLY_WAIT_DAYS = 21  # after this, an unused reply credit becomes a follow-up letter
+PREVIEW_HOURS = 48  # parents who preview letters have this long before a letter posts automatically
+# Cost guards: every rewrite or uploaded reply means paid AI calls, so both are capped per child.
+PARENT_REWRITES_PER_MONTH = int(os.environ.get("PARENT_REWRITES_PER_MONTH", "2"))
+REPLY_UPLOADS_PER_MONTH = int(os.environ.get("REPLY_UPLOADS_PER_MONTH", "4"))
 
 
 def _flag(name: str, default: bool) -> bool:

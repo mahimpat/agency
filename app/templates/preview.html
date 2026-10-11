@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Preview {{ letter.child.first_name }}'s letter · {{ PRODUCT }}{% endblock %}
+{% block content %}
+<h1>{{ FIGURE_NAMES.get(letter.figure, letter.figure) }} has written to {{ letter.child.first_name }}</h1>
+<p class="muted">This is the letter exactly as it will be printed, with the Real history card on the back. It's been checked for accuracy and safety. If you're happy, approve it. If you don't respond, it will be posted automatically in about {{ hours_left }} hours.</p>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <iframe src="/letters/{{ letter.id }}.html" title="Letter preview" sandbox="allow-scripts"
+          style="width:100%;height:80vh;min-height:560px;border:0;display:block;background:#d9d4c8"></iframe>
+</div>
+<p class="small"><a href="/letters/{{ letter.id }}.pdf" target="_blank">Open the print version (PDF)</a></p>
+
+<div class="grid2" style="align-items:start;margin-top:12px">
+  <form method="post" action="/letters/{{ letter.id }}/approve" class="card">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <h3>Looks lovely</h3>
+    <p class="small muted">We'll print it and post it today.</p>
+    <button class="btn" type="submit">Approve and post</button>
+  </form>
+  <form method="post" action="/letters/{{ letter.id }}/changes" class="card">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <h3>Ask for changes</h3>
+    {% if rewrites_left > 0 %}
+    <div class="field"><label for="note">What would you like changed? <span class="hint">e.g. "a bit shorter", "less about storms, she's nervous of them", "mention her new puppy, Pip"</span></label>
+      <textarea id="note" name="note" maxlength="500" required></textarea></div>
+    <p class="small muted">We'll write a new letter, check it again, and email you to preview it. You can ask for {{ rewrites_left }} more rewrite{% if rewrites_left != 1 %}s{% endif %} this month.</p>
+    <button class="btn ghost" type="submit">Rewrite this letter</button>
+    {% else %}
+    <p class="small">You've used this month's rewrites. If something's wrong, email <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> and we'll help.</p>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
