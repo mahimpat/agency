@@ -38,6 +38,38 @@ HERE = Path(__file__).parent
 MAX_UPLOAD = 10 * 1024 * 1024
 PHOTO_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
 FIGURE_NAMES = {k: v[0] for k, v in render.FIGURE_NAMES.items()}
+# The landing page's sheet of pen pals: one line each, in the order children meet them.
+PEN_PAL_HOOKS = {
+    "mary-anning": "Fossil hunter of Lyme Regis", "isambard-kingdom-brunel": "Bridges, tunnels and giant ships",
+    "ada-lovelace": "The first computer programmer", "grace-darling": "A lighthouse rescue in a storm",
+    "neil-armstrong": "First footsteps on the Moon", "florence-nightingale": "The lady with the lamp",
+    "samuel-pepys": "The Great Fire of London", "charles-darwin": "Beetles, finches and big ideas",
+    "elizabeth-i": "Queen of England", "george-stephenson": "Father of the railways",
+    "mary-seacole": "Nurse, healer and traveller", "isaac-newton": "Gravity, light and rainbows",
+    "william-shakespeare": "Plays at the Globe", "walter-tull": "Footballer and soldier",
+    "al-khwarizmi": "The father of algebra", "emmeline-pankhurst": "Votes for women",
+    "einstein": "Space, light and time", "amelia-earhart": "Flying solo across the Atlantic",
+    "leonardo-da-vinci": "Inventor, artist, mirror writer", "cleopatra": "Queen of Egypt",
+}
+PEN_PAL_SAMPLES = {"mary-anning": "anning-to-oliver", "einstein": "einstein-to-maya", "amelia-earhart": "earhart-to-leo",
+                   "leonardo-da-vinci": "leonardo-to-sam", "grace-darling": "darling-to-isla",
+                   "cleopatra": "cleopatra-to-sofia"}
+
+
+def _pen_pals() -> list[dict]:
+    pals = []
+    for slug in FIGURE_ORDER:
+        sheet = (HERE.parent / "letters" / "figures" / f"{slug}.md").read_text(encoding="utf-8")
+        years = re.search(r"^# .*?\(([^)]*)\)", sheet, re.MULTILINE)
+        min_age = re.search(r"^## Minimum age\s+(\d+)", sheet, re.MULTILINE)
+        pals.append({"slug": slug, "name": render.FIGURE_NAMES[slug][0].split(",")[0], "hook": PEN_PAL_HOOKS.get(slug, ""),
+                     "years": (years.group(1) if years else "").replace("-", "–").replace("about ", "c. ").replace("–c. ", "–"),
+                     "min_age": int(min_age.group(1)) if min_age else 0, "sample": PEN_PAL_SAMPLES.get(slug)})
+    return pals
+
+
+PEN_PALS = _pen_pals()
+
 STATUS_LABELS = {
     "needs_review": "Being checked", "held": "Being checked", "approved": "Ready to post",
     "awaiting_parent": "Waiting for your OK", "parent_rewrite": "Rewritten at your request",
@@ -208,7 +240,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
 
     @app.get("/", response_class=HTMLResponse)
     def landing(request: Request):
-        return page(request, "landing.html")
+        return page(request, "landing.html", pen_pals=PEN_PALS)
 
     @app.get("/privacy", response_class=HTMLResponse)
     def privacy(request: Request):

@@ -4,361 +4,430 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Letters from History | History writes back</title>
-<meta name="description" content="Real letters through your child's letterbox from Einstein, Amelia Earhart, Cleopatra and Leonardo da Vinci. Written for your child, fact-checked, and when your child writes back, they answer.">
+<meta name="description" content="Real letters through your child's letterbox from Mary Anning, Brunel, Ada Lovelace, Samuel Pepys and 16 more. Written for your child, fact-checked, and when your child writes back, they answer. Printed and posted in the UK.">
 <meta property="og:title" content="Letters from History: history writes back">
-<meta property="og:description" content="Real letters from history's greatest minds, written to your child. When your child writes back, they answer.">
+<meta property="og:description" content="Real letters from history's great minds, written to your child. When your child writes back, they answer.">
+<meta name="theme-color" content="#f7f5ef">
+<link rel="preload" href="/static/fonts/caslon-display.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/atkinson.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/fonts.css">
 <style>
 :root {
-  --paper: #f7f3ea;
-  --paper-deep: #efe8d9;
-  --ink: #26221d;
-  --ink-soft: #625a4e;
-  --accent: #9f3328;
-  --accent-ink: #fff8f2;
-  --rule: #d6cbb5;
-  --blue-ink: #1e2a55;
+  --paper: #f7f5ef;        /* writing paper, not beige */
+  --paper-2: #ece8dd;
+  --card: #fffefb;
+  --ink: #18203a;          /* fountain-pen black-blue */
+  --ink-2: #4d5468;
+  --ink-3: #7a7f8f;
+  --blue: #22418f;         /* royal blue ink */
+  --blue-deep: #172f6c;
+  --red: #c2371f;          /* postmark vermilion, used sparingly */
+  --kraft: #d3b98c;
+  --rule: #d8d2c3;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  color-scheme: light;
+  --display: 'Caslon Display', 'Caslon', Georgia, serif;
+  --serif: 'Caslon', Georgia, serif;
+  --sans: 'Atkinson', system-ui, sans-serif;
+  --hand: 'Caveat', cursive;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Lora', Georgia, serif; font-size: 18px; line-height: 1.6; }
-a { color: var(--accent); }
-.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
-h1, h2, .display { font-family: 'IM Fell English', Georgia, serif; font-weight: 400; letter-spacing: -0.005em; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 18px/1.6 var(--sans); }
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--blue); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; letter-spacing: -0.01em; color: var(--ink); }
+h2 { font-size: clamp(34px, 4.4vw, 52px); line-height: 1.04; margin: 0 0 18px; }
+h3 { font-family: var(--serif); font-size: 22px; margin: 0 0 6px; }
+.kicker { font: 700 13px/1.2 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--red); margin: 0 0 16px; }
+.lede { font-size: 20px; color: var(--ink-2); max-width: 34em; }
+.hand { font-family: var(--hand); color: var(--red); font-size: 22px; line-height: 1.1; }
 
-.btn { display: inline-block; border: 0; cursor: pointer; text-decoration: none; background: var(--accent); color: var(--accent-ink);
-  font: 600 17px/1 'Lora', Georgia, serif; padding: 17px 26px; border-radius: 6px;
-  transition: transform 140ms var(--ease-out), background-color 200ms ease; }
+/* Buttons: solid ink, square-ish, press feedback */
+.btn { display: inline-flex; align-items: center; gap: 10px; background: var(--blue); color: #fff; border: 0; border-radius: 3px;
+  padding: 15px 24px; font: 700 17px/1 var(--sans); text-decoration: none; cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms var(--ease-out); }
+.btn:hover { background: var(--blue-deep); }
 .btn:active { transform: scale(0.97); }
-.btn:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, .swatch:focus-visible { outline: 3px solid #d99a2b; outline-offset: 3px; }
-.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--rule); }
+.btn.line { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn.line:hover { background: rgba(24,32,58,.05); }
+.btn .arrow { transition: transform 200ms var(--ease-out); }
+.btn:hover .arrow { transform: translateX(3px); }
+:focus-visible { outline: 2.5px solid var(--red); outline-offset: 3px; }
 
-header { padding: 20px 0; border-bottom: 1px solid var(--rule); }
-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.logo { font-family: 'IM Fell English', Georgia, serif; font-size: 24px; color: var(--ink); text-decoration: none; }
-.logo i { color: var(--accent); }
-header .btn { padding: 12px 18px; font-size: 15px; }
+/* Banners */
+.banner { background: var(--ink); color: var(--paper); text-align: center; padding: 11px 20px; font-size: 16px; }
+.banner a { color: inherit; }
+.banner.xmas { background: var(--red); }
+
+/* Header */
+header.site { border-bottom: 1px solid var(--rule); }
+header.site .wrap { display: flex; align-items: center; justify-content: space-between; height: 74px; gap: 18px; }
+.logo { white-space: nowrap; display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); font: 400 25px/1 var(--display); }
+.logo i { font-family: var(--serif); font-style: italic; font-size: 21px; color: var(--ink-2); }
+.logo .mark { width: 30px; height: 36px; border: 3px dotted var(--paper); outline: 1.5px solid var(--ink); outline-offset: -5px;
+  background: var(--card); display: grid; place-items: center; font: 400 17px/1 var(--display); }
+nav.top { display: flex; align-items: center; gap: 26px; font-size: 16px; }
+nav.top a { color: var(--ink); text-decoration: none; white-space: nowrap; }
+nav.top a:hover { text-decoration: underline; }
+nav.top .btn { padding: 11px 18px; font-size: 15px; color: #fff; }
+nav.top .btn:hover { text-decoration: none; }
 
 /* Hero */
-.hero { padding: 56px 0 72px; }
-.hero .wrap { display: grid; grid-template-columns: 1fr 1.05fr; gap: 56px; align-items: center; }
-.kicker { font: 600 13px/1 'Lora', serif; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 18px; }
-h1 { font-size: clamp(44px, 6.4vw, 72px); line-height: 1.02; margin: 0 0 22px; }
-.lede { font-size: 20px; color: var(--ink-soft); margin: 0 0 30px; max-width: 34ch; }
-.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
-.facts { margin-top: 18px; font-size: 15px; color: var(--ink-soft); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 40px; align-items: center; padding-top: 64px; padding-bottom: 72px; }
+.hero h1 { font-size: clamp(56px, 8vw, 104px); line-height: .92; margin: 0 0 26px; letter-spacing: -0.025em; }
+.hero h1 em { font-family: var(--serif); font-style: italic; color: var(--blue); letter-spacing: -0.03em; }
+.hero .lede { margin: 0 0 32px; }
+.hero .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero .proof { margin: 26px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 15px; color: var(--ink-2); }
+.hero .proof li::before { content: "✓"; color: var(--blue); font-weight: 700; margin-right: 7px; }
 
-/* The exchange: a child's pencil letter and the real airmail reply */
-.exchange { position: relative; min-height: 640px; margin-top: 30px; }
-.sheet { position: absolute; box-shadow: 0 1px 1px rgba(40,30,15,.08), 0 20px 40px -22px rgba(40,30,15,.45); }
-.kid { width: 58%; left: 0; top: 0; transform: rotate(-3.5deg); padding: 22px 22px 26px 46px;
-  background: #fffefa repeating-linear-gradient(transparent 0 33px, #bcd3ea 33px 34px);
-  background-position: 0 14px; font-family: 'Caveat', cursive; font-size: 22px; line-height: 34px; color: #55524d; }
-.kid::before { content: ""; position: absolute; top: 0; bottom: 0; left: 32px; width: 1.5px; background: #e4a3a3; }
-.airmail { width: 76%; right: 0; top: 170px; transform: rotate(1.5deg); padding: 34px 32px 30px;
-  background: #eef1f3; font-family: 'Caveat', cursive; font-size: 21px; line-height: 1.28; color: var(--blue-ink); }
-.airmail::before, .airmail::after { content: ""; position: absolute; left: 0; right: 0; height: 9px;
-  background: repeating-linear-gradient(135deg, #b8322b 0 14px, transparent 14px 20px, #1f3f7a 20px 34px, transparent 34px 40px); }
-.airmail::before { top: 10px; } .airmail::after { bottom: 10px; }
-.airmail p { margin: 0 0 10px; }
-.airmail .sig { font-family: 'Homemade Apple', cursive; font-size: 24px; margin-top: 4px; }
-.note { position: absolute; font-family: 'Caveat', cursive; font-size: 20px; color: var(--accent); }
-.note.n1 { left: 3%; top: -30px; }
-.note.n2 { left: 0; top: 400px; max-width: 21%; line-height: 1.15; }
-.u { text-decoration: underline; text-decoration-color: rgba(159,51,40,.55); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.desk { position: relative; height: 610px; }
+.envelope { position: absolute; left: 4%; top: 64px; width: 78%; aspect-ratio: 1.55; background:
+  linear-gradient(160deg, rgba(255,255,255,.18), rgba(0,0,0,.05)), var(--kraft); border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(40,30,10,.15), 0 18px 40px -18px rgba(40,30,10,.35); transform: rotate(-5deg); overflow: hidden; }
+.envelope::before { content: ""; position: absolute; inset: 0; background:
+  linear-gradient(to bottom right, transparent 49.6%, rgba(90,60,20,.22) 50%, transparent 50.6%) left / 50% 100% no-repeat,
+  linear-gradient(to bottom left, transparent 49.6%, rgba(90,60,20,.22) 50%, transparent 50.6%) right / 50% 100% no-repeat; opacity: .55; }
+.envelope .to { position: absolute; left: 24%; top: 50%; font: 400 25px/1.25 var(--hand); color: #2a2f52; transform: rotate(-1deg); }
+.stamp-mini { position: absolute; right: 7%; top: 9%; width: 62px; height: 74px; background: var(--card); border: 5px dotted var(--kraft);
+  display: grid; place-items: center; text-align: center; font: 400 12px/1.1 var(--serif); color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); }
+.stamp-mini b { display: block; font: 400 25px/1 var(--display); }
+.postmark { position: absolute; right: 15%; top: 3%; width: 128px; height: 128px; color: rgba(194,55,31,.75); transform: rotate(-14deg); }
+.sheet-letter { position: absolute; right: 2%; top: 0; width: 52%; transform: rotate(3deg); box-shadow: 0 2px 3px rgba(20,20,40,.12), 0 30px 60px -24px rgba(20,20,40,.45);
+  transition: transform 300ms var(--ease-out); }
+.desk:hover .sheet-letter { transform: rotate(2deg) translateY(-4px); }
+.kid-note { position: absolute; left: 0; bottom: 18px; width: 52%; background:
+  repeating-linear-gradient(to bottom, transparent 0 31px, #b9cbe0 31px 32px), #fffef9;
+  padding: 18px 18px 12px 46px; font: 400 23px/32px var(--hand); color: #3b3b40; transform: rotate(-4deg);
+  box-shadow: 0 2px 3px rgba(20,20,40,.1), 0 22px 40px -22px rgba(20,20,40,.45); }
+.kid-note::before { content: ""; position: absolute; top: 0; bottom: 0; left: 32px; border-left: 1.5px solid #e6a3a3; }
+.note-a { position: absolute; left: 2%; top: 4px; transform: rotate(-3deg); max-width: 190px; }
+.note-b { position: absolute; right: 0; bottom: -6px; transform: rotate(-2deg); text-align: right; max-width: 230px; }
 
-section { padding: 72px 0; border-top: 1px solid var(--rule); }
-section.alt { background: var(--paper-deep); }
-h2 { font-size: clamp(34px, 4.6vw, 48px); line-height: 1.1; margin: 0 0 12px; }
-.sub { color: var(--ink-soft); margin: 0 0 40px; max-width: 58ch; }
+/* Sections */
+section { padding: 96px 0; }
+section.tint { background: var(--paper-2); }
+.split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; }
 
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
-.step { border-top: 2px solid var(--ink); padding-top: 16px; }
-.step .num { font-family: 'IM Fell English', serif; font-style: italic; font-size: 20px; color: var(--accent); }
-.step h3 { margin: 4px 0 8px; font-size: 21px; }
-.step p { margin: 0; color: var(--ink-soft); font-size: 16.5px; }
+/* The exchange */
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 74px 1fr; gap: 18px; padding: 26px 0; border-top: 1px solid var(--rule); }
+.steps li:last-child { border-bottom: 1px solid var(--rule); }
+.steps li::before { content: counter(step); font: 400 56px/0.9 var(--display); color: var(--blue); }
+.steps p { margin: 0; color: var(--ink-2); }
 
-/* Stationery swatches: each figure's real letter design */
-.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-.swatch { display: block; text-decoration: none; color: inherit; transition: transform 200ms var(--ease-out); }
-.swatch:active { transform: scale(0.98); }
-.mini { aspect-ratio: 8.5 / 11; padding: 22px 18px; font-size: 12.5px; line-height: 1.45; overflow: hidden; position: relative;
-  box-shadow: 0 1px 1px rgba(40,30,15,.08), 0 14px 28px -18px rgba(40,30,15,.5); }
-.mini .to { margin-bottom: 8px; }
-.mini::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40%; background: linear-gradient(transparent, var(--fade)); }
-.m-typed { --fade: #fdfcf8; background: #fdfcf8; outline: 1px solid #e4dccb; font-family: 'Special Elite', monospace; color: #26231f; }
-.m-air { --fade: #eef1f3; background: #eef1f3; font-family: 'Caveat', cursive; font-size: 16.5px; line-height: 1.25; color: var(--blue-ink); }
-.m-air::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 6px;
-  background: repeating-linear-gradient(135deg, #b8322b 0 9px, transparent 9px 13px, #1f3f7a 13px 22px, transparent 22px 26px); }
-.m-papyrus { --fade: #e2cd99; background: linear-gradient(90deg, rgba(0,0,0,.03), transparent 30%, rgba(0,0,0,.04) 70%, transparent),
-  repeating-linear-gradient(0deg, rgba(120,85,35,.08) 0 1px, transparent 1px 5px), #e4d09e; font-family: 'IM Fell English', serif; color: #2a1b0e; font-size: 13.5px; }
-.m-vict { --fade: #f5edd9; background: repeating-linear-gradient(0deg, rgba(120,100,70,.05) 0 1px, transparent 1px 3px), #f5edd9;
-  font-family: 'IM Fell English', serif; color: #2b1f14; font-size: 13.5px; }
-.m-parch { --fade: #eddcb6; background: radial-gradient(circle at 20% 25%, rgba(150,100,40,.12), transparent 35%), #eddcb6;
-  font-family: 'IM Fell English', serif; font-style: italic; color: #4a2c14; font-size: 13.5px; }
-.swatch b { display: block; margin-top: 14px; font-size: 17px; }
-.swatch span { font-size: 14.5px; color: var(--ink-soft); }
+/* Sheet of stamps */
+.stamps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 40px; background: var(--card);
+  padding: 18px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 20px 50px -30px rgba(20,20,40,.35); }
+.stamp { --c: var(--blue); position: relative; background: var(--card); border: 7px dotted var(--paper-2); padding: 0; }
+.stamp .face { height: 100%; padding: 14px 14px 13px; background: color-mix(in srgb, var(--c) 7%, var(--card));
+  box-shadow: inset 0 0 0 1.5px var(--c); display: flex; flex-direction: column; gap: 3px; transition: transform 200ms var(--ease-out); }
+.stamp:nth-child(6n+2) { --c: #2d5a45; } .stamp:nth-child(6n+3) { --c: #8a2d3b; } .stamp:nth-child(6n+4) { --c: #8a6418; }
+.stamp:nth-child(6n+5) { --c: #3e5466; } .stamp:nth-child(6n+6) { --c: #5a3f7a; }
+.stamp .no { display: flex; justify-content: space-between; font: 700 11px/1 var(--sans); letter-spacing: .1em; color: var(--c); text-transform: uppercase; }
+.stamp .name { font: 400 21px/1.08 var(--display); color: var(--ink); margin: 10px 0 2px; }
+.stamp .hook { font-size: 14px; line-height: 1.35; color: var(--ink-2); }
+.stamp a { margin-top: auto; padding-top: 8px; font-size: 14px; font-weight: 700; color: var(--c); }
+@media (hover: hover) { .stamp:hover .face { transform: translateY(-2px); } }
+.stamps-note { font-size: 15px; color: var(--ink-3); margin: 14px 0 0; }
 
-.benefits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 48px; }
-.benefit h3 { margin: 0 0 4px; font-size: 20px; }
-.benefit p { margin: 0; color: var(--ink-soft); font-size: 16.5px; }
+/* Real letters strip */
+.letters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px; margin-top: 44px; }
+.letters a { color: var(--ink); text-decoration: none; }
+.letters img { box-shadow: 0 1px 2px rgba(20,20,40,.1), 0 20px 36px -22px rgba(20,20,40,.45); transition: transform 300ms var(--ease-out); }
+.letters a:nth-child(odd) img { transform: rotate(-1.2deg); }
+.letters a:nth-child(even) img { transform: rotate(1deg); }
+@media (hover: hover) { .letters a:hover img { transform: rotate(0deg) translateY(-6px); } }
+.letters .cap { display: block; margin-top: 16px; font: 400 19px/1.2 var(--serif); }
+.letters .cap small { display: block; font: 15px/1.4 var(--sans); color: var(--ink-3); margin-top: 3px; }
 
-.plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 840px; }
-.plan { background: #fffdf8; border: 1px solid var(--rule); padding: 28px; }
-.plan.best { border: 2px solid var(--ink); }
-.plan .label { font: 600 12px/1 'Lora', serif; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); height: 12px; margin-bottom: 12px; }
-.plan h3 { margin: 0; font-size: 22px; }
-.price { font-family: 'IM Fell English', serif; font-size: 48px; line-height: 1.1; margin: 8px 0 2px; }
-.price small { font-family: 'Lora', serif; font-size: 16px; color: var(--ink-soft); }
-.plan ul { padding-left: 20px; margin: 14px 0 0; font-size: 16.5px; }
-.plan li { margin-bottom: 6px; }
-.founding { margin-top: 26px; font-size: 16.5px; color: var(--ink-soft); max-width: 60ch; }
+/* Real history + safety */
+.card-shot { width: 100%; max-width: 420px; transform: rotate(-1.5deg); box-shadow: 0 1px 2px rgba(20,20,40,.1), 0 26px 50px -26px rgba(20,20,40,.45); }
+.ticks { list-style: none; padding: 0; margin: 26px 0 0; }
+.ticks li { position: relative; padding: 0 0 16px 34px; color: var(--ink-2); }
+.ticks li b { color: var(--ink); font-weight: 700; }
+.ticks li::before { content: ""; position: absolute; left: 2px; top: 7px; width: 14px; height: 8px; border-left: 2.5px solid var(--blue);
+  border-bottom: 2.5px solid var(--blue); transform: rotate(-45deg); }
 
-.signup { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: start; }
-form { background: #fffdf8; border: 1px solid var(--rule); padding: 28px; }
-label { display: block; font-size: 15px; font-weight: 600; margin: 0 0 6px; }
-.field { margin-bottom: 18px; }
-input[type=text], input[type=email], select { width: 100%; font: 17px 'Lora', Georgia, serif; color: var(--ink); background: #fff;
-  border: 1.5px solid var(--rule); border-radius: 4px; padding: 12px 14px; transition: border-color 160ms ease; }
-.choice { display: grid; gap: 10px; }
-.choice label { font-weight: 400; display: flex; gap: 10px; align-items: flex-start; border: 1.5px solid var(--rule); border-radius: 4px; padding: 12px 14px;
-  cursor: pointer; background: #fff; transition: border-color 160ms ease, background-color 160ms ease; }
-.choice label:has(input:checked) { border-color: var(--ink); background: #fbf7ee; }
-.choice input { margin-top: 5px; accent-color: var(--accent); }
-.consent { font-weight: 400; font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; color: var(--ink-soft); }
-.consent input { margin-top: 4px; accent-color: var(--accent); }
-.hidden { position: absolute; left: -9999px; }
-form .btn { width: 100%; }
-.error { color: var(--accent); font-size: 15px; margin-top: 10px; min-height: 1em; }
-.thanks { display: none; text-align: center; padding: 20px 8px; }
-.thanks.show { display: block; }
-.thanks h3 { font-family: 'IM Fell English', serif; font-weight: 400; font-size: 32px; margin: 0 0 8px; }
+/* Plans */
+.plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; margin-top: 40px; }
+.plan { background: var(--card); padding: 30px 30px 32px; position: relative; border-top: 5px solid var(--ink-3); }
+.plan.best { border-top-color: var(--blue); }
+.plan .tag { position: absolute; top: -16px; right: 24px; background: var(--blue); color: #fff; font: 700 12px/1 var(--sans);
+  letter-spacing: .1em; text-transform: uppercase; padding: 8px 10px; }
+.plan h3 { font-size: 26px; }
+.price { font: 400 54px/1 var(--display); margin: 10px 0 2px; }
+.price small { font: 16px var(--sans); color: var(--ink-3); margin-left: 4px; }
+.plan ul { list-style: none; padding: 0; margin: 18px 0 26px; }
+.plan li { padding: 9px 0; border-top: 1px dashed var(--rule); font-size: 17px; }
+.plan li:first-child { border-top: 0; }
+.plan .btn { width: 100%; justify-content: center; }
+.small-print { margin: 22px 0 0; font-size: 15px; color: var(--ink-3); }
 
-details { border-bottom: 1px solid var(--rule); padding: 16px 0; }
-summary { cursor: pointer; font-weight: 600; font-size: 18px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+/* Gift band */
+.gift { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: center; }
+.gift .cert { width: 100%; max-width: 360px; justify-self: center; transform: rotate(2.5deg);
+  box-shadow: 0 1px 2px rgba(20,20,40,.1), 0 26px 50px -26px rgba(20,20,40,.5); }
+.gift .options { display: flex; gap: 10px; flex-wrap: wrap; margin: 22px 0 28px; }
+.gift .options span { border: 1.5px solid var(--ink); padding: 9px 14px; font-size: 16px; }
+.gift .options b { font-family: var(--display); font-weight: 400; font-size: 20px; }
+
+/* Closing band */
+.closing { background: var(--ink); color: var(--paper); text-align: center; }
+.closing h2 { color: var(--paper); }
+.closing .lede { color: #c9cbd6; margin: 0 auto 30px; }
+.closing .btn { background: var(--paper); color: var(--ink); }
+.closing .btn:hover { background: #fff; }
+.closing .facts { margin-top: 22px; font-size: 15px; color: #a9acbb; }
+
+/* Questions */
+details { border-top: 1px solid var(--rule); }
+details:last-of-type { border-bottom: 1px solid var(--rule); }
+summary { cursor: pointer; list-style: none; padding: 20px 40px 20px 0; position: relative; font: 400 21px/1.3 var(--serif); }
 summary::-webkit-details-marker { display: none; }
-summary::after { content: "+"; font-size: 22px; line-height: 1; color: var(--accent); transition: transform 200ms var(--ease-out); }
-details[open] summary::after { transform: rotate(45deg); }
-details p { margin: 10px 0 0; color: var(--ink-soft); font-size: 16.5px; }
-footer { padding: 36px 0 48px; color: var(--ink-soft); font-size: 14.5px; text-align: center; border-top: 1px solid var(--rule); }
+summary::after { content: ""; position: absolute; right: 6px; top: 27px; width: 9px; height: 9px; border-right: 2px solid var(--blue);
+  border-bottom: 2px solid var(--blue); transform: rotate(45deg); transition: transform 200ms var(--ease-out); }
+details[open] summary::after { transform: rotate(-135deg); top: 31px; }
+details p { margin: 0 0 22px; color: var(--ink-2); max-width: 40em; }
 
-@media (max-width: 900px) {
-  .hero .wrap, .signup { grid-template-columns: 1fr; }
-  .steps, .plans, .benefits { grid-template-columns: 1fr; }
-  .swatches { grid-template-columns: repeat(2, 1fr); }
+footer.site { padding: 36px 0 48px; font-size: 15px; color: var(--ink-3); border-top: 1px solid var(--rule); }
+footer.site .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer.site a { color: inherit; }
+
+/* Entrances: letters settle onto the desk once, on first view */
+@media (prefers-reduced-motion: no-preference) {
+  .desk > * { animation: settle 700ms var(--ease-out) both; }
+  .desk .envelope { animation-delay: 0ms; } .desk .sheet-letter { animation-delay: 120ms; } .desk .kid-note { animation-delay: 220ms; }
+  .desk .note-a, .desk .note-b { animation-delay: 500ms; } .desk .postmark { animation-delay: 380ms; }
+  @keyframes settle { from { opacity: 0; translate: 0 14px; } }
 }
-@media (max-width: 520px) {
+
+@media (max-width: 960px) {
+  .hero .wrap, .split, .gift { grid-template-columns: 1fr; }
+  .hero .wrap { padding-top: 40px; gap: 28px; }
+  .desk { height: 520px; max-width: 560px; }
+  .stamps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .letters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .split { gap: 24px; }
+}
+@media (max-width: 640px) {
   body { font-size: 17px; }
-  .logo { font-size: 20px; }
-  header .btn { padding: 10px 12px; font-size: 14px; }
-  .exchange { min-height: 700px; }
-  .kid { width: 88%; font-size: 20px; }
-  .airmail { width: 94%; top: 250px; padding: 30px 22px 26px; font-size: 19.5px; }
-  .note.n1 { top: -30px; }
-  .note.n2 { display: none; }
-  .swatches { gap: 14px; }
-  .mini { padding: 16px 12px; font-size: 10.5px; }
-  .m-air { font-size: 14px; }
-}
-/* Hero letters arrive once on load: rare, first-time moment, so a little delight is earned. */
-.arrive { opacity: 0; transform: translateY(14px) rotate(var(--r, 0deg)); animation: arrive 520ms var(--ease-out) var(--d, 0ms) forwards; }
-@keyframes arrive { to { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)); } }
-/* Stationery slides out from below as it scrolls into view (clip reveal), staggered 60ms. */
-.reveal .mini { clip-path: inset(0 0 100% 0); transition: clip-path 600ms cubic-bezier(0.77, 0, 0.175, 1) var(--d, 0ms); }
-.reveal.in .mini { clip-path: inset(0 0 0 0); }
-/* Button label crossfade with a touch of blur so the text swap reads as one change. */
-.btn-label { display: inline-block; transition: opacity 120ms ease, filter 120ms ease; }
-.btn-label.swapping { opacity: 0; filter: blur(2px); }
-.btn:disabled { cursor: progress; opacity: .85; }
-/* Thank-you note enters from a slight offset, never from nothing. */
-.thanks { opacity: 1; transform: none; transition: opacity 260ms var(--ease-out), transform 260ms var(--ease-out); }
-@starting-style { .thanks.show { opacity: 0; transform: translateY(8px); } }
-/* Hover only where hover exists; touch screens get press feedback instead. */
-@media (hover: hover) and (pointer: fine) {
-        }
-/* Reduced motion: keep fades that aid comprehension, drop movement. */
-@media (prefers-reduced-motion: reduce) {
-  .arrive { transform: rotate(var(--r, 0deg)); animation: fade 200ms ease forwards; }
-  @keyframes fade { to { opacity: 1; } }
-  .reveal .mini { clip-path: none; transition: none; }
-  .swatch, .btn, .thanks { transition: opacity 200ms ease, background-color 200ms ease; }
-  .swatch:hover, .btn:active { transform: none; }
+  .wrap { padding: 0 18px; }
+  section { padding: 68px 0; }
+  nav.top .hide-sm { display: none; }
+  nav.top { gap: 14px; }
+  .logo { font-size: 20px; } .logo i { font-size: 17px; } .logo .mark { display: none; }
+  nav.top .btn { padding: 10px 13px; }
+  .desk { height: 430px; }
+  .envelope .to { font-size: 19px; }
+  .kid-note { font-size: 18px; line-height: 26px; padding: 12px 12px 8px 34px; width: 60%;
+    background: repeating-linear-gradient(to bottom, transparent 0 25px, #b9cbe0 25px 26px), #fffef9; }
+  .kid-note::before { left: 24px; }
+  .sheet-letter { width: 64%; }
+  .postmark { width: 92px; height: 92px; }
+  .note-a, .note-b { font-size: 18px; }
+  .stamps { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 10px; }
+  .stamp { border-width: 6px; } .stamp .name { font-size: 19px; }
+  .plans { grid-template-columns: 1fr; gap: 34px; }
+  .letters { gap: 18px; }
 }
 </style>
-<!-- Analytics (optional, cookie-free): uncomment and set your GoatCounter code.
-<script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
--->
 </head>
 <body>
-{% if invite_offer %}<div style="background:var(--ink);color:#fbf8f1;text-align:center;padding:10px 16px;font-size:15px">You've been invited: <b>{{ invite_offer }}</b> of letters. <a href="/signup" style="color:inherit">Get started</a></div>{% endif %}
+{% if invite_offer %}<div class="banner">You've been invited: <b>{{ invite_offer }}</b> of letters. <a href="/signup">Get started</a></div>{% endif %}
+{% if christmas %}<div class="banner xmas">{{ christmas.text }} <a href="/gift">Give a gift</a></div>{% endif %}
 
-<header>
+<header class="site">
   <div class="wrap">
-    <a class="logo" href="#">Letters <i>from</i> History</a>
-    <nav style="display:flex;gap:14px;align-items:center"><a href="/login" style="color:var(--ink);text-decoration:none;font-size:15px">Log in</a><a class="btn" href="/signup">Get started</a></nav>
+    <a class="logo" href="/" aria-label="Letters from History, home"><span class="mark" aria-hidden="true">L</span><span>Letters <i>from</i> History</span></a>
+    <nav class="top" aria-label="Main">
+      <a class="hide-sm" href="#pen-pals">Pen pals</a>
+      <a class="hide-sm" href="#gifts">Gifts</a>
+      {% if user %}<a href="/account">My account</a>{% else %}<a href="/login">Log in</a>
+      <a class="btn" href="/signup">Get started</a>{% endif %}
+    </nav>
   </div>
 </header>
 
 <main>
-<section class="hero" style="border-top:0">
+<section class="hero" style="padding:0">
   <div class="wrap">
     <div>
-      <p class="kicker">Real letters through your child's letterbox</p>
-      <h1>History writes back.</h1>
-      <p class="lede">Mary Anning, Isambard Kingdom Brunel, Ada Lovelace, Florence Nightingale and more write letters to your child about the things your child loves. When your child writes back, the next letter <em>answers them</em>.</p>
-      <div class="hero-cta">
-        <a class="btn" href="/signup">Start their letters</a>
-        <a class="btn ghost" href="#pen-pals">See the letters</a>
+      <p class="kicker">Real letters, through your letterbox</p>
+      <h1>History <em>writes</em> back.</h1>
+      <p class="lede">Mary Anning, Isambard Kingdom Brunel, Ada Lovelace and Samuel Pepys write to your child about the things your child loves. When your child writes back, the next letter answers them.</p>
+      <div class="ctas">
+        <a class="btn" href="/signup">Start their letters <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn line" href="#letters">Read a real letter</a>
       </div>
-      <p class="facts">Ages 5–12 · Printed and posted in the UK · Every fact checked before it's sent</p>
+      <ul class="proof">
+        <li>Ages 5–12</li><li>Printed and posted in the UK</li><li>Every letter fact-checked</li>
+      </ul>
     </div>
 
-    <div class="exchange" aria-label="Example: Leo's handwritten letter and Amelia Earhart's reply">
-      <div class="sheet kid arrive" style="--r:-3.5deg">Dear Amelia, I built a Lego plane it is red like yours. wer you scard when you flew over the ocean all alone? what did you eat on the plane? I lost my frist tooth. From Leo</div>
-      <div class="note n1 arrive" style="--r:-2deg; --d:120ms">Leo, age 7, writes in pencil ↓</div>
-      <div class="sheet airmail arrive" style="--r:1.5deg; --d:260ms">
-        <p>Dear Leo,</p>
-        <p>A red Lego plane, just like my red plane? That made me smile all the way up to the clouds.</p>
-        <p>You asked if I was scared flying over the ocean all alone. <span class="u">Here is the truth: sometimes I was.</span> But I had practised and practised. Being brave does not mean you never feel scared. It means you keep going carefully, even when you do.</p>
-        <p>You also asked what I ate. <span class="u">I mostly sipped tomato juice through a straw!</span></p>
-        <p>And you lost your first tooth! Congratulations, Leo.</p>
-        <div>Your friend in the sky,</div>
-        <div class="sig">Amelia</div>
+    <div class="desk" aria-label="Leo's letter to Amelia Earhart, and her reply">
+      <div class="envelope" aria-hidden="true">
+        <div class="stamp-mini"><span><b>L</b>1st</span></div>
+        <div class="to">Leo<br>14 Elm Road<br>Bristol</div>
       </div>
-      <div class="note n2 arrive" style="--r:-3deg; --d:420ms">Amelia answers every question →</div>
+      <svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><g fill="none" stroke="currentColor">
+        <circle cx="60" cy="60" r="44" stroke-width="2.5"/><circle cx="60" cy="60" r="30" stroke-width="1.2"/>
+        <path id="pm" d="M 60 60 m -37 0 a 37 37 0 1 1 74 0 a 37 37 0 1 1 -74 0" stroke="none"/>
+        <text font-family="Atkinson, sans-serif" font-size="9.5" font-weight="700" letter-spacing="2.2" fill="currentColor" stroke="none"><textPath href="#pm">LETTERS FROM HISTORY · BRISTOL ·</textPath></text>
+        <text x="60" y="58" text-anchor="middle" font-family="Atkinson, sans-serif" font-size="11" font-weight="700" fill="currentColor" stroke="none">14 NOV</text>
+        <text x="60" y="71" text-anchor="middle" font-family="Atkinson, sans-serif" font-size="10" fill="currentColor" stroke="none">2026</text>
+        <path d="M 108 44 q 10 -6 20 0 t 20 0 M 108 60 q 10 -6 20 0 t 20 0 M 108 76 q 10 -6 20 0 t 20 0" stroke-width="2"/></g></svg>
+      <img class="sheet-letter" src="/static/img/earhart-to-leo.webp" width="820" height="1161" alt="Amelia Earhart's reply to Leo, on airmail paper. She answers his questions: yes, she was sometimes scared, and she sipped tomato juice through a straw.">
+      <div class="kid-note">Dear Amelia, I built a Lego plane it is red like yours. wer you scard when you flew over the ocean? what did you eat? I lost my frist tooth. From Leo</div>
+      <p class="hand note-a">Leo, 7, writes back in pencil ↓</p>
+      <p class="hand note-b">↑ Amelia answers every question</p>
     </div>
   </div>
 </section>
 
-<section class="alt">
-  <div class="wrap">
-    <h2>How it works</h2>
-    <p class="sub">A pen pal from history who actually reads what your child writes.</p>
-    <div class="steps">
-      <div class="step"><div class="num">One</div><h3>Tell us about your child</h3><p>Their name, age, and what they love: dinosaurs, space, football, drawing. Every letter is written for them alone.</p></div>
-      <div class="step"><div class="num">Two</div><h3>A letter arrives in the post</h3><p>Printed on stationery from the figure's own era, with a "Real history" card on the back to read together.</p></div>
-      <div class="step"><div class="num">Three</div><h3>Your child writes back</h3><p>Snap a photo of their handwritten reply. The next letter answers their questions and remembers their news.</p></div>
+<section class="tint" id="how">
+  <div class="wrap split">
+    <div>
+      <p class="kicker">How it works</p>
+      <h2>A pen pal who actually reads what your child writes.</h2>
     </div>
+    <ol class="steps">
+      <li><div><h3>Tell us about your child</h3><p>First name, age and what they love: dinosaurs, space, football, a cat called Biscuit. Every letter is written for them alone.</p></div></li>
+      <li><div><h3>A letter arrives in the post</h3><p>Their first pen pal introduces themselves, on paper from their own time, with a "Real history" card on the back to read together.</p></div></li>
+      <li><div><h3>Your child writes back</h3><p>Snap a photo of their reply, or type it in. The next letter answers their questions and remembers their news.</p></div></li>
+    </ol>
   </div>
 </section>
 
 <section id="pen-pals">
   <div class="wrap">
-    <h2>Every pen pal writes on their own paper</h2>
-    <p class="sub">Mary Anning writes on Victorian paper with a fossil sketched in the margin. Einstein types. Amelia writes on airmail paper. Leonardo leaves a line of mirror writing to decode. Tap one to see a full letter.</p>
-    <div class="swatches">
-      <a class="swatch reveal" href="/samples/anning-to-oliver.pdf" target="_blank" rel="noopener" >
-        <div class="mini m-vict"><div class="to">Dear Oliver,</div>My name is Mary Anning, and I am writing to you from Lyme Regis, a little town by the sea in Dorset. I hunt for fossils…</div>
-        <b>Mary Anning</b><span>Fossils, dinosaurs and the seaside</span>
-      </a>
-      <a class="swatch reveal" href="/samples/einstein-to-maya.pdf" target="_blank" rel="noopener" style="--d:60ms">
-        <div class="mini m-typed"><div class="to">Dear Maya,</div>A most curious thing happened this morning. I sat down at my desk here in Princeton to think about the universe, and instead my pen began writing to you…</div>
-        <b>Albert Einstein</b><span>Space, light and big questions</span>
-      </a>
-      <a class="swatch reveal" href="/samples/earhart-to-leo.pdf" target="_blank" rel="noopener" style="--d:120ms">
-        <div class="mini m-air"><div class="to">Dear Leo,</div>Thank you for your wonderful letter! A red Lego plane, just like my red plane? That made me smile all the way up to the clouds…</div>
-        <b>Amelia Earhart</b><span>Flight, courage and adventure</span>
-      </a>
-      <a class="swatch reveal" href="/samples/leonardo-to-sam.pdf" target="_blank" rel="noopener" style="--d:180ms">
-        <div class="mini m-parch"><div class="to">Dear Sam,</div>Forgive the ink spots on this page. I write quickly when an idea is chasing me, and this morning one chased me all the way across Milan…</div>
-        <b>Leonardo da Vinci</b><span>Art, inventions and nature</span>
-      </a>
+    <div class="split" style="align-items:end">
+      <div><p class="kicker">The pen pals</p><h2>Twenty pen pals, led by British history.</h2></div>
+      <p class="lede" style="margin:0">Each one writes for a few months, says goodbye, and hands over to the next. Many are on the school curriculum, from the Great Fire of London to Victorian engineers.</p>
+    </div>
+    <div class="stamps">
+      {% for p in pen_pals %}
+      <div class="stamp"><div class="face">
+        <div class="no"><span>{{ p.years }}</span><span>{% if p.min_age %}{{ p.min_age }}+{% else %}{{ loop.index }}{% endif %}</span></div>
+        <div class="name">{{ p.name }}</div>
+        <div class="hook">{{ p.hook }}</div>
+        {% if p.sample %}<a href="/samples/{{ p.sample }}.pdf" target="_blank" rel="noopener">Read a letter</a>{% endif %}
+      </div></div>
+      {% endfor %}
+    </div>
+    <p class="stamps-note">8+ means we save that pen pal for children aged 8 and over.</p>
+  </div>
+</section>
+
+<section class="tint" id="letters">
+  <div class="wrap">
+    <div class="split" style="align-items:end">
+      <div><p class="kicker">Real letters</p><h2>Every pen pal writes on their own paper.</h2></div>
+      <p class="lede" style="margin:0">Victorian notepaper with a fossil in the margin. Airmail with a striped border. A lighthouse keeper's letter from the Farne Islands. Tap one to read it in full.</p>
+    </div>
+    <div class="letters">
+      <a href="/samples/anning-to-oliver.pdf" target="_blank" rel="noopener"><img src="/static/img/anning-to-oliver.webp" width="820" height="1161" loading="lazy" alt="Letter from Mary Anning to Oliver"><span class="cap">Mary Anning to Oliver<small>Fossils at Lyme Regis</small></span></a>
+      <a href="/samples/darling-to-isla.pdf" target="_blank" rel="noopener"><img src="/static/img/darling-to-isla.webp" width="820" height="1161" loading="lazy" alt="Letter from Grace Darling to Isla"><span class="cap">Grace Darling to Isla<small>A rescue in a storm</small></span></a>
+      <a href="/samples/earhart-to-leo.pdf" target="_blank" rel="noopener"><img src="/static/img/earhart-to-leo.webp" width="820" height="1161" loading="lazy" alt="Letter from Amelia Earhart to Leo, answering his letter"><span class="cap">Amelia Earhart to Leo<small>An answer to his letter</small></span></a>
+      <a href="/samples/leonardo-to-sam.pdf" target="_blank" rel="noopener"><img src="/static/img/leonardo-to-sam.webp" width="820" height="1161" loading="lazy" alt="Letter from Leonardo da Vinci to Sam"><span class="cap">Leonardo da Vinci to Sam<small>With mirror writing to decode</small></span></a>
     </div>
   </div>
 </section>
 
-<section class="alt">
-  <div class="wrap">
-    <h2>Why parents sign up</h2>
-    <p class="sub">History stops being dates in a textbook and becomes a friend who writes back.</p>
-    <div class="benefits">
-      <div class="benefit"><h3>Kids who want to write</h3><p>Nothing gets a reluctant writer going like a question from Einstein they're dying to answer.</p></div>
-      <div class="benefit"><h3>Screen-free and real</h3><p>Paper, ink and a letterbox. Getting real post with your own name on it never stops being exciting.</p></div>
-      <div class="benefit"><h3>Every fact checked</h3><p>Letters are written from a verified fact sheet for each figure and checked again before printing. Anything imagined is marked on the "Real history" card.</p></div>
-      <div class="benefit"><h3>Brilliant for home education</h3><p>A living-history companion that sparks conversation, map work and trips to the library.</p></div>
+<section id="care">
+  <div class="wrap split" style="align-items:center">
+    <img class="card-shot" src="/static/img/real-history-card.webp" width="820" height="1161" loading="lazy" alt="The Real history card on the back of Mary Anning's letter, listing the true facts behind it">
+    <div>
+      <p class="kicker">Made with care</p>
+      <h2>Fun to read. True to history. Safe for children.</h2>
+      <ul class="ticks">
+        <li><b>Every letter is fact-checked</b> against a verified fact sheet for its pen pal before it's posted. The "Real history" card on the back shows what's true and what's imagined.</li>
+        <li><b>Your child's letters are read carefully.</b> Replies go through safety checks, and anything worrying is read by a trained person.</li>
+        <li><b>You can read every letter first.</b> Turn on previews and we'll email each one before it's posted.</li>
+        <li><b>We ask only for what the letters need</b>, from parents, never from children. Photos of replies are deleted as soon as they're read.</li>
+        <li><b>Screen-free and real.</b> Paper, ink and a letterbox, and a reason to pick up a pencil.</li>
+      </ul>
     </div>
   </div>
 </section>
 
-<section id="plans">
+<section class="tint" id="plans">
   <div class="wrap">
-    <h2>Two simple plans</h2>
-    <p class="sub">Cancel any time. Postage included. Or <a href="/gift">give it as a gift</a>.</p>
-    {% if christmas %}<p class="sub" style="background:#f7efe0;border-left:3px solid var(--accent);padding:12px 16px;max-width:840px;box-sizing:border-box">{{ christmas.text }} <a href="/gift">Give a gift</a></p>{% endif %}
+    <div class="split" style="align-items:end">
+      <div><p class="kicker">Plans</p><h2>Postage included. Cancel any time.</h2></div>
+      <p class="lede" style="margin:0">Have an invite code from a friend or a partner? <a href="/signup">Enter it when you sign up</a>.</p>
+    </div>
     <div class="plans">
       <div class="plan">
-        <div class="label"></div>
         <h3>Story Letters</h3>
-        <div class="price">£7<small> a month</small></div>
+        <div class="price">£7<small>a month</small></div>
         <ul>
-          <li>1 personalized letter a month</li>
-          <li>A new historical figure every few months</li>
-          <li>"Real history" card with every letter</li>
+          <li>1 personalised letter a month</li>
+          <li>A new pen pal every few months</li>
+          <li>A "Real history" card with every letter</li>
         </ul>
-        <p style="margin:18px 0 0"><a class="btn ghost" href="/signup?plan=story">Choose Story Letters</a></p>
+        <a class="btn line" href="/signup?plan=story">Choose Story Letters</a>
       </div>
       <div class="plan best">
-        <div class="label">What most families choose</div>
+        <span class="tag">Most families</span>
         <h3>Pen Pal from History</h3>
-        <div class="price">£12<small> a month</small></div>
+        <div class="price">£12<small>a month</small></div>
         <ul>
           <li>2 letters a month</li>
           <li><b>Your child writes back, and the next letter answers them</b></li>
-          <li>The story continues, letter after letter</li>
-          <li>"Real history" card with every letter</li>
+          <li>A "Real history" card with every letter</li>
         </ul>
-        <p style="margin:18px 0 0"><a class="btn" href="/signup?plan=penpal">Choose Pen Pal from History</a></p>
+        <a class="btn" href="/signup?plan=penpal">Choose Pen Pal from History</a>
       </div>
     </div>
-    <div class="plan" style="max-width:840px;margin-top:24px;box-sizing:border-box">
-      <div class="label">For grandparents, godparents and birthdays</div>
-      <h3>Give Pen Pal from History</h3>
-      <p style="margin:10px 0 0;font-size:16.5px">3, 6 or 12 months, paid once, with nothing to renew. You get a printable certificate with a gift code; the family redeems it and adds their address. From £36.</p>
-      <p style="margin:18px 0 0"><a class="btn ghost" href="/gift">Give a gift</a> <a href="/redeem" style="margin-left:14px">Redeem a gift code</a></p>
+    <p class="small-print">One-click cancelling from your account. We'll remind you every 6 months that your subscription is running.</p>
+  </div>
+</section>
+
+<section id="gifts">
+  <div class="wrap gift">
+    <div>
+      <p class="kicker">Gifts</p>
+      <h2>A present that keeps arriving.</h2>
+      <p class="lede">For grandparents, godparents and birthdays: months of Pen Pal from History, paid once, with nothing to renew. You get a printable certificate with a gift code, or we can email it to the family on the day.</p>
+      <div class="options"><span><b>3 months</b> £36</span><span><b>6 months</b> £69</span><span><b>12 months</b> £132</span></div>
+      <a class="btn" href="/gift">Give a gift <span class="arrow" aria-hidden="true">→</span></a>
+      <p class="small-print">Been given one? <a href="/redeem">Redeem a gift code</a></p>
     </div>
+    <img class="cert" src="/static/img/gift-certificate.webp" width="744" height="1053" loading="lazy" alt="A Letters from History gift certificate for Maya, with a message from Granny Rose and a gift code">
   </div>
 </section>
 
-<section class="alt" id="join">
-  <div class="wrap" style="text-align:center;max-width:720px">
-    <h2>Their first letter is an introduction</h2>
-    <p class="sub" style="margin:0 auto 26px">Tell us your child's name and what they love. Within a few days, a letter from their first pen pal arrives through the letterbox.</p>
-    <a class="btn" href="/signup">Start their letters</a>
-    <p class="facts">Cancel any time · Postage included · Every letter checked by a person before it's posted</p>
+<section class="closing">
+  <div class="wrap" style="max-width:760px">
+    <h2>Their first letter is an introduction.</h2>
+    <p class="lede">Tell us your child's name and what they love. Within a few days, a letter from their first pen pal comes through the letterbox.</p>
+    <a class="btn" href="/signup">Start their letters <span class="arrow" aria-hidden="true">→</span></a>
+    <p class="facts">Cancel any time · Postage included · Every letter fact-checked before it's posted</p>
   </div>
 </section>
 
-<section>
-  <div class="wrap" style="max-width: 780px">
-    <h2>Questions</h2>
-    <details><summary>Who writes the letters?</summary><p>Letters are written with the help of AI, in each figure's voice, from a verified fact sheet for every figure. A separate fact-checking step reviews each letter before it's printed, and anything imagined (like letters traveling through time) is clearly marked on the "Real history" card.</p></details>
-    <details><summary>What ages is it for?</summary><p>Ages 5–12. Letters match your child's reading level: shorter with simple words for young children (great for reading aloud), richer for older children. Written in British English.</p></details>
-    <details><summary>How does writing back work?</summary><p>Your child writes on any paper, or on the back of the letter. You snap a photo and upload it. The next letter answers their questions and responds to their news.</p></details>
-    <details><summary>What about difficult history?</summary><p>Every figure has age-appropriate guidelines. Letters are warm and encouraging, and you can tell us about topics you'd like us to avoid.</p></details>
-    <details><summary>What about privacy?</summary><p>We collect information from parents only, never directly from children, and only what we need to write and post the letters. Reply photos are deleted as soon as they've been read. Read our <a href="/privacy">privacy policy</a>. Reply photos are deleted after they're read.</p></details>
-    <details><summary>Where do you ship?</summary><p>We post to UK addresses, with letters printed and posted here. More countries are coming. Email us if you'd like to know when we reach yours.</p></details>
+<section id="questions">
+  <div class="wrap split">
+    <div><p class="kicker">Questions</p><h2>Good to know.</h2></div>
+    <div>
+      <details><summary>Who writes the letters?</summary><p>Letters are written with the help of AI, in each pen pal's voice, from a verified fact sheet for every figure. A separate fact-checking step reviews each letter before it's printed, and anything imagined (like a letter travelling through time) is clearly marked on the "Real history" card. You can read every letter before it's posted.</p></details>
+      <details><summary>What ages is it for?</summary><p>Ages 5–12. Letters match your child's reading level: shorter, with simple words, for young children (great for reading aloud), and richer for older children. Written in British English.</p></details>
+      <details><summary>How does writing back work?</summary><p>Your child writes on any paper, or on the back of the letter. You take a photo and upload it, or type it in. The next letter answers their questions and responds to their news.</p></details>
+      <details><summary>What about difficult history?</summary><p>Every pen pal has age-appropriate guidelines, and a few are kept for children aged 8 and over. Letters are warm and encouraging, and you can tell us about any topics you'd like us to avoid.</p></details>
+      <details><summary>What about privacy?</summary><p>We collect information from parents only, never directly from children, and only what we need to write and post the letters. Photos of replies are deleted as soon as they've been read. Read our <a href="/privacy">privacy policy</a>.</p></details>
+      <details><summary>Where do you post to?</summary><p>UK addresses, with letters printed and posted in the UK by Royal Mail 2nd class. More countries may follow: email us if you'd like to know when we reach yours.</p></details>
+    </div>
   </div>
 </section>
 </main>
 
-<footer>
-  <div class="wrap">Letters from History is a product of {{ COMPANY }} · <a href="/privacy" style="color:inherit">Privacy policy</a> · <a href="/terms" style="color:inherit">Terms</a> · <a href="mailto:{{ contact_email }}" style="color:inherit">Contact</a></div>
+<footer class="site">
+  <div class="wrap">
+    <span>Letters from History is a product of {{ COMPANY }}</span>
+    <span><a href="/privacy">Privacy policy</a> · <a href="/terms">Terms</a> · <a href="mailto:{{ contact_email }}">Contact</a></span>
+  </div>
 </footer>
-
-<script>
-(function () {
-  // Stationery samples slide out as they scroll into view, once.
-  const revealables = document.querySelectorAll(".reveal");
-  if (!("IntersectionObserver" in window)) { revealables.forEach((el) => el.classList.add("in")); return; }
-  const io = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) { entry.target.classList.add("in"); io.unobserve(entry.target); }
-    }
-  }, { rootMargin: "0px 0px -80px 0px" });
-  revealables.forEach((el) => io.observe(el));
-})();
-</script>
 </body>
 </html>
