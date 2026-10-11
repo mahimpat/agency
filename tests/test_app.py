@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest import mock
 
 from fastapi.testclient import TestClient
+from pypdf import PdfWriter
 
 from app import billing, jobs
 from app.config import FIGURE_ORDER, Settings
@@ -30,7 +31,7 @@ def fake_letter() -> pipeline.Letter:
 
 class FakeServices(jobs.Services):
     def __init__(self, reply_result=None):
-        self.written, self.sent, self.read = [], [], []
+        self.written, self.sent, self.read, self.pdfs = [], [], [], []
         self.reply_result = reply_result
         super().__init__(write_letter=self._write, read_reply=self._read, to_pdf=self._pdf, send=self._send)
 
@@ -46,7 +47,12 @@ class FakeServices(jobs.Services):
             needs_human=False, needs_human_reason="")
 
     def _pdf(self, html, path):
-        Path(path).write_bytes(b"%PDF-1.4 fake")
+        writer = PdfWriter()
+        for _ in range(2):
+            writer.add_blank_page(width=595, height=842)
+        with open(path, "wb") as f:
+            writer.write(f)
+        self.pdfs.append(html)
         return 2
 
     def _send(self, pdf_path, to, live=False):

@@ -8,6 +8,7 @@ from the letters already written, so rejecting a letter never leaves the
 rotation in a wrong state.
 """
 
+import io
 import json
 import logging
 import re
@@ -17,9 +18,10 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Callable
 
+from pypdf import PdfReader, PdfWriter
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from letters import llm, mail, pdf, pipeline, render
 
@@ -28,6 +30,7 @@ from .config import (FIGURE_ORDER, LETTERS_PER_FIGURE, PARENT_REWRITES_PER_MONTH
 from . import gifts, ratelimit, reminders
 from .emails import send_email
 from .models import Child, JobLock, Letter, Reply, SafeguardingRecord, Subscription, User, now
+from .flyer import flyer_pdf
 from .storage import get_storage
 
 log = logging.getLogger("letters.jobs")
@@ -169,10 +172,35 @@ def _make_pdf(settings: Settings, letter: Letter, html: str, services: Services)
     key = f"letters/{letter.child_id}/letter-{letter.id}.pdf"
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "letter.pdf"
-        pages = services.to_pdf(html, path)
-        storage.put(key, path.read_bytes(), "application/pdf")
+        pages = services.to_pdf(html, path)  # the letter's own pages, checked by the caller
+        data = path.read_bytes()
+        if _first_letter(letter) and settings.welcome_flyer:
+            data = with_flyer(data, flyer_pdf(settings, letter.child.subscription.plan, services.to_pdf))
+        storage.put(key, data, "application/pdf")
     letter.pdf_path = key
     return pages
+
+
+def _first_letter(letter: Letter) -> bool:
+    """The family's first letter to this child gets the welcome flyer for the grown-ups."""
+    if letter.kind != "intro" or letter.child.subscription is None:
+        return False
+    # Ask the database rather than child.letters: loading that list here, before the new letter is
+    # saved, would leave a stale copy that later rotation decisions in this run would read.
+    db = object_session(letter)
+    earlier = db.scalar(select(func.count()).select_from(Letter).where(
+        Letter.child_id == letter.child_id, Letter.status == "sent", Letter.id != letter.id))
+    return not earlier
+
+
+def with_flyer(letter_pdf: bytes, flyer: bytes) -> bytes:
+    """The letter's pages, then the flyer sheet: same envelope, letter on top, address in the window."""
+    writer = PdfWriter()
+    for part in (letter_pdf, flyer):
+        writer.append(PdfReader(io.BytesIO(part)))
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
 
 
 def _save_files(settings: Settings, letter: Letter, html: str, services: Services) -> None:
@@ -205,7 +233,8 @@ def create_letter(db: Session, settings: Settings, sub: Subscription, kind: str,
         status = "needs_review"
     else:
         status = "approved"
-    letter = Letter(child_id=child.id, figure=figure, kind=kind, status=status, note=result.note,
+    # child=child (not child_id) also adds it to child.letters, which this session keeps loaded.
+    letter = Letter(child=child, figure=figure, kind=kind, status=status, note=result.note,
                     letter_json=result.letter.model_dump_json() if result.letter else None,
                     checks_json=json.dumps([c.model_dump() for c in result.checks]),
                     reply_id=reply.id if reply else None)

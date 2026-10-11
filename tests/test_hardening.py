@@ -153,7 +153,7 @@ class StorageTests(unittest.TestCase):
             admin = case.make_admin()
             case.admin_post(admin, "/admin/letters/1/approve")
             self.assertEqual(len(case.services.sent), 1)
-            self.assertEqual(case.client.get("/letters/1.pdf").content, b"%PDF-1.4 fake")
+            self.assertTrue(case.client.get("/letters/1.pdf").content.startswith(b"%PDF"))
         finally:
             case.tearDown()
 

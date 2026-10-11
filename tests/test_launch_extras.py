@@ -234,3 +234,64 @@ class PenPalListTests(AppTestCase):
         sheet = (FIGURES / "samuel-pepys.md").read_text()
         for section in ("## Write from", "## Verified facts", "## Handle with care", "Pudding Lane"):
             self.assertIn(section, sheet)
+
+
+class WelcomeFlyerTests(AppTestCase):
+    def pdf_pages(self, letter_id):
+        import io
+        from pypdf import PdfReader
+        from app.models import Letter
+        db = self.db
+        key = db.get(Letter, letter_id).pdf_path
+        db.close()
+        return len(PdfReader(io.BytesIO(jobs_storage(self.settings).get(key))).pages)
+
+    def test_first_letter_gets_the_flyer_once(self):
+        from app import jobs
+        sub_id = self.signup()
+        self.activate(sub_id)
+        jobs.run_due(self.db, self.settings, self.services)
+        self.assertEqual(self.pdf_pages(1), 4)  # letter + real-history card, then the flyer sheet
+        flyer_html = [h for h in self.services.pdfs if "For grown-ups" in h]
+        self.assertEqual(len(flyer_html), 1)
+        self.assertIn("Send us their letter", flyer_html[0])  # Pen Pal: how to send replies
+        self.assertIn("/?ref=flyer", flyer_html[0])
+        self.assertNotIn("Dear Maya", flyer_html[0])  # nothing for the child in it
+
+        # Once a letter has been posted, later letters (even a new pen pal's introduction) have no flyer.
+        db = self.db
+        from app.models import Letter
+        first = db.get(Letter, 1)
+        first.status = "sent"
+        letter = Letter(child_id=first.child_id, figure="charles-darwin", kind="intro", status="needs_review")
+        db.add(letter)
+        db.commit()
+        jobs._make_pdf(self.settings, letter, "<html>letter</html>", self.services)
+        db.commit()
+        self.assertEqual(self.pdf_pages(letter.id), 2)
+        db.close()
+
+    def test_flyer_is_made_once_per_version(self):
+        from app import jobs
+        for n, email in enumerate(["a@example.com", "b@example.com"]):
+            if n:
+                self.client.post("/logout", data={"csrf": self.csrf("/account")})
+            self.activate(self.signup(email=email), stripe_id=f"sub_{n}", event_suffix=str(n))
+        jobs.run_due(self.db, self.settings, self.services)
+        self.assertEqual(sum("For grown-ups" in h for h in self.services.pdfs), 1)
+
+    def test_story_plan_flyer_and_switch_off(self):
+        from app import jobs
+        from app.flyer import flyer_html
+        self.assertIn("Want their letters answered?", flyer_html(self.settings, "story"))
+        self.settings.flyer_founding = False
+        self.assertNotIn("first families", flyer_html(self.settings, "penpal"))
+        self.settings.welcome_flyer = False
+        self.activate(self.signup())
+        jobs.run_due(self.db, self.settings, self.services)
+        self.assertEqual(self.pdf_pages(1), 2)
+
+
+def jobs_storage(settings):
+    from app.storage import get_storage
+    return get_storage(settings)

@@ -90,6 +90,10 @@ class Settings:
     sentry_dsn: str = field(default_factory=lambda: os.environ.get("SENTRY_DSN", ""))
     # Brute-force and bot protection on login, sign-up, password reset and uploads.
     rate_limits: bool = field(default_factory=lambda: _flag("RATE_LIMITS", True))
+    # Welcome flyer for the grown-ups, posted with each family's first letter (one extra sheet).
+    welcome_flyer: bool = field(default_factory=lambda: _flag("WELCOME_FLYER", True))
+    # Founding-family wording on the flyer ("you're one of our first families"). Turn off once you've grown.
+    flyer_founding: bool = field(default_factory=lambda: _flag("FLYER_FOUNDING", True))
     # Create tables at start-up. On for SQLite (development); production Postgres uses Alembic migrations.
     auto_create_tables: bool | None = field(default_factory=lambda: (
         _flag("AUTO_CREATE_TABLES", False) if "AUTO_CREATE_TABLES" in os.environ else None))
