@@ -1,0 +1,135 @@
+"""Database tables. SQLite by default; set DATABASE_URL for Postgres."""
+
+from datetime import datetime, timezone
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
+
+
+def now() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    password_hash: Mapped[str] = mapped_column(String(300))
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    stripe_customer_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    marketing_opt_in: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    children: Mapped[list["Child"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
+
+class Child(Base):
+    __tablename__ = "children"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    first_name: Mapped[str] = mapped_column(String(60))
+    age: Mapped[int] = mapped_column(Integer)
+    interests: Mapped[str] = mapped_column(Text, default="")
+    avoid: Mapped[str] = mapped_column(Text, default="")
+    country: Mapped[str] = mapped_column(String(2), default="GB")
+    # Where letters are posted
+    recipient_name: Mapped[str] = mapped_column(String(120))
+    line1: Mapped[str] = mapped_column(String(200))
+    line2: Mapped[str] = mapped_column(String(200), default="")
+    town: Mapped[str] = mapped_column(String(100))
+    postcode: Mapped[str] = mapped_column(String(12))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    user: Mapped[User] = relationship(back_populates="children")
+    subscription: Mapped["Subscription | None"] = relationship(back_populates="child", uselist=False)
+    letters: Mapped[list["Letter"]] = relationship(back_populates="child", cascade="all, delete-orphan",
+                                                  order_by="Letter.created_at.desc()")
+    replies: Mapped[list["Reply"]] = relationship(back_populates="child", cascade="all, delete-orphan",
+                                                 order_by="Reply.created_at.desc()")
+
+    def address(self) -> dict:
+        return {"name": self.recipient_name, "line1": self.line1, "line2": self.line2,
+                "town": self.town, "postcode": self.postcode, "country": self.country}
+
+    def profile(self) -> dict:
+        """What the letter writer is told about the child (no surname, no address)."""
+        return {"name": self.first_name, "age": self.age, "country": self.country,
+                "interests": [x.strip() for x in self.interests.split(",") if x.strip()],
+                "avoid": [x.strip() for x in self.avoid.split(",") if x.strip()]}
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    child_id: Mapped[int] = mapped_column(ForeignKey("children.id"), unique=True)
+    plan: Mapped[str] = mapped_column(String(20))
+    # pending (checkout not finished), active, past_due, canceled, ...
+    status: Mapped[str] = mapped_column(String(30), default="pending")
+    stripe_subscription_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    story_credits: Mapped[int] = mapped_column(Integer, default=0)
+    reply_credits: Mapped[int] = mapped_column(Integer, default=0)
+    reply_credit_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=now, onupdate=now)
+    user: Mapped[User] = relationship(back_populates="subscriptions")
+    child: Mapped[Child] = relationship(back_populates="subscription")
+
+
+class Reply(Base):
+    """A child's letter back. The photo is deleted as soon as it has been read."""
+    __tablename__ = "replies"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    child_id: Mapped[int] = mapped_column(ForeignKey("children.id"), index=True)
+    figure: Mapped[str] = mapped_column(String(40))
+    typed_text: Mapped[str] = mapped_column(Text, default="")
+    photo_path: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    transcription_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # new -> ready (read, waiting for a letter) -> used; or held (needs a human) / dismissed
+    status: Mapped[str] = mapped_column(String(20), default="new")
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    child: Mapped[Child] = relationship(back_populates="replies")
+
+
+class Letter(Base):
+    __tablename__ = "letters"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    child_id: Mapped[int] = mapped_column(ForeignKey("children.id"), index=True)
+    figure: Mapped[str] = mapped_column(String(40))
+    kind: Mapped[str] = mapped_column(String(20))  # story, reply, follow_up
+    # needs_review, held, approved, sent, rejected, failed
+    status: Mapped[str] = mapped_column(String(20), index=True)
+    letter_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    checks_json: Mapped[str] = mapped_column(Text, default="[]")
+    note: Mapped[str] = mapped_column(Text, default="")
+    pdf_path: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    html_path: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    reply_id: Mapped[int | None] = mapped_column(ForeignKey("replies.id"), nullable=True)
+    provider_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    proof_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    cost: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    child: Mapped[Child] = relationship(back_populates="letters")
+
+
+class ProcessedEvent(Base):
+    """Stripe webhook events already handled (Stripe can deliver an event more than once)."""
+    __tablename__ = "processed_events"
+    id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+
+
+def make_sessionmaker(database_url: str) -> sessionmaker:
+    # Hosted Postgres (Supabase, Render, Railway...) often hands out postgres:// URLs.
+    if database_url.startswith(("postgres://", "postgresql://")):
+        database_url = "postgresql+psycopg://" + database_url.split("://", 1)[1]
+    connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
+    engine = create_engine(database_url, connect_args=connect_args)
+    Base.metadata.create_all(engine)
+    return sessionmaker(bind=engine, expire_on_commit=False)

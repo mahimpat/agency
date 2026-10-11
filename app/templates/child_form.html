@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Tell us about your child · {{ PRODUCT }}{% endblock %}
+{% block width %}narrow{% endblock %}
+{% block content %}
+<h1>Tell us about your child</h1>
+<p class="muted">Every letter is written for them. We only ask for what the letters need.</p>
+<form method="post" action="/children/new" class="card">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <h2>Your child</h2>
+  <div class="grid2">
+    <div class="field"><label for="first_name">First name <span class="hint">(no surname needed)</span></label><input type="text" id="first_name" name="first_name" value="{{ form.first_name or '' }}" required maxlength="60"></div>
+    <div class="field"><label for="age">Age</label><input type="number" id="age" name="age" min="4" max="13" value="{{ form.age or '' }}" required></div>
+  </div>
+  <div class="field"><label for="interests">What do they love? <span class="hint">Separate with commas, e.g. space, our cat Biscuit, football, drawing</span></label><input type="text" id="interests" name="interests" value="{{ form.interests or '' }}" maxlength="500"></div>
+  <div class="field"><label for="avoid">Anything letters should avoid? <span class="hint">Optional, e.g. anything scary about storms</span></label><input type="text" id="avoid" name="avoid" value="{{ form.avoid or '' }}" maxlength="500"></div>
+
+  <h2 style="margin-top:26px">Where should letters go?</h2>
+  <div class="field"><label for="recipient_name">Name on the envelope</label><input type="text" id="recipient_name" name="recipient_name" value="{{ form.recipient_name or '' }}" placeholder="e.g. Maya Smith" required maxlength="120"></div>
+  <div class="field"><label for="line1">Address line 1</label><input type="text" id="line1" name="line1" value="{{ form.line1 or '' }}" autocomplete="address-line1" required></div>
+  <div class="field"><label for="line2">Address line 2 <span class="hint">(optional)</span></label><input type="text" id="line2" name="line2" value="{{ form.line2 or '' }}" autocomplete="address-line2"></div>
+  <div class="grid2">
+    <div class="field"><label for="town">Town or city</label><input type="text" id="town" name="town" value="{{ form.town or '' }}" autocomplete="address-level2" required></div>
+    <div class="field"><label for="postcode">Postcode</label><input type="text" id="postcode" name="postcode" value="{{ form.postcode or '' }}" autocomplete="postal-code" required></div>
+  </div>
+  <p class="small muted">We post to UK addresses only for now.</p>
+
+  <h2 style="margin-top:26px">Choose a plan</h2>
+  <div class="choice field">
+    <label><input type="radio" name="plan" value="penpal" {% if plan == 'penpal' %}checked{% endif %}> <span><b>Pen Pal from History</b>, £12 a month. Two letters a month, and your child's letters get answered.</span></label>
+    <label><input type="radio" name="plan" value="story" {% if plan == 'story' %}checked{% endif %}> <span><b>Story Letters</b>, £7 a month. One letter a month.</span></label>
+  </div>
+  <div class="field"><label class="check"><input type="checkbox" name="guardian" value="true" required> I'm this child's parent or guardian, or I have their parent's permission to sign them up.</label></div>
+  <button class="btn" type="submit">Continue to payment</button>
+  <p class="small muted" style="margin-top:12px">Postage included. Cancel any time from your account.</p>
+</form>
+{% endblock %}

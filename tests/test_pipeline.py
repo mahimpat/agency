@@ -85,6 +85,16 @@ class WriteLetterTests(unittest.TestCase):
         self.assertEqual(result.status, "held")
         self.assertEqual(fake.calls, [])
 
+    def test_first_letter_is_an_intro_and_later_ones_are_not(self):
+        _, fake = self.run_with({pipeline.Letter: [make_letter()], pipeline.FactCheck: [PASS]})
+        self.assertIn("<letter_kind>intro</letter_kind>", fake.calls[0][1])
+        _, fake = self.run_with({pipeline.Letter: [make_letter()], pipeline.FactCheck: [PASS]},
+                                history="Dear Leo, ...")
+        self.assertIn("<letter_kind>story</letter_kind>", fake.calls[0][1])
+        _, fake = self.run_with({pipeline.Letter: [make_letter()], pipeline.FactCheck: [PASS]},
+                                history="Dear Leo, ...", kind="farewell")
+        self.assertIn("<letter_kind>farewell</letter_kind>", fake.calls[0][1])
+
     def test_reply_questions_reach_the_writer(self):
         reply = pipeline.ChildReply(
             legible=True, text="wer you scard", questions=["Were you scared?"],
@@ -94,6 +104,7 @@ class WriteLetterTests(unittest.TestCase):
             {pipeline.Letter: [make_letter()], pipeline.FactCheck: [PASS]}, reply=reply)
         self.assertIn("Were you scared?", fake.calls[0][1])
         self.assertIn("answer to the child's reply", fake.calls[0][1])
+        self.assertIn("<letter_kind>reply</letter_kind>", fake.calls[0][1])
 
 
 class RenderTests(unittest.TestCase):

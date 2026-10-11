@@ -68,7 +68,28 @@ def read_reply(photo: str | Path | None = None, text: str | None = None) -> Chil
     return llm.ask(system, content, ChildReply, effort="low")
 
 
-def _writer_input(child: dict, fact_sheet: str, reply: ChildReply | None, history: str) -> str:
+# What each kind of letter is for. The writer prompt explains the voice and rules;
+# this tells it which letter in the friendship it is writing.
+LETTER_KINDS = {
+    "intro": "This is the FIRST letter from this figure to this child. Introduce yourself: who you are, "
+             "where and when you are writing from, and the magic of letters slipping through time. Make one "
+             "or two warm connections to the child's interests, share one vivid true detail from your life, "
+             "and explain that the child can write back and you will read every word. Do not answer "
+             "questions the child has not asked.",
+    "story": "Continue the friendship. Share a new chapter of your life (something not covered in previous "
+             "letters), connected to the child's interests where it fits naturally.",
+    "reply": "Write the next letter as a direct, warm answer to the child's reply.",
+    "follow_up": "You wrote before but have not had a reply yet. Say warmly that you hope your letter arrived "
+                 "(no guilt, no pressure), then share a new chapter of your life. Remind them gently that "
+                 "you would love to hear from them.",
+    "farewell": "This is your LAST letter to this child for now. Share one final true story, thank the child "
+                "for being your pen pal, and say that next month a new pen pal from another time will write "
+                "to them. Do not name who it will be. Keep it warm, not sad.",
+}
+
+
+def _writer_input(child: dict, fact_sheet: str, reply: ChildReply | None, history: str,
+                  kind: str = "story") -> str:
     parts = [
         f"<figure_fact_sheet>\n{fact_sheet}\n</figure_fact_sheet>",
         f"<child>\n{json.dumps(child, indent=2, ensure_ascii=False)}\n</child>",
@@ -77,9 +98,10 @@ def _writer_input(child: dict, fact_sheet: str, reply: ChildReply | None, histor
         parts.append(f"<previous_letters>\n{history}\n</previous_letters>")
     if reply:
         parts.append(f"<child_reply>\n{reply.model_dump_json(indent=2)}\n</child_reply>")
-        parts.append("Write the next letter as a direct, warm answer to the child's reply.")
-    else:
-        parts.append("Write the first letter to this child.")
+        kind = "reply"
+    elif kind == "story" and not history:
+        kind = "intro"
+    parts.append(f"<letter_kind>{kind}</letter_kind>\n{LETTER_KINDS[kind]}")
     return "\n\n".join(parts)
 
 
@@ -88,7 +110,10 @@ def write_letter(
     figure: str,
     reply: ChildReply | None = None,
     history: str = "",
+    kind: str = "story",
 ) -> Result:
+    """kind: intro, story, follow_up or farewell (a reply always makes a "reply" letter).
+    A story with no history is written as an intro."""
     if reply and reply.needs_human:
         return Result(None, "held", reply=reply, note=reply.needs_human_reason)
     if reply and not reply.legible:
@@ -97,7 +122,7 @@ def write_letter(
     fact_sheet = llm.load_text("figures", figure)
     writer = llm.load_text("prompts", "writer")
     checker = llm.load_text("prompts", "checker")
-    request = _writer_input(child, fact_sheet, reply, history)
+    request = _writer_input(child, fact_sheet, reply, history, kind)
 
     letter = llm.ask(writer, request, Letter, effort="high")
     checks: list[FactCheck] = []

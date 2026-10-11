@@ -21,8 +21,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-# Check this against the API URL shown in your Stannp dashboard (API settings).
-STANNP_API_URL = os.environ.get("STANNP_API_URL", "https://dash.stannp.com/api/v1")
+# UK accounts (Stannp API guide). The key is at the bottom of your Stannp settings page.
+STANNP_API_URL = os.environ.get("STANNP_API_URL", "https://api-eu1.stannp.com/v1")
 LOB_LETTERS_URL = "https://api.lob.com/v1/letters"
 
 

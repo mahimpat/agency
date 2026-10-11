@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ PRODUCT }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <a class="logo" href="/">Letters <i>from</i> History</a>
+  <nav>
+    {% if user %}
+      {% if user.is_admin %}<a href="/admin">Admin</a>{% endif %}
+      <a href="/account">My account</a>
+      <form method="post" action="/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="linkbtn" type="submit">Log out</button></form>
+    {% else %}
+      <a href="/login">Log in</a>
+      <a class="btn small" href="/signup">Get started</a>
+    {% endif %}
+  </nav>
+</div></header>
+<main><div class="wrap {% block width %}{% endblock %}">
+  {% for message in flashes %}<div class="flash" role="status">{{ message }}</div>{% endfor %}
+  {% if errors %}<ul class="errors" role="alert">{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  {% block content %}{% endblock %}
+</div></main>
+<footer class="site"><div class="wrap">
+  <span>{{ PRODUCT }} is a product of {{ COMPANY }}.</span>
+  <span><a href="/privacy">Privacy policy</a> · <a href="/terms">Terms</a> · <a href="mailto:{{ contact_email }}">Contact</a></span>
+</div></footer>
+</body>
+</html>

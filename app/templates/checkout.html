@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Payment · {{ PRODUCT }}{% endblock %}
+{% block width %}narrow{% endblock %}
+{% block content %}
+<h1>Almost there</h1>
+<div class="card">
+  <p><b>{{ PLANS[sub.plan].name }}</b> for {{ sub.child.first_name }}: {{ PLANS[sub.plan].price_label }}, postage included.</p>
+  <p class="muted small">You'll pay securely with Stripe. We never see or store your card details. Your subscription renews monthly until you cancel, and you can cancel any time from your account.</p>
+  <form method="post" action="/checkout/{{ sub.id }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button class="btn" type="submit">Continue to secure payment</button>
+  </form>
+</div>
+{% endblock %}

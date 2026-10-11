@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Terms · {{ PRODUCT }}{% endblock %}
+{% macro filled(value, label) %}{% if value %}{{ value }}{% else %}<mark>[{{ label }}]</mark>{% endif %}{% endmacro %}
+{% block content %}
+<article class="prose">
+<h1>Terms of service</h1>
+<p class="muted">Last updated: {{ POLICY_DATE }}</p>
+
+<p>These terms are the agreement between you and {{ legal.company_legal_name }} (company number {{ filled(legal.company_number, "company number") }}, registered address {{ filled(legal.company_address, "registered address") }}) for {{ PRODUCT }}. Please read them with our <a href="/privacy">privacy policy</a>. Nothing in these terms affects your legal rights as a consumer.</p>
+
+<h2>1. What we provide</h2>
+<ul>
+  <li>Personalised paper letters, posted to your child, written in the voice of historical figures. Each comes with a "Real history" card explaining the true facts behind it.</li>
+  <li>The letters are <b>imaginative storytelling</b>. The historical figures did not really write them. They are written with the help of AI from verified fact sheets, checked for accuracy and child safety, and approved by our team before posting. Anything imagined is marked on the Real history card.</li>
+  <li>We work hard to keep every letter accurate. If you spot a mistake, please tell us and we'll correct it. The letters are an educational extra, not a replacement for a curriculum.</li>
+</ul>
+
+<h2>2. Who can sign up</h2>
+<p>You must be 18 or over, live in the UK, and be the child's parent or guardian, or have their permission. Letters are written for children aged 5 to 12. We post to UK addresses only.</p>
+
+<h2>3. Plans and prices</h2>
+<table>
+  <tr><th>Plan</th><th>Price</th><th>What you get each month</th></tr>
+  <tr><td>Story Letters</td><td>£7 a month</td><td>One personalised letter</td></tr>
+  <tr><td>Pen Pal from History</td><td>£12 a month</td><td>Two letters. When your child writes back (you upload their reply), the next letter answers it. If no reply arrives within about three weeks, the second letter continues the story instead.</td></tr>
+</table>
+<ul>
+  <li>Prices include printing and UK postage.</li>
+  <li>You pay monthly in advance by card through Stripe. Your subscription renews automatically each month until you cancel.</li>
+  <li>If we change a price, we'll email you at least 30 days before it applies, and you can cancel before then.</li>
+</ul>
+
+<h2>4. Letters and delivery</h2>
+<ul>
+  <li>The first letter is an introduction from your child's first pen pal. Each pen pal writes for a few months, says goodbye, and then a new pen pal from another time takes over.</li>
+  <li>We aim to post each letter within 5 working days of a payment or of receiving your child's reply. Letters go by Royal Mail 2nd class, which usually takes 2 to 3 working days.</li>
+  <li>We're not responsible for delays caused by the postal service, but if a letter doesn't arrive within 15 working days of being posted, tell us and we'll send it again free of charge.</li>
+  <li>Please keep the address in your account up to date. We can't resend letters posted to an old address you didn't update.</li>
+</ul>
+
+<h2>5. Cancelling</h2>
+<ul>
+  <li><b>Cancel any time</b> from your account ("Manage billing"). Your subscription stops at the end of the month you've paid for, any letters already due for that month are still sent, and you won't be charged again.</li>
+  <li><b>Your 14-day right to cancel:</b> if you cancel within 14 days of first subscribing and no letter has been posted yet, we'll refund you in full. Each letter is personalised for your child, so once a letter has been written and posted it can't be returned. You can still stop all future letters at any time.</li>
+  <li>If a payment fails, we'll let you know. If it isn't sorted out, the subscription may be cancelled.</li>
+</ul>
+
+<h2>6. Your child's replies</h2>
+<ul>
+  <li>When you upload your child's reply, you permit us to use it to write the answer and to continue their letters. We don't publish children's letters or use them in marketing.</li>
+  <li>Please help your child leave out personal details such as their surname, school or address.</li>
+  <li>If a reply mentions something worrying, a member of our team will read it instead of an automatic answer being written. We may contact you, and if we believe a child is in danger, the appropriate authorities (see our privacy policy).</li>
+</ul>
+
+<h2>7. Using the service fairly</h2>
+<p>Please don't misuse the service: for example, by uploading content that isn't your child's letter, content that is unlawful or harmful, or trying to get letters about inappropriate topics. We may suspend accounts that do this, and we'll refund any letters paid for but not sent.</p>
+
+<h2>8. Ownership</h2>
+<p>The letters, designs and Real history cards belong to us. They're yours and your child's to keep, read, copy and share for personal, non-commercial purposes. Your child's own letters remain theirs.</p>
+
+<h2>9. Our responsibility to you</h2>
+<ul>
+  <li>We'll provide the service with reasonable care and skill. If something goes wrong because of us, we'll put it right, for example by resending a letter or refunding it.</li>
+  <li>We're not responsible for losses that weren't foreseeable, or for business losses (the service is for personal use).</li>
+  <li>Apart from the above, our total responsibility to you is limited to the amount you've paid us in the 12 months before the problem.</li>
+  <li>Nothing in these terms limits our responsibility for death or personal injury caused by our negligence, for fraud, or for anything else the law doesn't allow us to limit, including your statutory rights.</li>
+</ul>
+
+<h2>10. Changes to the service or these terms</h2>
+<p>We may update the service, for example by adding new pen pals, and may update these terms. If a change materially affects you, we'll email you at least 30 days before it applies. You can cancel before the change takes effect if you're not happy with it.</p>
+
+<h2>11. Problems and complaints</h2>
+<p>If you're not happy, email <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> and we'll do our best to sort it out quickly.</p>
+
+<h2>12. Law</h2>
+<p>These terms are governed by the law of England and Wales. You can bring legal proceedings in the courts of England and Wales. If you live in Scotland or Northern Ireland, you can also bring them in your local courts.</p>
+</article>
+{% endblock %}

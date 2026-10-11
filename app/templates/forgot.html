@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Reset your password · {{ PRODUCT }}{% endblock %}
+{% block width %}narrow{% endblock %}
+{% block content %}
+<h1>Reset your password</h1>
+<form method="post" action="/forgot" class="card">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="field"><label for="email">Your account email</label><input type="email" id="email" name="email" autocomplete="email" required></div>
+  <button class="btn" type="submit">Email me a reset link</button>
+</form>
+{% endblock %}

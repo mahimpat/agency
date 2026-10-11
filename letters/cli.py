@@ -39,7 +39,7 @@ def cmd_write(args: argparse.Namespace) -> None:
 
     history = Path(args.history).read_text(encoding="utf-8") if args.history else ""
     print(f"Writing {args.figure}'s letter to {name} and fact-checking it...")
-    result = pipeline.write_letter(child, args.figure, reply=reply, history=history)
+    result = pipeline.write_letter(child, args.figure, reply=reply, history=history, kind=args.kind)
 
     stem = f"{name.lower()}-{args.figure}-{datetime.now():%Y%m%d-%H%M%S}"
     out_dir = Path(args.out)
@@ -118,6 +118,8 @@ def main() -> None:
     reply.add_argument("--reply-photo", help="Photo of the child's handwritten reply")
     reply.add_argument("--reply-text", help="The child's reply, typed")
     p.add_argument("--history", help="Text file with previous letters to this child")
+    p.add_argument("--kind", default="story", choices=["intro", "story", "follow_up", "farewell"],
+                   help="Which letter in the friendship (a story with no --history is written as an intro)")
     p.add_argument("--print-address", help="Address JSON to print in the window (for printing and posting it yourself)")
     p.add_argument("--out", default="output")
     p.set_defaults(func=cmd_write)

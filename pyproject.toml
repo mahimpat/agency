@@ -3,7 +3,21 @@ name = "letters-from-history"
 version = "0.1.0"
 description = "AI agents that write personalized, fact-checked letters from historical figures to kids"
 requires-python = ">=3.10"
-dependencies = ["anthropic>=1.13", "pydantic>=2"]
+dependencies = [
+  "anthropic>=1.13",
+  "pydantic>=2",
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "jinja2>=3.1",
+  "sqlalchemy>=2.0",
+  "stripe>=12",
+  "python-multipart>=0.0.9",
+  "itsdangerous>=2.2",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.2"]
+dev = ["httpx>=0.27"]
 
 [project.scripts]
 letters = "letters.cli:main"
@@ -13,7 +27,10 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["letters"]
+packages = ["letters", "letters.prompts", "letters.figures", "letters.fonts", "app"]
 
 [tool.setuptools.package-data]
-letters = ["prompts/*.md", "figures/*.md", "fonts/*.woff2"]
+"letters.prompts" = ["*.md"]
+"letters.figures" = ["*.md"]
+"letters.fonts" = ["*.woff2", "*.md"]
+app = ["templates/*.html", "static/*"]

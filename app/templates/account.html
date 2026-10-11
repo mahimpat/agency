@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}My account · {{ PRODUCT }}{% endblock %}
+{% block content %}
+<h1>Hello, {{ user.name }}</h1>
+
+{% for child in children %}
+{% set sub = child.subscription %}
+<section class="card">
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline">
+    <h2>{{ child.first_name }}, {{ child.age }}</h2>
+    {% if sub %}
+      {% if sub.status == 'active' %}<span class="pill ok">{{ PLANS[sub.plan].name }} · active</span>
+      {% elif sub.status == 'pending' %}<span class="pill warn">Payment not finished</span>
+      {% elif sub.status == 'past_due' %}<span class="pill bad">Payment problem</span>
+      {% else %}<span class="pill">{{ sub.status|replace('_', ' ') }}</span>{% endif %}
+    {% endif %}
+  </div>
+  <p class="small muted">Letters go to {{ child.recipient_name }}, {{ child.line1 }}, {{ child.town }} {{ child.postcode }}.</p>
+
+  {% if sub and sub.status in ['pending', 'canceled', 'incomplete_expired'] %}
+    <p><a class="btn" href="/checkout/{{ sub.id }}">{% if sub.status == 'pending' %}Finish setting up{% else %}Restart{% endif %} {{ PLANS[sub.plan].name }}</a></p>
+  {% endif %}
+  {% if sub and sub.status == 'past_due' %}
+    <p class="small">Your last payment didn't go through. Update your card under "Manage billing" below so letters keep coming.</p>
+  {% endif %}
+
+  <h3 style="margin-top:18px">Letters</h3>
+  {% set visible = child.letters|rejectattr('status', 'equalto', 'rejected')|list %}
+  {% if visible %}
+  <table>
+    <tr><th>From</th><th>Type</th><th>Status</th><th></th></tr>
+    {% for l in visible %}
+    <tr>
+      <td>{{ FIGURE_NAMES.get(l.figure, l.figure) }}</td>
+      <td>{{ {'intro': 'Introduction', 'story': 'Story', 'reply': 'Answer to a letter', 'follow_up': 'Story', 'farewell': 'Goodbye'}[l.kind] }}</td>
+      <td>{{ STATUS_LABELS.get(l.status, l.status) }}{% if l.sent_at %} · {{ l.sent_at.strftime('%-d %b %Y') }}{% endif %}</td>
+      <td>{% if l.status == 'sent' %}<a href="/letters/{{ l.id }}.pdf" target="_blank">View copy</a>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="small muted">{% if sub and sub.status == 'active' %}The first letter, an introduction, is being written and will be posted within a few days.{% else %}No letters yet.{% endif %}</p>
+  {% endif %}
+
+  {% if sub and PLANS[sub.plan].reply and sub.status == 'active' %}
+  <details style="margin-top:18px">
+    <summary><b>Upload {{ child.first_name }}'s reply</b></summary>
+    <form method="post" action="/children/{{ child.id }}/reply" enctype="multipart/form-data" style="margin-top:14px">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="field"><label for="figure-{{ child.id }}">Who is the letter to?</label>
+        <select id="figure-{{ child.id }}" name="figure">
+          {% set sent_figures = visible|selectattr('status', 'equalto', 'sent')|map(attribute='figure')|unique|list %}
+          {% for f in (sent_figures or FIGURE_NAMES.keys()|list) %}<option value="{{ f }}">{{ FIGURE_NAMES[f] }}</option>{% endfor %}
+        </select></div>
+      <div class="field"><label for="photo-{{ child.id }}">Photo of the letter <span class="hint">(JPG, PNG or WebP, under 10 MB)</span></label>
+        <input type="file" id="photo-{{ child.id }}" name="photo" accept="image/jpeg,image/png,image/webp" capture="environment"></div>
+      <div class="field"><label for="text-{{ child.id }}">Or type it in</label><textarea id="text-{{ child.id }}" name="text" maxlength="5000"></textarea></div>
+      <p class="small muted">We read the photo, then delete it straight away. Only the words are kept, so the next letter can answer them.</p>
+      <button class="btn" type="submit">Send to {{ child.first_name }}'s pen pal</button>
+    </form>
+  </details>
+  {% endif %}
+</section>
+{% else %}
+<div class="card"><p>Add your child to get their first letter.</p></div>
+{% endfor %}
+
+<p><a class="btn ghost" href="/children/new">Add {% if children %}another{% else %}a{% endif %} child</a></p>
+
+<section class="card" style="margin-top:28px">
+  <h2>Billing and your data</h2>
+  <form method="post" action="/billing" style="margin-bottom:14px">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button class="btn ghost small" type="submit">Manage billing, invoices or cancel</button>
+  </form>
+  <p class="small"><a href="/account/export">Download all your data</a> (JSON)</p>
+  <details>
+    <summary class="small">Delete my account</summary>
+    <form method="post" action="/account/delete" style="margin-top:12px">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <p class="small">This cancels any subscriptions and permanently deletes your account, your children's details, letters and replies. It can't be undone.</p>
+      <div class="field"><label for="confirm">Type DELETE to confirm</label><input type="text" id="confirm" name="confirm" autocomplete="off"></div>
+      <button class="btn danger small" type="submit">Delete everything</button>
+    </form>
+  </details>
+</section>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Admin · {{ PRODUCT }}{% endblock %}
+{% block content %}
+<h1>Admin</h1>
+<p class="small muted">
+  Subscriptions: {{ counts.active }} active · {{ counts.pending }} unpaid · {{ counts.past_due }} payment problems · {{ counts.canceled }} cancelled.<br>
+  Posting mode: {% if live_mail %}<b>LIVE</b> (approved letters are printed and posted){% else %}<b>TEST</b> (Stannp proofs only; set LIVE_MAIL=true to post){% endif %}.
+  Review: {% if review_all %}every letter{% else %}flagged letters only{% endif %}.
+</p>
+<form method="post" action="/admin/run" style="margin-bottom:24px">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <button class="btn ghost small" type="submit">Run the daily job now</button>
+</form>
+
+<h2>Letters to check ({{ review|length }})</h2>
+{% for l in review %}
+{% set data = letters[l.id] %}
+<section class="card">
+  <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <b>#{{ l.id }} · {{ FIGURE_NAMES.get(l.figure, l.figure) }} → {{ l.child.first_name }} ({{ l.child.age }}) · {{ l.kind }}</b>
+    {% if l.status == 'held' %}<span class="pill bad">held</span>{% elif l.status == 'failed' %}<span class="pill bad">failed</span>{% else %}<span class="pill warn">needs review</span>{% endif %}
+  </div>
+  {% if l.note %}<p class="issue">{{ l.note }}</p>{% endif %}
+  {% set last = checks[l.id][-1] if checks[l.id] else None %}
+  {% if last and last.issues %}
+    <p class="small"><b>Fact-check issues still open:</b></p>
+    <ul>{% for i in last.issues %}<li class="issue">"{{ i.quote }}": {{ i.problem }} <i>Fix: {{ i.fix }}</i></li>{% endfor %}</ul>
+  {% elif last %}<p class="small" style="color:var(--ok)">Fact-check passed ({{ checks[l.id]|length }} round{% if checks[l.id]|length > 1 %}s{% endif %}).</p>{% endif %}
+  {% if data %}
+  <details><summary class="small">Read the letter</summary>
+    <div class="letter-preview">{{ data.greeting }}
+
+{{ data.body|join('\n\n') }}
+
+{{ data.signoff }}
+
+P.S. {{ data.postscript }}</div>
+    <p class="small"><b>Real history:</b></p><ul class="small">{% for n in data.real_history %}<li>{{ n }}</li>{% endfor %}</ul>
+  </details>
+  {% if l.pdf_path %}<p class="small"><a href="/letters/{{ l.id }}.pdf" target="_blank">Open the print PDF</a></p>{% endif %}
+  {% endif %}
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+    {% if data and l.status in ['needs_review', 'failed'] %}
+    <form method="post" action="/admin/letters/{{ l.id }}/approve"><input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="btn small" type="submit">Approve and {% if live_mail %}post{% else %}make test proof{% endif %}</button></form>
+    {% endif %}
+    <form method="post" action="/admin/letters/{{ l.id }}/reject"><input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="btn ghost small" type="submit">Reject and rewrite</button></form>
+  </div>
+</section>
+{% else %}
+<p class="muted">Nothing waiting.</p>
+{% endfor %}
+
+<h2 style="margin-top:32px">Children's letters held for a person ({{ held_replies|length }})</h2>
+<p class="small muted">These replies mentioned something a person should read before any automatic answer. Contact the parent if needed.</p>
+{% for r in held_replies %}
+{% set t = replies[r.id] %}
+<section class="card">
+  <b>Reply #{{ r.id }} from {{ r.child.first_name }} ({{ r.child.age }}) to {{ FIGURE_NAMES.get(r.figure, r.figure) }}</b>
+  <p class="issue">{{ r.note }}</p>
+  {% if t %}<div class="letter-preview">{{ t.text }}</div>{% endif %}
+  <p class="small">Parent: {{ r.child.user.name }} · <a href="mailto:{{ r.child.user.email }}">{{ r.child.user.email }}</a></p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <form method="post" action="/admin/replies/{{ r.id }}/release"><input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="btn small" type="submit">It's fine: write an answer</button></form>
+    <form method="post" action="/admin/replies/{{ r.id }}/dismiss"><input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="btn ghost small" type="submit">Dismiss (handled personally)</button></form>
+  </div>
+</section>
+{% else %}
+<p class="muted">None.</p>
+{% endfor %}
+
+<h2 style="margin-top:32px">Recently posted</h2>
+<table>
+  <tr><th>#</th><th>Letter</th><th>Posted</th><th>Cost</th><th>Proof</th></tr>
+  {% for l in recent %}
+  <tr><td>{{ l.id }}</td><td>{{ FIGURE_NAMES.get(l.figure, l.figure) }} → {{ l.child.first_name }} ({{ l.kind }})</td>
+    <td>{{ l.sent_at.strftime('%-d %b %H:%M') if l.sent_at else '' }}</td><td>{{ l.cost or '' }}</td>
+    <td>{% if l.proof_url %}<a href="{{ l.proof_url }}" target="_blank" rel="noopener">PDF</a>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="5" class="muted">Nothing posted yet.</td></tr>{% endfor %}
+</table>
+{% endblock %}
