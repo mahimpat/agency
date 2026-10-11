@@ -1,0 +1,980 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><title>Letters from History: UK Market Research and Parent Survey</title>
+<link rel="stylesheet" href="../../app/static/fonts.css">
+<style>
+@page { size: A4; margin: 16mm 17mm 18mm; @bottom-left { content: "Letters from History · UK market research · Forem Innovations"; font: 8pt Lora, Georgia, serif; color: #8a8174; } @bottom-right { content: counter(page); font: 8pt Lora, Georgia, serif; color: #8a8174; } }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { color: #26221d; font: 10pt/1.5 'Lora', Georgia, serif; margin: 0; }
+h1 { font-family: 'IM Fell English', serif; font-weight: 400; font-size: 32pt; line-height: 1.05; margin: 0 0 3mm; }
+.part { break-before: page; }
+h2 { font-family: 'IM Fell English', serif; font-weight: 400; font-size: 19pt; margin: 8mm 0 3mm; break-after: avoid; border-top: 0.6pt solid #d6cbb5; padding-top: 5mm; }
+h3 { font-size: 11.5pt; margin: 5mm 0 1.5mm; color: #9f3328; break-after: avoid; }
+p { margin: 0 0 2.5mm; } ul, ol { margin: 0 0 3mm; padding-left: 5mm; } li { margin-bottom: 1mm; }
+blockquote { margin: 3mm 0 6mm; padding: 4mm 5mm; background: #f7f3ea; border-left: 2pt solid #9f3328; }
+blockquote p { margin: 0; }
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 8.6pt; }
+th, td { text-align: left; padding: 1.7mm 2.2mm; border-bottom: 0.6pt solid #d6cbb5; vertical-align: top; }
+th { border-bottom: 1.2pt solid #26221d; } tr { break-inside: avoid; }
+pre { background: #f7f3ea; padding: 3mm 4mm; font-size: 8.5pt; white-space: pre-wrap; }
+code { font-family: 'Special Elite', monospace; font-size: 8.8pt; }
+a { color: #9f3328; word-break: break-word; }
+h1 + p em, .date { color:#6d655a; }
+</style></head><body><h1>UK Market Research: Letters from History</h1>
+<p><em>Forem Innovations · Desk research dated 11 October 2026</em></p>
+<blockquote>
+<p>This report adds UK detail to <a href="market-research-letters-from-history.md"><code>market-research-letters-from-history.md</code></a> (mostly about the US) and <a href="uk-launch.md"><code>uk-launch.md</code></a> (UK costs and logistics). It doesn't repeat what those documents already say.</p>
+<p><strong>How it was researched:</strong> every source below was found through web search. Direct page fetches were blocked in this environment, so figures come from search results and source summaries rather than from reading each page in full. Anything marked <strong>(unverified)</strong> comes from a secondary or self-reported source, a page with no date, or sources that disagree. Check these figures before using them in a pitch or a plan.</p>
+</blockquote>
+<h2>Verdict</h2>
+<p><strong>There is real but modest UK demand, and a clear gap. Go ahead, but expect hundreds of customers in year one, not thousands.</strong> UK parents already pay for children's letters by post. Banjo Robinson, My Pirate Pen Pal, Tiny T's fairy pen pals and Tilly's Letters all sell at about £5 to £15 a month, and children's magazines sell at £3.50 to £11 a month. We found <strong>no UK service that sends personalised letters from historical figures and answers the child's own letter.</strong> The nearest concept rivals are US businesses (Historical Pen Pals, Penpaly, Pen Pals from the Past), and one US-run club, Post From The Past, posts its one-way letters from the UK. The curriculum fit is strong: Mary Anning, Florence Nightingale and the Great Fire of London are standard KS1 topics, and Walter Tull is widely taught at KS2. Children's enjoyment of writing is near a record low (28.7% in 2026), which gives parents a reason to buy. On the other side, the core home-education market is small (about 126,000 children in England), paid ads at £15 to £35 per sale could absorb most of the first month's margin, and £12 a month sits at the top of the UK letter-club price range. <strong>A realistic first year is roughly 200 to 600 paying subscribers plus 100 to 300 gift subscriptions</strong> (our estimate, explained in section 7). That depends on the validation tests in <code>validation-playbook.md</code> passing.</p>
+<hr />
+<h2>1. Market size</h2>
+<h3>1.1 Children and households</h3>
+<table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Figure</th>
+<th>Source and notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UK population, mid-2024</td>
+<td><strong>69.3 million</strong> (69,281,400)</td>
+<td>ONS mid-2024 estimates, released 26 Sept 2025 (<a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualmidyearpopulationestimates/mid2024">ONS</a>)</td>
+</tr>
+<tr>
+<td>Children under 16, mid-2024</td>
+<td><strong>18.2%</strong> of the population, which is about <strong>12.6 million</strong> (our calculation)</td>
+<td>ONS 2024-based projections bulletin (<a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationprojections/bulletins/nationalpopulationprojections/2024based">ONS</a>)</td>
+</tr>
+<tr>
+<td>Children aged 0-11 ("Gen Alpha"), 2024</td>
+<td><strong>about 9.2 million</strong>. The largest single year is age 11, at 835,063</td>
+<td>Statista using ONS data (<a href="https://www.statista.com/statistics/1394643/uk-gen-alpha-population">Statista</a>) (unverified)</td>
+</tr>
+<tr>
+<td><strong>Children aged 5-12, UK</strong></td>
+<td><strong>About 6.3 million</strong> (our estimate: eight single years at roughly 790,000 each)</td>
+<td>We couldn't get the exact ONS single-year table. Take it from the ONS mid-2024 dataset before quoting it (<a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/populationestimatesforukenglandandwalesscotlandandnorthernireland">ONS dataset</a>)</td>
+</tr>
+<tr>
+<td>Trend</td>
+<td>Primary pupil numbers in England fell 1.8% between January 2025 and January 2026, and are 4.9% below their 2019 peak. The 4-11 age group in England is projected to fall about 15% by 2034</td>
+<td>NFER on DfE data (<a href="https://www.nfer.ac.uk/press-releases/nfer-responses-to-new-dfe-data/">NFER</a>); House of Commons Library (<a href="https://commonslibrary.parliament.uk/research-briefings/cbp-12207/">HoC Library</a>)</td>
+</tr>
+<tr>
+<td>Pupils in England, January 2026</td>
+<td><strong>Over 8.9 million</strong> in all school types, down 112,200</td>
+<td>DfE Schools, pupils and their characteristics 2025/26 (<a href="https://explore-education-statistics.service.gov.uk/find-statistics/school-pupils-and-their-characteristics/2025-26">DfE</a>)</td>
+</tr>
+<tr>
+<td>UK households, 2024</td>
+<td><strong>28.6 million</strong></td>
+<td>ONS Families and households 2024 (<a href="https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/families/bulletins/familiesandhouseholds/2024">ONS</a>)</td>
+</tr>
+<tr>
+<td>Families with dependent children</td>
+<td><strong>42.3%</strong> of families (2024) and <strong>42.8%</strong> (2025). We couldn't find the total number</td>
+<td>ONS Families and households 2024 and 2025 (<a href="https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/families/bulletins/familiesandhouseholds/2025">ONS 2025</a>)</td>
+</tr>
+<tr>
+<td>Households with a child aged 5-11</td>
+<td>ONS published a table for 2019 (reference 11709), but we couldn't open the spreadsheet. <strong>Not verified</strong></td>
+<td><a href="https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/families/adhocs/11709estimatednumberofhouseholdscontainingatleastonechildaged5to11yearsuk2019">ONS ad hoc 11709</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>What this means:</strong> about 6 million children are in our age range. The number is shrinking slowly, so growth has to come from winning a larger share of families, not from a growing population.</p>
+<h3>1.2 Home education (latest figures)</h3>
+<table>
+<thead>
+<tr>
+<th>Nation</th>
+<th>Latest figure</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>England</strong></td>
+<td><strong>126,000</strong> children on census day, autumn 2025 (up about 14,300 in a year). <code>uk-launch.md</code> gives 175,900 at some point during 2024/25. Published 15 January 2026, as "official statistics in development"</td>
+<td>DfE (<a href="https://explore-education-statistics.service.gov.uk/find-statistics/elective-home-education">EES</a>, <a href="https://www.gov.uk/government/statistics/announcements/elective-home-education-autumn-term-202526">GOV.UK</a>)</td>
+</tr>
+<tr>
+<td><strong>Wales</strong></td>
+<td><strong>7,176</strong> known in 2024/25 (2,517 in 2018/19). The 2025/26 release reports <strong>7,917</strong>, or 17.0 per 1,000 pupils</td>
+<td>Welsh Government (<a href="https://www.gov.wales/pupils-educated-other-school-september-2024-august-2025-html">2024/25</a>, <a href="https://www.gov.wales/childrens-wellbeing-and-schools-act-2026-and-elective-home-education-html">Act page</a>, <a href="https://www.gov.wales/node/78077">2025/26</a>)</td>
+</tr>
+<tr>
+<td><strong>Scotland</strong></td>
+<td><strong>No official national count.</strong> Councils reported about 2,851 in total for 2024/25 (unverified). A Centre for Social Justice estimate put it near 10,000 (unverified). The Scottish Government's 2025 guidance says it will "consider options" for collecting data</td>
+<td><a href="https://www.findtutors.co.uk/blog/home-schooling-uk-statistics">FindTutors summary</a> (unverified); <a href="https://university.open.ac.uk/scotland/news/blogs/home-education-myths-debunked">Open University</a>; <a href="https://www.gov.scot/binaries/content/documents/govscot/publications/advice-and-guidance/2025/01/home-education-guidance-2/documents/home-education-guidance/home-education-guidance/govscot:document/home-education-guidance.pdf">Scottish Government guidance 2025</a></td>
+</tr>
+<tr>
+<td><strong>Northern Ireland</strong></td>
+<td><strong>1,220</strong> known in 2024/25 (808 in 2021/22), then 1,150 by January. The minister says there is "no complete record"</td>
+<td>Irish News, reporting an Assembly answer (<a href="https://ie.irishnews.com/news/northern-ireland/concerns-raised-over-50-rise-in-number-of-ni-children-being-home-schooled-SRBE5DNH4NEURPU4UF4O5JRMB4">Irish News</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>UK total:</strong> roughly <strong>137,000 to 145,000</strong> home-educated children at any one time (our sum; Scotland's figure is uncertain). We couldn't find how many of them are of primary age, but the DfE dataset has a year-group breakdown. Download it before setting targets for this segment.</p>
+<h3>1.3 Spending on subscriptions and educational extras</h3>
+<ul>
+<li><strong>Children's educational subscriptions:</strong> we found <strong>no reliable UK figure</strong>. The only study we found is a small 2022 thesis interviewing 12 UK parents (<a href="https://www.theseus.fi/handle/10024/753166">Theseus</a>).</li>
+<li><strong>All UK subscription boxes:</strong> the estimates disagree and are old. Royal Mail estimated almost £1.4bn spent in 2020, rising to £1.8bn by 2025. Whistl estimated £395m a year in 2021 (<a href="https://www.ipc.be/news-portal/general-news/2021/07/01/08/11/uk-subscription">IPC/Royal Mail</a>; <a href="https://postandparcel.info/?p=146910">Whistl via Post &amp; Parcel</a>). (unverified)</li>
+<li><strong>Extracurricular spending:</strong> £284 per child over summer 2025, and 89% of parents say extracurricular activities matter (<a href="https://www.confused.com/press/releases/2025/parents-fork-out-more-than-2500-to-cover-school-holiday-costs">Confused.com, Sept 2025</a>). Parents spend £443 a year on children's sport (<a href="https://newsroom.afterpay.com/updates/parents-spend-443-a-year-funding-childrens-sporting-dreams">Clearpay/Opinium, June 2025</a>).</li>
+<li><strong>Pressure to cut subscriptions:</strong> 29% of UK consumers plan to cancel or downgrade a subscription in the next year (<a href="https://www.askattest.com/blog/research/consumers-slash-tv-streaming-subscriptions-as-price-sensitivity-peaks.md">Attest, updated July 2026</a>). In January 2026, 31% planned to review unused services after Christmas (Nationwide, via <a href="https://newsar.codejungle.org/articles/6728">press coverage</a>) (unverified).</li>
+</ul>
+<hr />
+<h2>2. UK competitors and close substitutes</h2>
+<h3>2.1 Children's letter clubs (the closest substitutes)</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>What it is</th>
+<th>Price (£)</th>
+<th>Personalised?</th>
+<th>Answers the child's letter?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Banjo Robinson</strong> (UK)</td>
+<td>Travelling cat pen pal, ages 5-8 (some sources say 4-9). Two letters a month. Also sold on Not On The High Street</td>
+<td><strong>£5.15-£5.95 a month</strong> on 3, 6 or 12-month plans (<a href="https://whatsgoodtodo.com/banjo-robinson-your-childs-new-pen-pal-review">review</a>). Has offered £2 a month (<a href="https://cloud.mumsnet.com/articles/banjo-robinson-exclusive-mumsnet-offer">Mumsnet, 2023</a>) and £12.49 for 3 months (<a href="https://www.littlebird.co.uk/idea/banjo-robinson-pen-pal-subscription-the-montessori-inspired-reading-writing-experience-45-off">LittleBird</a>) (unverified, prices change)</td>
+<td>Yes, from a questionnaire</td>
+<td><strong>Partly.</strong> The parent writes a P.S. that Banjo "answers" in the next letter (<a href="https://cloud.mumsnet.com/talk/mumsnet_product_tests/3887741-Read-what-Mumsnet-users-and-their-children-thought-of-Banjo-Robinson-s-personalised-pen-pal-experience?page=4">Mumsnet test</a>). Says it has sent 120,000 letters to 41 countries (<a href="https://jobs.techstars.com/companies/banjo-robinson">Techstars</a>) (unverified)</td>
+</tr>
+<tr>
+<td><strong>My Pirate Pen Pal</strong> (Bristol)</td>
+<td>Monthly pirate letters, ages 3-8, with facts about places</td>
+<td><strong>£8.97 a month</strong>, or <strong>£96.87 a year</strong>. Gift plans of 3, 6 or 12 months. Free UK delivery (<a href="https://mypiratepenpal.co.uk/subscriptions">site</a>)</td>
+<td>Addressed to the child</td>
+<td>No reply service found</td>
+</tr>
+<tr>
+<td><strong>Tiny T's Theatre Rainbow Fairy Pen Pals</strong></td>
+<td>Two fairy letters a month (one general, one personalised)</td>
+<td><strong>£15 a month</strong> (<a href="https://www.tinytstheatre.com/fairypenpals">site</a>)</td>
+<td>One letter in two</td>
+<td>Not stated</td>
+</tr>
+<tr>
+<td><strong>Tilly's Letters</strong></td>
+<td>Illustrated story letter, recipe and craft, ages 2-6</td>
+<td>Price not found</td>
+<td>Yes</td>
+<td>Not stated (<a href="https://www.wowtrk.com/offer/667103">affiliate listing</a>)</td>
+</tr>
+<tr>
+<td><strong>Post From The Past</strong></td>
+<td>Illustrated letters from figures such as Einstein, Curie, Earhart and Dickens, with a news article or photo. <strong>Posted from the UK</strong> around the 12th of each month, but the site is US-run and priced in dollars</td>
+<td>About <strong>$13 a single letter</strong> in the shop (unverified) (<a href="https://postfromthepast.club/">site</a>, <a href="https://www.thehomeschoolfront.com/post-from-the-past/">review</a>)</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Mysteries in Time</strong> (UK)</td>
+<td>Monthly history pack (story and magazine), ages 6-11</td>
+<td>Listings range from £6.95 to £14.95 a pack (unverified) (<a href="https://mysteriesintime.com/">site</a>, <a href="https://www.mysubscriptionaddiction.com/b/mysteries-in-time">MSA</a>)</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3>2.2 Concept rivals outside the UK (not currently UK-focused)</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>What it is</th>
+<th>Price</th>
+<th>Answers the child?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Historical Pen Pals</strong></td>
+<td>Letters "in the figure's own voice", written by a system trained on their real letters and reviewed by a person. For adults and children. Posted with USPS</td>
+<td>$29 for 5 letters, then $9.99 a letter (<a href="https://www.historicalpenpals.com/">site</a>)</td>
+<td><strong>Yes</strong>: "responds to what you actually wrote" (<a href="https://www.historicalpenpals.com/letter-writing-hobby">site</a>). UK shipping not confirmed</td>
+</tr>
+<tr>
+<td><strong>Penpaly</strong></td>
+<td>Letters from any historical or made-up figure, "powered by AI"</td>
+<td>$25 a month (<a href="https://www.penpaly.com/">site</a>)</td>
+<td>Implied, not confirmed. Countries served not found</td>
+</tr>
+<tr>
+<td><strong>Pen Pals from the Past</strong></td>
+<td>History-inspired letters for children</td>
+<td>$1 for the first month, then $12 a month. US postage only (<a href="https://penpalspost.com/">site</a>)</td>
+<td>Unclear</td>
+</tr>
+</tbody>
+</table>
+<p><strong>This is the biggest competitive finding:</strong> an AI-written, reply-answering historical pen pal <strong>already exists in the US</strong> (Historical Pen Pals, Penpaly). We haven't found one aimed at UK children, built on the UK curriculum and posted in the UK. Our advantage is being local and focused on children (UK figures, KS1/KS2 links, Royal Mail, prices in pounds, safeguarding), not the idea itself. Expect US players to be able to add UK shipping quickly.</p>
+<h3>2.3 Children's magazines and boxes (what parents compare us with)</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Ages</th>
+<th>Price (£)</th>
+<th>Personalised?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The Week Junior</td>
+<td>8-14</td>
+<td>£33.99-£38.99 every 3 months, or about £102-£145 a year (unverified, sources disagree) (<a href="https://theweekjunior.co.uk/node/2325">offer page</a>, <a href="https://schoolreadinglist.co.uk/recommends/the-week-junior">reseller</a>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>First News</td>
+<td>7-14</td>
+<td>£109.99-£114.99 a year for print and digital. £4.99 a month digital only (<a href="https://subscribe.firstnews.co.uk/offer/">offer</a>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Beano</td>
+<td>6-12</td>
+<td>£11 a month, or <strong>£132 a year</strong> prepaid (<a href="https://beanoshopstag.dctdigital.com/pound-subscription">Beano shop</a>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Aquila</td>
+<td>8-13</td>
+<td><strong>£69.99 a year</strong>, or £6.49 a month by direct debit (<a href="https://www.aquila.co.uk/subscribe">Aquila</a>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Whizz Pop Bang</td>
+<td>6-12</td>
+<td>£4.75 a month, or £47.99 a year (2023 prices, unverified) (<a href="https://monkeyandmouse.co.uk/whizz-pop-bang-magazine-review/">review</a>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Storytime</td>
+<td>3-9</td>
+<td>Full price <strong>£41.99 a year</strong>, often discounted to £15-£21 on Wowcher (<a href="https://www.wowcher.co.uk/deal/shop/kids/28287198/12-month-children-s-magazine-subscription">Wowcher</a>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>National Geographic Kids UK</td>
+<td>6-14</td>
+<td>£35-£58.50 a year (unverified, undated) (<a href="https://www.natgeokids.com/uk/?p=307888">NatGeo Kids</a>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>toucanBox (craft)</td>
+<td>3-8</td>
+<td>About £13.90-£16.90 a box (unverified) (<a href="https://ui.awin.com/merchant-profile/6056">Awin</a>)</td>
+<td>Name on box</td>
+</tr>
+<tr>
+<td>MEL Science</td>
+<td>5-14</td>
+<td>From $29.90 a month. UK price in pounds not found (<a href="https://melscience.com/kids">MEL</a>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Book subscriptions</td>
+<td>0-12</td>
+<td>Box2Door £9.99 a month; Fox Lane Books £35-£36 for 3 months; Scottish Book Trust from £10 (<a href="https://www.books2door.com/collections/subscription-boxes">Box2Door</a>, <a href="https://www.foxlanebooks.co.uk/product-page/children-s-5-8-3-month-subscription">Fox Lane</a>)</td>
+<td>Chosen by age</td>
+</tr>
+</tbody>
+</table>
+<h3>2.4 One-off personalised letters (Santa, Tooth Fairy)</h3>
+<ul>
+<li><strong>Letters from Santa:</strong> about <strong>£4-£5</strong> each on deal sites (<a href="https://www.wowcher.co.uk/deal/shop/food-drink/accessories/43233466/personalised-father-christmas-letter">Wowcher</a>). The NSPCC asks for a <strong>£5 suggested donation</strong> (<a href="https://scrqualitymarkers-scie.nspcc.org.uk/support-us/ways-to-give/letter-from-santa">NSPCC</a>). We couldn't get Etsy bestseller prices through search, so check them on Etsy directly.</li>
+<li><strong>Lesson:</strong> parents happily pay about £5 for <strong>one</strong> personalised letter at Christmas. A historical figure's letter at about £6 is within that habit. The difference is that ours is a subscription.</li>
+</ul>
+<h3>2.5 Is there a direct UK competitor?</h3>
+<p><strong>No direct UK competitor was found</strong> (as of 11 October 2026). By "direct" we mean UK-based, for children, from historical figures, personalised, and answering the child's own letter. The two closest are <strong>Banjo Robinson</strong> (personalised and UK-based, with replies through the parent's P.S., but not history) and <strong>Post From The Past</strong> (history letters posted from the UK, but one-way and the same letter for every child).</p>
+<hr />
+<h2>3. Demand signals</h2>
+<h3>3.1 Curriculum fit (England)</h3>
+<p>The KS1 history programme asks for "the lives of significant individuals in the past who have contributed to national and international achievements", and for "events beyond living memory". Its <strong>non-statutory examples</strong> include <em>Elizabeth I and Queen Victoria</em>, <em>Christopher Columbus and Neil Armstrong</em>, <em>Rosa Parks and Emily Davison</em>, and <em>Mary Seacole and/or Florence Nightingale and Edith Cavell</em>. The Great Fire of London is the usual example of an event beyond living memory (<a href="https://www.history.org.uk/primary/categories/1/resource/577">HA: Teaching famous people at KS1</a>; <a href="https://www.rgs.org/schools/resources-for-schools/teaching-ernest-shackleton-as-a-significant-individual-in-primary-history-at-ks1/">RGS</a>). We read these through schools' copies of the programme; check the wording against the GOV.UK programme of study.</p>
+<table>
+<thead>
+<tr>
+<th>Our pen pal</th>
+<th>Curriculum link</th>
+<th>Strength</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mary Anning</strong></td>
+<td>Commonly taught in Year 1 under "significant individuals". Hampshire's model plan puts her in Year 1 (<a href="https://www.northfeatherstone.wakefield.sch.uk/ks1-2">Wakefield school</a>; <a href="https://history.hias.hants.gov.uk/mod/resource/view.php?id=2297">Hampshire HIAS</a>)</td>
+<td><strong>Strong</strong></td>
+</tr>
+<tr>
+<td><strong>Florence Nightingale</strong></td>
+<td>A named non-statutory KS1 example</td>
+<td><strong>Strong</strong></td>
+</tr>
+<tr>
+<td><strong>Emmeline Pankhurst</strong></td>
+<td>Votes for women, often paired with Emily Davison (a named example)</td>
+<td>Good</td>
+</tr>
+<tr>
+<td><strong>Walter Tull</strong></td>
+<td>Widely used in KS2 and in Black History Month (October) resources (<a href="https://www.twinkl.com.au/resource/ks2-all-about-walter-tull-powerpoint-t-h-1628158381">Twinkl</a>; <a href="https://www.tes.com/teaching-resource/black-history-ks2-bundle-timelines-and-non-chronological-reports-13314445">Tes</a>)</td>
+<td>Good. <strong>Black History Month is happening now</strong></td>
+</tr>
+<tr>
+<td><strong>Isambard Kingdom Brunel</strong></td>
+<td>Victorians and local history (Bristol). Not a named example</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>Ada Lovelace</strong></td>
+<td>Significant individual and computing. Not a named example</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>Cleopatra</strong></td>
+<td>KS2 "earliest civilisations" (Ancient Egypt depth study). Note: Cleopatra lived at the very end of ancient Egypt, much later than the period most schools teach</td>
+<td>Medium (topic match, not period match)</td>
+</tr>
+<tr>
+<td><strong>Amelia Earhart / Einstein / Leonardo</strong></td>
+<td>Fit the "national and international achievements" strand in general. No named link</td>
+<td>Weak to medium</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Gap to fill:</strong> there is no <strong>Great Fire of London</strong> pen pal (for example, Samuel Pepys). It is one of the most-taught KS1 topics.</p>
+<p><strong>Curriculum review:</strong> the November 2025 Curriculum and Assessment Review called history "broadly working well" ("evolution not revolution"). It asks for stronger disciplinary knowledge and more diversity, including Black British and Asian British history. New programmes of study are due in <strong>spring 2027</strong>, for first teaching in <strong>autumn 2028</strong> (<a href="https://www.history.org.uk/primary/news/4477/curriculum-and-assessment-review-final-report-re">Historical Association</a>; <a href="https://www.twinkl.com.sa/blog/curriculum-and-assessment-review-history">Twinkl summary</a>). No disruption is expected before then, but check the 2027 text for our figures.</p>
+<h3>3.2 Children's writing (National Literacy Trust)</h3>
+<ul>
+<li><strong>2026:</strong> 28.7% of 8-18-year-olds enjoy writing in their free time, up from <strong>26.6% in 2025</strong>, the lowest since 2010 (46.8% in 2010). Only 11.9% write something daily in their free time. Girls 34.9%, boys 21.1%. Sample: 125,375 children, January to March 2026 (<a href="https://literacytrust.org.uk/news/our-latest-research-reveals-slight-upturn-in-childrens-writing-engagement-after-15-year-low/">NLT news</a>; <a href="https://literacytrust.org.uk/research-services/research-reports/children-and-young-peoples-writing-in-2025/">2025 report</a>).</li>
+<li>In 2025, enjoyment among <strong>primary-aged</strong> children fell 6 points in a year (<a href="https://literacytrust.org.uk/research-services/research-reports/children-and-young-peoples-writing-in-2025/">NLT 2025</a>).</li>
+<li><strong>Why it matters:</strong> "get your child writing for fun again" is a strong, evidence-backed message for parents. The gap between girls and boys suggests trying pen pals that appeal to boys (Brunel, Tull) in ads.</li>
+</ul>
+<h3>3.3 Children and real post</h3>
+<ul>
+<li>A Diana Award and Nationwide survey (2022) found that <strong>84%</strong> of children would be excited to get post through the letterbox, and about <strong>a third</strong> have never sent or received a letter (<a href="https://www.pressreader.com/uk/daily-mail/20221116/281977496610033">Daily Mail via PressReader</a>) (unverified).</li>
+<li>Pinterest's 2026 trend forecast reports searches for "snail mail gifts" up 110% and "penpal ideas" up 90%. This is global data and mostly adults (<a href="https://mother.ly/child/child-learn-play/letter-writing-with-kids/">summary</a>) (unverified for the UK).</li>
+</ul>
+<h3>3.4 Parent forums</h3>
+<ul>
+<li><strong>Mumsnet:</strong> Banjo Robinson's 2020 product test found <strong>88% satisfied and 89% would recommend</strong> (<a href="https://cloud.mumsnet.com/talk/mumsnet_product_tests/3887741-Read-what-Mumsnet-users-and-their-children-thought-of-Banjo-Robinson-s-personalised-pen-pal-experience?page=2">Mumsnet</a>). A 2024 "Pen pals" thread asks for schemes for a 6-year-old and notes that most are for older children (<a href="https://www.mumsnet.com/talk/parenting/5193017-pen-pals">Mumsnet</a>), which is a small sign of unmet demand for younger children.</li>
+<li><strong>Grandparent gift threads:</strong> Mumsnet posters suggest magazine subscriptions and "experiences or subscriptions in envelopes" as alternatives to more toys (<a href="https://www.mumsnet.com/talk/_chat/3736549-Xmas-pressies">Mumsnet "Xmas pressies"</a>). That thread is from 2019, so treat it as qualitative only.</li>
+<li><strong>UK search interest:</strong> we <strong>could not verify</strong> Google search volumes or Trends data for terms like "pen pal for kids UK" or "history subscription for kids". Check with Google Keyword Planner or Trends before spending on search ads.</li>
+</ul>
+<h3>3.5 Attitudes to AI</h3>
+<ul>
+<li>In a May 2026 BSI survey of 1,000 UK parents, half said their child had an AI toy or learning device, and <strong>69%</strong> would be more likely to buy one with educational content. But <strong>65%</strong> worry AI could replace real friendships, and only 46% think their child can tell AI from a person (<a href="https://www.bsigroup.com/en-GB/insights-and-media/media-centre/press-releases/2026/may/half-of-children-have-ai-toys-as-parents-allow-widespread-use-despite-safety-concerns-and-gaps-in-guidance-parents/">BSI</a>).</li>
+<li><strong>What this means:</strong> parents accept AI for learning but worry about children being fooled. Be clear with parents that the letters are written with AI, and keep the "a person checks every letter" promise.</li>
+</ul>
+<h3>3.6 Grandparents and gifts</h3>
+<table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Figure</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grandparent spend per grandchild at Christmas</td>
+<td>At least <strong>£65</strong> (Saga, more than 9,500 people aged 50+). SunLife gave £126 (2022) and later £140</td>
+<td><a href="https://www.doncasterfreepress.co.uk/news/grandparents-set-spend-aps14bn-grandkids-christmas-and-half-it-credit-57790">Saga via Doncaster Free Press</a>; <a href="https://sunlife.co.uk/press-office/news/grandparent-christmas-spending">SunLife</a> (years unclear, unverified)</td>
+</tr>
+<tr>
+<td>Grandparents spending over £100 per grandchild</td>
+<td><strong>1 in 5</strong></td>
+<td><a href="https://yougov.com/en-gb/articles/53595-the-yougov-big-survey-on-christmas-the-cost-of-christmas">YouGov</a> (unverified date)</td>
+</tr>
+<tr>
+<td>Parent spend per child at Christmas</td>
+<td>Surveys range from <strong>£119</strong> to <strong>£352</strong></td>
+<td><a href="https://luxuriousmagazine.com/parents-will-spend-200m-more-on-childrens-presents">VoucherCodes/Luxurious</a>; <a href="https://www.scottishfinancialnews.com/articles/st-james-s-place-nearly-760m-wasted-each-year-on-unwanted-christmas-presents">SJP</a> (dates unclear)</td>
+</tr>
+<tr>
+<td>Christmas subscription gifts</td>
+<td>About <strong>12 million</strong> subscriptions bought as gifts, averaging <strong>£58</strong> each</td>
+<td><a href="https://internetretailing.net/?p=67447">Acquired/Opinium via Internet Retailing</a> (date unverified)</td>
+</tr>
+<tr>
+<td>Shoppers choosing a subscription instead of a physical gift</td>
+<td><strong>29%</strong> (Bango, December 2024)</td>
+<td><a href="https://www.marketing-beat.co.uk/2024/12/17/subscription-bango-research/">Marketing Beat</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>What this means:</strong> our <strong>3-month gift at £36</strong> fits under the typical £58 subscription gift and the £65 grandparent spend. The <strong>12-month gift at £132</strong> suits the 1 in 5 grandparents who spend over £100, and it is the same price as a prepaid year of Beano.</p>
+<hr />
+<h2>4. Pricing benchmarks</h2>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Price per month (about)</th>
+<th>Price per letter or issue (about)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Banjo Robinson (2 letters)</td>
+<td>£5.15-£5.95</td>
+<td><strong>£2.60-£3</strong></td>
+</tr>
+<tr>
+<td>My Pirate Pen Pal (1 letter)</td>
+<td>£8.97 (£8.07 on the annual plan)</td>
+<td><strong>£8-£9</strong></td>
+</tr>
+<tr>
+<td>Tiny T's fairy pen pals (2 letters)</td>
+<td>£15</td>
+<td><strong>£7.50</strong></td>
+</tr>
+<tr>
+<td>Letter from Santa (one-off)</td>
+<td>n/a</td>
+<td><strong>£4-£5</strong></td>
+</tr>
+<tr>
+<td><strong>Our Story Letters (1 letter)</strong></td>
+<td><strong>£7</strong></td>
+<td><strong>£7</strong></td>
+</tr>
+<tr>
+<td><strong>Our Pen Pal from History (2 letters plus answered replies)</strong></td>
+<td><strong>£12</strong></td>
+<td><strong>£6</strong></td>
+</tr>
+<tr>
+<td>Aquila / Whizz Pop Bang</td>
+<td>£4.75-£6.49</td>
+<td>One magazine a month</td>
+</tr>
+<tr>
+<td>Beano</td>
+<td>£11</td>
+<td>About £2.75 a weekly issue</td>
+</tr>
+<tr>
+<td>The Week Junior</td>
+<td>About £11-£13</td>
+<td>About £2.60-£3 a weekly issue</td>
+</tr>
+<tr>
+<td>Book box (Box2Door)</td>
+<td>£9.99</td>
+<td>3-4 books</td>
+</tr>
+<tr>
+<td>toucanBox</td>
+<td>£13.90-£16.90</td>
+<td>One craft box</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What this tells us:</strong></p>
+<ul>
+<li><strong>£7 Story Letters</strong> costs about the same per letter as My Pirate Pen Pal, but it is a one-way letter like many cheaper options. It is only worth having as an entry tier.</li>
+<li><strong>£12 Pen Pal</strong> is at the <strong>top of the letter-club range</strong> and matches a Beano or Week Junior subscription. That only works if parents see the reply feature in the first month. Lead with "your child's letter gets a real answer".</li>
+<li><strong>Gift prices:</strong> £36 for 3 months, £69 for 6 and £132 for 12 match what UK buyers already pay (Aquila £69.99 a year, Beano £132 a year, First News about £110 a year). The 12-month plan saves only 8% on monthly billing. Consider £120 to make the yearly saving clearer (a suggestion, not tested).</li>
+<li><strong>VAT:</strong> if turnover passes £90,000, £12 becomes £10 after VAT (see <code>uk-launch.md</code>).</li>
+</ul>
+<hr />
+<h2>5. Rules that affect how we sell</h2>
+<p><em>This is a checklist from public sources, not legal advice. Have a solicitor review it before launch, as <code>marketing-launch-plan.md</code> already plans.</em></p>
+<h3>5.1 UK GDPR and children's data</h3>
+<ul>
+<li><strong>Article 8 (consent of under-13s)</strong> applies only when an online service is offered <strong>directly to a child</strong>. Our customer is the parent, so we rely on the parent's account and a lawful basis such as the contract with the parent (<a href="https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/children-and-the-uk-gdpr/what-are-the-rules-about-an-iss-and-consent">ICO</a>).</li>
+<li>We still <strong>process children's data</strong>: name, age, interests, and the content and handwriting of their letters. The ICO expects extra care with children's data. A <strong>Data Protection Impact Assessment (DPIA)</strong> is the sensible step. Whether it is strictly required here is (unverified), so ask the solicitor.</li>
+<li>A photo of a child's letter may reveal sensitive details, such as health or family problems. Our safeguarding policy (<code>safeguarding.md</code>) and the plan to delete photos after reading both help here.</li>
+<li><strong>ICO fee:</strong> Tier 1 is <strong>£52 a year</strong> (£47 by direct debit) from 17 February 2025 (<a href="https://www.lewissilkin.com/insights/2025/02/06/fee-payable-to-the-ico-to-increase-in-february-102jzb9">Lewis Silkin</a>). This updates the "about £50" in <code>uk-launch.md</code>.</li>
+<li>The <strong>Data (Use and Access) Act 2025</strong> received Royal Assent on 19 June 2025. One source says it puts the Children's Code principles into UK GDPR Article 25 (unverified) (<a href="https://www.taylorwessing.com/en/global-data-hub/2024/february---childrens-data/likely-to-be-accessed-by-children">Taylor Wessing</a>).</li>
+</ul>
+<h3>5.2 ICO Children's Code (Age Appropriate Design Code)</h3>
+<ul>
+<li>It applies to online services <strong>"likely to be accessed by children"</strong>, which the ICO describes as "more probable than not". It covers any service where children are a "substantive and identifiable user group", even one not aimed at them (<a href="https://www.taylorwessing.com/en/global-data-hub/2024/february---childrens-data/likely-to-be-accessed-by-children">Taylor Wessing</a>).</li>
+<li><strong>Our position (our assessment, unverified):</strong> the website and dashboard are for parents, and children never log in. We are probably outside the Code's core scope, but children may well look at the site with a parent. <strong>Write down a short "likely to be accessed" assessment.</strong> Apply the Code's defaults anyway: no profiling of children, no nudges, collect as little as possible, and show privacy information parents can understand.</li>
+</ul>
+<h3>5.3 Advertising (ASA / CAP Code)</h3>
+<ul>
+<li><strong>Section 5 (children):</strong> "children" means <strong>under 16</strong>. Ads must not tell children to buy, or to ask their parents to buy (rule 5.4.2), and must not show a child asking for the product. Promotions that require a purchase must not be aimed at children (rule 5.7) (<a href="https://asa.org.uk/advice-online/children-general.html">ASA advice</a>; <a href="https://www.asa.org.uk/advice-online/children-promotional-marketing.html">ASA promotions</a>).</li>
+<li><strong>What this means for us:</strong> <strong>aim every ad at adults</strong> (parents and grandparents). Never write lines like "Ask Mum for a letter from Brunel!", and don't send letters with "tell your parents to upgrade" messages. The letters themselves are the product, not ads, but <strong>never put sales messages inside a child's letter.</strong></li>
+<li><strong>AI:</strong> there is <strong>no general UK rule that AI use must be disclosed</strong> in ads. But ads must not mislead. CAP's May 2025 guidance asks whether people would be misled without a disclosure. ASA guidance from June 2026 says AI images of real people must not suggest an endorsement (<a href="https://www.rpclegal.com/snapshots/advertising-and-marketing/summer-2025/cap-issues-guidance-on-use-of-ai-in-ads/">RPC</a>; <a href="https://www.lewissilkin.com/insights/2026/06/18/asa-warns-on-ai-generated-content-and-deepfakes-102n4o1">Lewis Silkin</a>). Don't use AI-made "photos" of historical figures that look real. Back up any "every fact checked" claim with records.</li>
+</ul>
+<h3>5.4 Consumer Contracts Regulations 2013 (14-day cancellation)</h3>
+<ul>
+<li>Online sales normally carry a <strong>14-day cancellation right</strong>. <strong>Regulation 28(1)(b)</strong> removes that right for goods "made to the consumer's specifications or clearly personalised" (<a href="https://www.legislation.gov.uk/uksi/2013/3134/part/3">legislation.gov.uk</a>).</li>
+<li><strong>Our letters are personalised</strong>, so the exemption <em>may</em> cover each letter once it is made. But the contract is an ongoing subscription that mixes a service with goods, and we found <strong>no UK guidance or case on personalised subscriptions</strong> (unverified).</li>
+<li><strong>Practical advice:</strong> don't rely on the exemption. Our "love it or it's free" refund on the first month already goes further than the law requires, and it is simpler and better for trust. Do allow cancellation before the first letter is made.</li>
+</ul>
+<h3>5.5 DMCC Act 2024: subscription contract rules (status at October 2026)</h3>
+<ul>
+<li><strong>Start date: January 2027.</strong> The government brought it forward from spring 2027 in an announcement on <strong>9 or 10 August 2026</strong> (sources differ). The Department for Business and Trade says the requirements themselves have not changed (<a href="https://www.tlt.com/insights-and-events/insight/dmcc-act-subscription-contracts-regime-brought-forward-by-the-pm-what-do-businesses-need-to-know">TLT</a>; <a href="https://www.stephensonharwood.com/insights/subscription-reforms-brought-forward-to-january-2027-is-your-business-ready/">Stephenson Harwood</a>; <a href="https://www.mills-reeve.com/publications/new-subscription-rules-are-you-ready-for-january-2027/">Mills &amp; Reeve</a>).</li>
+<li><strong>History:</strong> it was expected in spring 2026, then delayed to autumn 2026 at the earliest (November 2025), then to spring 2027 (April 2026), then brought forward to January 2027 (<a href="https://www.taylorwessing.com/en/insights-and-events/insights/2026/04/subscription-contracts">Taylor Wessing</a>).</li>
+<li><strong>Still missing:</strong> as of August 2026, the <strong>secondary legislation and guidance had not been published</strong> (TLT). Check again in November.</li>
+<li><strong>What it will require:</strong> key information before the contract starts, <strong>reminder notices</strong> before renewals and before free or discounted periods end, a <strong>cooling-off period</strong> at the start and at renewals, and an <strong>easy way to leave</strong> (for example, cancelling online in one step) (<a href="https://carson-mcdowell.com/news-insights/insights/new-subscription-contracts-regime-brought-forward">Carson McDowell</a>).</li>
+<li><strong>What this means for us:</strong> families who join in November or December 2026 sign up before the new rules start. Lawyers say renewals of older contracts need checking case by case (<a href="https://www.lw.com/en/insights/new-requirements-accelerated-for-uk-consumer-subscription-contracts">Latham &amp; Watkins</a>). Build to the new standard now: one-click cancel in the dashboard, reminder emails before discounts end, and a clear summary before payment. The <code>FOUNDING30</code> "forever" discount and gift plans that turn into paid plans will both need reminder notices. Prepaid gifts that <strong>don't auto-renew</strong> are simpler.</li>
+</ul>
+<h3>5.6 Online Safety Act 2023</h3>
+<ul>
+<li>The Act covers "user-to-user" services, where content uploaded by one user can be seen by <strong>other users</strong>, and search services (<a href="https://www.burges-salmon.com/our-thinking/online-safety-act-who-does-it-apply-to/">Burges Salmon</a>; <a href="https://www.bristows.com/content-hub/the-safety-net/scope-of-act/">Bristows</a>).</li>
+<li><strong>Our assessment (unverified):</strong> a parent's photo of a letter is seen only by us, and the answer comes back on paper. No user sees another user's content, so we are probably <strong>out of scope</strong>. This would change if we added a public gallery of replies, a community feed, or sharing between families. Write down the reasoning and check it again before adding any sharing features.</li>
+</ul>
+<hr />
+<h2>6. Channels</h2>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Cost and fit</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Meta (Facebook/Instagram)</strong></td>
+<td>UK cost per click about <strong>£1.17</strong>, and <strong>£1.36 in Q4 2025</strong>. Ad prices peak in December (<a href="https://www.superads.ai/facebook-ads-costs/cpc-cost-per-click/united-kingdom">Superads</a>). E-commerce cost per sale about <strong>£15-£35</strong> (unverified) (<a href="https://www.photonpay.com/uk/blog/article/facebook-advertising-costs">PhotonPay</a>)</td>
+<td>Good for grandparents aged 55+ and parents. Meta has removed many detailed targeting options since 2022 (<a href="https://ppc.land/facebook-to-remove-detailed-targeting-options-starting-next-year">PPC Land</a>), so the ad itself has to find the audience. The plan's <strong>£35 per sale cut-off</strong> is right: at £35, payback takes about 4 months on Pen Pal margin</td>
+</tr>
+<tr>
+<td><strong>Mumsnet</strong></td>
+<td><strong>No public rate card found.</strong> Banjo Robinson used a paid product test (2020) and an "exclusive offer" page (2023)</td>
+<td>Ask Mumsnet's partnerships team for prices. For £0, read the rules on the free "Mumsnet Talk" self-promotion boards</td>
+</tr>
+<tr>
+<td><strong>Home-ed Facebook groups</strong></td>
+<td>Free. <strong>400-500 UK groups</strong>; the biggest is said to have about 80,000 members (unverified) (<a href="https://expose-news.com/2025/10/30/home-education-an-ai-powered-tool/">Expose</a>; <a href="https://demodocker.edplace.com/homeschooling/communities-support">EdPlace</a>)</td>
+<td>Our best fit for the money. Follow each group's promotion days</td>
+</tr>
+<tr>
+<td><strong>Schools and PTAs</strong></td>
+<td>No DfE guidance on PTAs selling to parents was found. Each school decides</td>
+<td>Offer something useful rather than selling: a free class letter from Mary Anning, or a free "write to history" activity, with a parent flyer only where the school agrees. Keep it to a later phase (as the plan says)</td>
+</tr>
+<tr>
+<td><strong>World Book Day, Thu 4 March 2027</strong></td>
+<td>Free to join in. <strong>£1 book tokens can be used from 11 February</strong> to 14 or 21 March 2027 (sources differ). 2027 is World Book Day's 30th year (<a href="https://www.worldbookday.com/news/world-book-day-2027-announcements/">World Book Day</a>, <a href="https://www.worldbookday.com/faq/">FAQ</a>)</td>
+<td>The "letter from history" activity in February fits well. Mothering Sunday falls three days later (7 March)</td>
+</tr>
+<tr>
+<td><strong>Christmas posting</strong></td>
+<td>2026 dates are <strong>not yet official</strong>. Unofficial lists say <strong>2nd class about Thursday 17 December</strong> and 1st class about 19-21 December. The official 2025 dates were 17 and 20 December (<a href="https://www.eurosender.com/en/hp/christmas-delivery/royal-mail">Eurosender</a>; <a href="https://parcelmatch.co.uk/last-posting-dates">ParcelMatch</a>)</td>
+<td>The plan's "post December letters by about 11 December" leaves about a week of margin. Keep it. Check Royal Mail's own page in November</td>
+</tr>
+<tr>
+<td><strong>Etsy</strong></td>
+<td>6.5% transaction fee, plus 4% + 20p payment fee, plus about £0.16 per listing, plus a regulatory operating fee (0.25%-0.48%, sources differ), plus 20% VAT on fees for non-VAT-registered sellers (<a href="https://www.printful.com/uk/blog/how-much-does-etsy-take-per-sale">Printful</a>; <a href="https://wise.com/gb/blog/how-to-sell-etsy">Wise</a>). <strong>About 12-13% in total</strong> before ads</td>
+<td>Etsy has no native subscriptions. Sell <strong>gift certificates or "one letter from…"</strong> single products that lead to the subscription. Post From The Past already sells on Etsy</td>
+</tr>
+<tr>
+<td><strong>Not On The High Street</strong></td>
+<td>About <strong>£199 + VAT to join</strong> and about <strong>25% + VAT commission</strong> (unverified, third-party guides) (<a href="https://www.topbubbleindex.com/blog/selling-on-noths-guide-fees-tips/">TopBubbleIndex</a>; <a href="https://www.mintsoft.com/resources/blog/should-you-sell-on-not-on-the-high-street/">Mintsoft</a>)</td>
+<td>Banjo Robinson sells here (<a href="https://www.notonthehighstreet.com/banjorobinson">NOTHS</a>), so the category works. At 25% commission, a £132 gift gives about £33 to NOTHS. Acceptable for gifts, too costly for monthly plans. Better after Christmas 2026, once we have reviews</td>
+</tr>
+<tr>
+<td><strong>October hook</strong></td>
+<td>Black History Month is now</td>
+<td>A Walter Tull sample letter and Real history card to share now (creators and press)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Risks and an honest verdict</h2>
+<h3>7.1 Is there demand in the UK?</h3>
+<p><strong>Yes, at a niche level.</strong> The evidence:</p>
+<ul>
+<li>Several UK companies sell personalised children's letters by post: Banjo Robinson (120,000 letters claimed, Mumsnet test 88% satisfied), My Pirate Pen Pal, Tiny T's and Tilly's.</li>
+<li>About 6 million children are aged 5-12, and about 140,000 are home-educated across the UK.</li>
+<li>Writing enjoyment is low and widely reported, so parents have a reason to buy.</li>
+<li>Our figures are taught in KS1 and KS2.</li>
+<li>Grandparents spend £65 or more per grandchild, and subscription gifts are an established habit.</li>
+</ul>
+<p><strong>What we don't know:</strong> UK search volumes, how many home-educated children are of primary age, and any proof that UK parents will pay <strong>£12</strong> (rather than £5-£9) for replies.</p>
+<h3>7.2 Realistic first-year customer numbers (our estimate)</h3>
+<p>This is reasoning, not data:</p>
+<ul>
+<li><strong>Home education:</strong> if 1 in 500 home-educated children aged 5-12 in the UK subscribe, that is about 150 to 250 children. This assumes that half to two-thirds of the roughly 140,000 are of primary age, which we haven't verified.</li>
+<li><strong>Other parents (paid ads and creators):</strong> the plan's £1,500 of Meta spend at £20-£35 per sale gives about 45 to 75 subscribers. Creators and press might add 50 to 150.</li>
+<li><strong>Gifts:</strong> the plan's 75 gifts by the end of December looks reachable. A full year with two gift peaks (Christmas, then World Book Day and Mothering Sunday) might bring <strong>100 to 300 gifts</strong>.</li>
+<li><strong>Cancellations:</strong> at the plan's 8% a month, about a third of subscribers who join in month 1 are still subscribed at month 12.</li>
+</ul>
+<p><strong>Estimate: 200 to 600 active paying subscribers by October 2027, plus 100 to 300 gift subscriptions sold.</strong> At an average of about £10 a month, that is roughly <strong>£2,000 to £6,000 a month</strong> in recurring revenue by the end of year one. That is a good small business or side project, not yet a company that needs funding. The plan's target of 300 by 31 March 2027 is ambitious but possible if Christmas gifts sell well.</p>
+<h3>7.3 Main risks</h3>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Why it matters in the UK</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A US rival adds UK shipping</td>
+<td>Historical Pen Pals and Penpaly already offer AI or reply-based history letters</td>
+<td>Move fast on the UK advantages: KS1/KS2 figures, UK heritage partners, UK safeguarding, prices in pounds, Royal Mail</td>
+</tr>
+<tr>
+<td>Price resistance at £12</td>
+<td>Banjo charges about £3 a letter. Magazines cost £5-£11 a month</td>
+<td>Show a real reply in every ad. Test £9.99 against £12 in the validation stage</td>
+</tr>
+<tr>
+<td>Cost per sale too high</td>
+<td>UK Meta costs rise in Q4. £15-£35 per sale against about £9.50 a month margin</td>
+<td>Put home-ed groups, creators and gifts first. Keep the £35 cut-off</td>
+</tr>
+<tr>
+<td>Doubts about AI and safeguarding</td>
+<td>65% of parents worry about AI replacing human contact (BSI 2026)</td>
+<td>Say "AI helps us write; a person checks every letter". Publish the safeguarding policy</td>
+</tr>
+<tr>
+<td>DMCC rules start in January 2027</td>
+<td>Reminder notices, cooling-off periods, easy exit. Guidance not yet published</td>
+<td>Build one-click cancel and reminder emails now. Make prepaid gifts non-renewing</td>
+</tr>
+<tr>
+<td>Children's data</td>
+<td>Letters can reveal sensitive details</td>
+<td>DPIA, deleting photos, <code>safeguarding.md</code> process, a written "likely to be accessed" assessment</td>
+</tr>
+<tr>
+<td>Christmas post</td>
+<td>Peak volume; 2nd class last date about 17 December</td>
+<td>Gift certificates with a January start. Post December letters by 11 December</td>
+</tr>
+<tr>
+<td>Shrinking age group</td>
+<td>Primary numbers are falling about 2% a year</td>
+<td>Grow share, gifts and the classroom edition later</td>
+</tr>
+</tbody>
+</table>
+<h3>7.4 What would change our mind</h3>
+<p><strong>Towards "stop" or "change course":</strong></p>
+<ul>
+<li>In validation, fewer than 1% of landing-page visitors join the waitlist, or fewer than 10 people pay a deposit.</li>
+<li>Fewer than 25% of Pen Pal children write back in the first two months. The reply is the whole difference from competitors.</li>
+<li>Paid cost per sale stays above £40 after £300 of spend, and free channels bring fewer than 30 families by mid-December.</li>
+<li>Fewer than 15% of gift subscriptions turn into paid subscriptions.</li>
+<li>A well-funded rival launches a UK children's version first (watch Historical Pen Pals, Penpaly, and Banjo Robinson adding real replies).</li>
+</ul>
+<p><strong>Towards "invest more":</strong></p>
+<ul>
+<li>A reply rate above 40%, with parents sharing reply moments without being asked.</li>
+<li>Monthly cancellations below 6%.</li>
+<li>A heritage partner (Lyme Regis Museum, SS Great Britain) or a school trust asks for a co-branded or classroom version.</li>
+<li>Gift sales above 150 by Christmas.</li>
+</ul>
+<hr />
+<h2>8. Things to check before relying on them</h2>
+<ol>
+<li>Exact ONS count of UK children aged 5-12 (mid-2024 single-year table) and the 2019 table of households with a child aged 5-11.</li>
+<li>DfE home-education breakdown by year group (how many are of primary age).</li>
+<li>Current Banjo Robinson, My Pirate Pen Pal and Tilly's Letters prices, and whether any of them answer the child's letter.</li>
+<li>Whether Historical Pen Pals and Penpaly ship to the UK, and at what price.</li>
+<li>Google Trends and Keyword Planner volumes for UK search terms.</li>
+<li>Royal Mail's official Christmas 2026 last posting dates (expected in November).</li>
+<li>Mumsnet partnership rates.</li>
+<li>DMCC secondary legislation and guidance (watch for it from November 2026).</li>
+<li>Solicitor view on regulation 28 (personalised goods) for a subscription, and on whether a DPIA is required.</li>
+</ol>
+<hr />
+<h2>Sources</h2>
+<p><strong>Population, households and education statistics</strong></p>
+<ul>
+<li><a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualmidyearpopulationestimates/mid2024">ONS: Population estimates for the UK, mid-2024</a></li>
+<li><a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationprojections/bulletins/nationalpopulationprojections/2024based">ONS: National population projections, 2024-based</a></li>
+<li><a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/populationestimatesforukenglandandwalesscotlandandnorthernireland">ONS: Population estimates dataset (single year of age)</a></li>
+<li><a href="https://www.statista.com/statistics/1394643/uk-gen-alpha-population">Statista: UK Gen Alpha population</a></li>
+<li><a href="https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/families/bulletins/familiesandhouseholds/2024">ONS: Families and households in the UK, 2024</a></li>
+<li><a href="https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/families/bulletins/familiesandhouseholds/2025">ONS: Families and households in the UK, 2025</a></li>
+<li><a href="https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/families/adhocs/11709estimatednumberofhouseholdscontainingatleastonechildaged5to11yearsuk2019">ONS: Households with a child aged 5-11, 2019 (ad hoc 11709)</a></li>
+<li><a href="https://commonslibrary.parliament.uk/research-briefings/cbp-12207/">House of Commons Library: Declining pupil numbers in England</a></li>
+<li><a href="https://explore-education-statistics.service.gov.uk/find-statistics/school-pupils-and-their-characteristics/2025-26">DfE: Schools, pupils and their characteristics 2025/26</a></li>
+<li><a href="https://www.nfer.ac.uk/press-releases/nfer-responses-to-new-dfe-data/">NFER: Responses to new DfE data</a></li>
+<li><a href="https://explore-education-statistics.service.gov.uk/find-statistics/elective-home-education">DfE: Elective home education</a></li>
+<li><a href="https://www.gov.uk/government/statistics/announcements/elective-home-education-autumn-term-202526">GOV.UK: EHE autumn term 2025/26 release</a></li>
+<li><a href="https://www.gov.wales/pupils-educated-other-school-september-2024-august-2025-html">Welsh Government: Pupils educated other than at school 2024/25</a></li>
+<li><a href="https://www.gov.wales/node/78077">Welsh Government: Pupils educated other than at school 2025/26</a></li>
+<li><a href="https://www.gov.wales/childrens-wellbeing-and-schools-act-2026-and-elective-home-education-html">Welsh Government: Children's Wellbeing and Schools Act 2026 and EHE</a></li>
+<li><a href="https://www.gov.scot/binaries/content/documents/govscot/publications/advice-and-guidance/2025/01/home-education-guidance-2/documents/home-education-guidance/home-education-guidance/govscot:document/home-education-guidance.pdf">Scottish Government: Home education guidance, January 2025</a></li>
+<li><a href="https://www.findtutors.co.uk/blog/home-schooling-uk-statistics">FindTutors: UK home schooling statistics 2026</a></li>
+<li><a href="https://university.open.ac.uk/scotland/news/blogs/home-education-myths-debunked">Open University Scotland: Home education myths debunked</a></li>
+<li><a href="https://ie.irishnews.com/news/northern-ireland/concerns-raised-over-50-rise-in-number-of-ni-children-being-home-schooled-SRBE5DNH4NEURPU4UF4O5JRMB4">Irish News: Rise in NI children being home schooled</a></li>
+</ul>
+<p><strong>Spending and gifts</strong></p>
+<ul>
+<li><a href="https://www.ipc.be/news-portal/general-news/2021/07/01/08/11/uk-subscription">Royal Mail subscription box report (IPC)</a></li>
+<li><a href="https://postandparcel.info/?p=146910">Whistl subscription box report (Post &amp; Parcel)</a></li>
+<li><a href="https://www.theseus.fi/handle/10024/753166">Theseus: Parents' perspective on educational subscription boxes</a></li>
+<li><a href="https://www.confused.com/press/releases/2025/parents-fork-out-more-than-2500-to-cover-school-holiday-costs">Confused.com: School holiday costs 2025</a></li>
+<li><a href="https://newsroom.afterpay.com/updates/parents-spend-443-a-year-funding-childrens-sporting-dreams">Clearpay: Parents spend £443 a year on sport</a></li>
+<li><a href="https://www.askattest.com/blog/research/consumers-slash-tv-streaming-subscriptions-as-price-sensitivity-peaks.md">Attest: Subscription price sensitivity</a></li>
+<li><a href="https://newsar.codejungle.org/articles/6728">Nationwide subscription review survey (coverage)</a></li>
+<li><a href="https://www.doncasterfreepress.co.uk/news/grandparents-set-spend-aps14bn-grandkids-christmas-and-half-it-credit-57790">Saga grandparent spending (Doncaster Free Press)</a></li>
+<li><a href="https://sunlife.co.uk/press-office/news/grandparent-christmas-spending">SunLife: Grandparent Christmas spending</a></li>
+<li><a href="https://yougov.com/en-gb/articles/53595-the-yougov-big-survey-on-christmas-the-cost-of-christmas">YouGov: The cost of Christmas</a></li>
+<li><a href="https://luxuriousmagazine.com/parents-will-spend-200m-more-on-childrens-presents">VoucherCodes per-child spend (Luxurious Magazine)</a></li>
+<li><a href="https://www.scottishfinancialnews.com/articles/st-james-s-place-nearly-760m-wasted-each-year-on-unwanted-christmas-presents">St James's Place: Unwanted presents</a></li>
+<li><a href="https://internetretailing.net/?p=67447">Internet Retailing: Christmas subscription gifts</a></li>
+<li><a href="https://www.marketing-beat.co.uk/2024/12/17/subscription-bango-research/">Marketing Beat: Bango subscription gift research, Dec 2024</a></li>
+</ul>
+<p><strong>Competitors and substitutes</strong></p>
+<ul>
+<li><a href="https://whatsgoodtodo.com/banjo-robinson-your-childs-new-pen-pal-review">Banjo Robinson review (What's Good To Do)</a></li>
+<li><a href="https://cloud.mumsnet.com/talk/mumsnet_product_tests/3887741-Read-what-Mumsnet-users-and-their-children-thought-of-Banjo-Robinson-s-personalised-pen-pal-experience?page=2">Banjo Robinson Mumsnet product test results</a></li>
+<li><a href="https://cloud.mumsnet.com/talk/mumsnet_product_tests/3887741-Read-what-Mumsnet-users-and-their-children-thought-of-Banjo-Robinson-s-personalised-pen-pal-experience?page=4">Banjo Robinson Mumsnet test, P.S. feature</a></li>
+<li><a href="https://cloud.mumsnet.com/articles/banjo-robinson-exclusive-mumsnet-offer">Banjo Robinson Mumsnet offer, 2023</a></li>
+<li><a href="https://www.littlebird.co.uk/idea/banjo-robinson-pen-pal-subscription-the-montessori-inspired-reading-writing-experience-45-off">Banjo Robinson on LittleBird</a></li>
+<li><a href="https://jobs.techstars.com/companies/banjo-robinson">Banjo Robinson on Techstars</a></li>
+<li><a href="https://www.notonthehighstreet.com/banjorobinson">Banjo Robinson on Not On The High Street</a></li>
+<li><a href="https://mypiratepenpal.co.uk/subscriptions">My Pirate Pen Pal subscriptions</a></li>
+<li><a href="https://www.tinytstheatre.com/fairypenpals">Tiny T's Theatre fairy pen pals</a></li>
+<li><a href="https://www.wowtrk.com/offer/667103">Tilly's Letters (affiliate listing)</a></li>
+<li><a href="https://postfromthepast.club/">Post From The Past</a></li>
+<li><a href="https://www.thehomeschoolfront.com/post-from-the-past/">Post from the Past review (The Homeschool Front)</a></li>
+<li><a href="https://mysteriesintime.com/">Mysteries in Time</a></li>
+<li><a href="https://www.mysubscriptionaddiction.com/b/mysteries-in-time">Mysteries in Time reviews (MSA)</a></li>
+<li><a href="https://www.historicalpenpals.com/">Historical Pen Pals</a></li>
+<li><a href="https://www.historicalpenpals.com/letter-writing-hobby">Historical Pen Pals: letter-writing hobby</a></li>
+<li><a href="https://www.penpaly.com/">Penpaly</a></li>
+<li><a href="https://penpalspost.com/">Pen Pals from the Past</a></li>
+<li><a href="https://theweekjunior.co.uk/node/2325">The Week Junior offer page</a></li>
+<li><a href="https://schoolreadinglist.co.uk/recommends/the-week-junior">The Week Junior (School Reading List)</a></li>
+<li><a href="https://subscribe.firstnews.co.uk/offer/">First News offers</a></li>
+<li><a href="https://beanoshopstag.dctdigital.com/pound-subscription">Beano subscription</a></li>
+<li><a href="https://www.aquila.co.uk/subscribe">Aquila subscribe</a></li>
+<li><a href="https://monkeyandmouse.co.uk/whizz-pop-bang-magazine-review/">Whizz Pop Bang review (Monkey and Mouse)</a></li>
+<li><a href="https://www.wowcher.co.uk/deal/shop/kids/28287198/12-month-children-s-magazine-subscription">Storytime on Wowcher</a></li>
+<li><a href="https://www.natgeokids.com/uk/?p=307888">National Geographic Kids UK</a></li>
+<li><a href="https://ui.awin.com/merchant-profile/6056">toucanBox (Awin profile)</a></li>
+<li><a href="https://melscience.com/kids">MEL Science Kids</a></li>
+<li><a href="https://www.books2door.com/collections/subscription-boxes">Box2Door subscriptions</a></li>
+<li><a href="https://www.foxlanebooks.co.uk/product-page/children-s-5-8-3-month-subscription">Fox Lane Books subscription</a></li>
+<li><a href="https://www.wowcher.co.uk/deal/shop/food-drink/accessories/43233466/personalised-father-christmas-letter">Wowcher: Personalised Father Christmas letter</a></li>
+<li><a href="https://scrqualitymarkers-scie.nspcc.org.uk/support-us/ways-to-give/letter-from-santa">NSPCC Letter from Santa</a></li>
+</ul>
+<p><strong>Demand signals and curriculum</strong></p>
+<ul>
+<li><a href="https://www.history.org.uk/primary/categories/1/resource/577">Historical Association: Teaching famous people at KS1</a></li>
+<li><a href="https://www.rgs.org/schools/resources-for-schools/teaching-ernest-shackleton-as-a-significant-individual-in-primary-history-at-ks1/">RGS: Teaching Shackleton as a significant individual at KS1</a></li>
+<li><a href="https://www.northfeatherstone.wakefield.sch.uk/ks1-2">North Featherstone school KS1 map (Mary Anning)</a></li>
+<li><a href="https://history.hias.hants.gov.uk/mod/resource/view.php?id=2297">Hampshire HIAS KS1 history overview</a></li>
+<li><a href="https://www.twinkl.com.au/resource/ks2-all-about-walter-tull-powerpoint-t-h-1628158381">Twinkl: KS2 All About Walter Tull</a></li>
+<li><a href="https://www.tes.com/teaching-resource/black-history-ks2-bundle-timelines-and-non-chronological-reports-13314445">Tes: Black history KS2 bundle</a></li>
+<li><a href="https://www.history.org.uk/primary/news/4477/curriculum-and-assessment-review-final-report-re">Historical Association: Curriculum and Assessment Review response</a></li>
+<li><a href="https://www.twinkl.com.sa/blog/curriculum-and-assessment-review-history">Twinkl: Curriculum and Assessment Review, history</a></li>
+<li><a href="https://literacytrust.org.uk/news/our-latest-research-reveals-slight-upturn-in-childrens-writing-engagement-after-15-year-low/">National Literacy Trust: Slight upturn in writing engagement (2026)</a></li>
+<li><a href="https://literacytrust.org.uk/research-services/research-reports/children-and-young-peoples-writing-in-2025/">National Literacy Trust: Children and young people's writing in 2025</a></li>
+<li><a href="https://www.pressreader.com/uk/daily-mail/20221116/281977496610033">Diana Award / Nationwide letter survey (Daily Mail via PressReader)</a></li>
+<li><a href="https://mother.ly/child/child-learn-play/letter-writing-with-kids/">Mother.ly: Letter writing with kids (Pinterest trends)</a></li>
+<li><a href="https://www.mumsnet.com/talk/parenting/5193017-pen-pals">Mumsnet: Pen pals thread</a></li>
+<li><a href="https://www.mumsnet.com/talk/_chat/3736549-Xmas-pressies">Mumsnet: Xmas pressies thread</a></li>
+<li><a href="https://www.bsigroup.com/en-GB/insights-and-media/media-centre/press-releases/2026/may/half-of-children-have-ai-toys-as-parents-allow-widespread-use-despite-safety-concerns-and-gaps-in-guidance-parents/">BSI: Half of children have AI toys (May 2026)</a></li>
+</ul>
+<p><strong>Regulation</strong></p>
+<ul>
+<li><a href="https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/children-and-the-uk-gdpr/what-are-the-rules-about-an-iss-and-consent">ICO: Rules about an ISS and consent</a></li>
+<li><a href="https://www.taylorwessing.com/en/global-data-hub/2024/february---childrens-data/likely-to-be-accessed-by-children">Taylor Wessing: "Likely to be accessed by children"</a></li>
+<li><a href="https://www.lewissilkin.com/insights/2025/02/06/fee-payable-to-the-ico-to-increase-in-february-102jzb9">Lewis Silkin: ICO fee increase, February 2025</a></li>
+<li><a href="https://asa.org.uk/advice-online/children-general.html">ASA: Children, general</a></li>
+<li><a href="https://www.asa.org.uk/advice-online/children-promotional-marketing.html">ASA: Children, promotional marketing</a></li>
+<li><a href="https://www.rpclegal.com/snapshots/advertising-and-marketing/summer-2025/cap-issues-guidance-on-use-of-ai-in-ads/">RPC: CAP guidance on AI in ads</a></li>
+<li><a href="https://www.lewissilkin.com/insights/2026/06/18/asa-warns-on-ai-generated-content-and-deepfakes-102n4o1">Lewis Silkin: ASA warns on AI-generated content (June 2026)</a></li>
+<li><a href="https://www.legislation.gov.uk/uksi/2013/3134/part/3">Consumer Contracts Regulations 2013, Part 3</a></li>
+<li><a href="https://www.tlt.com/insights-and-events/insight/dmcc-act-subscription-contracts-regime-brought-forward-by-the-pm-what-do-businesses-need-to-know">TLT: DMCC subscription regime brought forward</a></li>
+<li><a href="https://www.stephensonharwood.com/insights/subscription-reforms-brought-forward-to-january-2027-is-your-business-ready/">Stephenson Harwood: Subscription reforms brought forward to January 2027</a></li>
+<li><a href="https://www.mills-reeve.com/publications/new-subscription-rules-are-you-ready-for-january-2027/">Mills &amp; Reeve: Ready for January 2027?</a></li>
+<li><a href="https://www.taylorwessing.com/en/insights-and-events/insights/2026/04/subscription-contracts">Taylor Wessing: Regime delayed to spring 2027 (April 2026)</a></li>
+<li><a href="https://www.lw.com/en/insights/new-requirements-accelerated-for-uk-consumer-subscription-contracts">Latham &amp; Watkins: New requirements accelerated</a></li>
+<li><a href="https://carson-mcdowell.com/news-insights/insights/new-subscription-contracts-regime-brought-forward">Carson McDowell: New subscription contracts regime brought forward</a></li>
+<li><a href="https://www.burges-salmon.com/our-thinking/online-safety-act-who-does-it-apply-to/">Burges Salmon: Online Safety Act, who does it apply to</a></li>
+<li><a href="https://www.bristows.com/content-hub/the-safety-net/scope-of-act/">Bristows: Scope of the Online Safety Act</a></li>
+</ul>
+<p><strong>Channels</strong></p>
+<ul>
+<li><a href="https://www.superads.ai/facebook-ads-costs/cpc-cost-per-click/united-kingdom">Superads: UK Facebook CPC</a></li>
+<li><a href="https://www.photonpay.com/uk/blog/article/facebook-advertising-costs">PhotonPay: Facebook advertising costs UK 2026</a></li>
+<li><a href="https://ppc.land/facebook-to-remove-detailed-targeting-options-starting-next-year">PPC Land: Facebook removing detailed targeting</a></li>
+<li><a href="https://expose-news.com/2025/10/30/home-education-an-ai-powered-tool/">Expose: Home education and AI tools (group sizes)</a></li>
+<li><a href="https://demodocker.edplace.com/homeschooling/communities-support">EdPlace: Home-ed communities</a></li>
+<li><a href="https://www.worldbookday.com/news/world-book-day-2027-announcements/">World Book Day 2027 announcements</a></li>
+<li><a href="https://www.worldbookday.com/faq/">World Book Day FAQ</a></li>
+<li><a href="https://www.eurosender.com/en/hp/christmas-delivery/royal-mail">Eurosender: Royal Mail Christmas 2026 dates</a></li>
+<li><a href="https://parcelmatch.co.uk/last-posting-dates">ParcelMatch: Last posting dates 2026</a></li>
+<li><a href="https://www.printful.com/uk/blog/how-much-does-etsy-take-per-sale">Printful: How much Etsy takes per sale (UK)</a></li>
+<li><a href="https://wise.com/gb/blog/how-to-sell-etsy">Wise: How to sell on Etsy UK 2026</a></li>
+<li><a href="https://www.topbubbleindex.com/blog/selling-on-noths-guide-fees-tips/">TopBubbleIndex: Selling on NOTHS</a></li>
+<li><a href="https://www.mintsoft.com/resources/blog/should-you-sell-on-not-on-the-high-street/">Mintsoft: Should you sell on NOTHS?</a></li>
+</ul><h1 class="part">Part 2: UK Parent Survey: Letters from History</h1>
+<p>A short survey to test UK demand before and during launch. It takes about 4 minutes. Build it in Google Forms or Typeform, and put a <code>?ref=</code> code on each link you share so you know which channel each answer came from.</p>
+<p><strong>Aim:</strong> 150 or more completed answers from UK parents of children aged 5–12, plus 40 or more from grandparents and other gift buyers.</p>
+<p><strong>Rules we follow:</strong></p>
+<ul>
+<li>We survey adults only. Never ask the child to fill it in.</li>
+<li>We don't ask for children's names or any sensitive details.</li>
+<li>Email is optional, and only for people who want to join the waitlist (consent tick box).</li>
+<li>Results are reported in total only, never by individual.</li>
+</ul>
+<h2>Introduction (shown at the top)</h2>
+<blockquote>
+<p>We're a small UK team building something new for children aged 5–12: real paper letters through the letterbox from famous people in history, such as Mary Anning, Isambard Kingdom Brunel or Amelia Earhart. Each letter is written for your child and checked for historical accuracy. When your child writes back, the next letter answers them.</p>
+<p>This survey takes about 4 minutes. It's anonymous unless you choose to leave your email at the end. Thank you!</p>
+</blockquote>
+<h2>Section A: About you (screener)</h2>
+<p><strong>A1. Which best describes you?</strong> <em>(single choice)</em></p>
+<ul>
+<li>Parent or guardian of at least one child aged 5–12 → <strong>go to B</strong></li>
+<li>Grandparent of a child aged 5–12 → <strong>go to Section G (gift buyers)</strong></li>
+<li>Aunt, uncle, godparent or family friend of a child aged 5–12 → <strong>go to Section G</strong></li>
+<li>Teacher or home educator (not a parent of a 5–12 year old) → <strong>go to B</strong></li>
+<li>None of these → <strong>end the survey</strong> ("Thank you, this survey is for people with a child aged 5–12 in their lives.")</li>
+</ul>
+<p><strong>A2. Where do you live?</strong> <em>(single choice)</em> England / Scotland / Wales / Northern Ireland / Outside the UK → <strong>end the survey</strong></p>
+<p><strong>A3. How old are the children aged 5–12 in your home?</strong> <em>(tick all that apply)</em> 5 / 6 / 7 / 8 / 9 / 10 / 11 / 12</p>
+<p><strong>A4. How is your child mainly educated?</strong> <em>(single choice)</em> State school / Independent school / Home educated / Flexi-schooling / Prefer not to say</p>
+<h2>Section B: Today</h2>
+<p><strong>B1. How much does your child enjoy writing (letters, stories, notes) outside school?</strong> <em>(1–5 scale: "not at all" to "loves it")</em></p>
+<p><strong>B2. How much does your child enjoy history or "real-life stories" of famous people?</strong> <em>(1–5 scale)</em></p>
+<p><strong>B3. How often does your child get post addressed to them?</strong> <em>(single choice)</em> Almost never / Birthdays and Christmas only / A few times a year / Monthly or more</p>
+<p><strong>B4. Which of these do you pay for, or have paid for in the last year?</strong> <em>(tick all that apply)</em></p>
+<ul>
+<li>A children's magazine (e.g. The Week Junior, National Geographic Kids, Aquila, Whizz Pop Bang, Beano)</li>
+<li>A craft, science or activity box (e.g. Toucan Box, MEL Science)</li>
+<li>A book subscription</li>
+<li>An educational app or online tutoring</li>
+<li>Personalised letters (e.g. from Father Christmas or the Tooth Fairy)</li>
+<li>None of these</li>
+</ul>
+<p><strong>B5. Roughly how much does your household spend each month on extras like these for one child?</strong> <em>(single choice)</em> Nothing / Under £5 / £5–£10 / £10–£20 / £20–£40 / More than £40</p>
+<h2>Section C: The idea</h2>
+<p><em>Show the picture of a sample letter (<code>samples/anning-to-oliver.pdf</code>, page 1) and this text:</em></p>
+<blockquote>
+<p>Every month, your child gets a real letter in the post from a famous person in history, written just for them. It mentions what they love, tells a true story from that person's life, and asks them a question. A "real history" card explains which parts are fact. Letters are written with AI, checked for accuracy, and you can read each one before it's posted.</p>
+</blockquote>
+<p><strong>C1. How interesting is this for your child?</strong> <em>(1–5 scale: "not at all" to "extremely")</em></p>
+<p><strong>C2. Which part appeals most?</strong> <em>(pick up to two)</em></p>
+<ul>
+<li>Getting real post</li>
+<li>Learning history in a fun way</li>
+<li>Writing practice (writing back)</li>
+<li>Less screen time</li>
+<li>That it's personalised to my child</li>
+<li>That it fits the school curriculum</li>
+<li>None of these</li>
+</ul>
+<p><strong>C3. Your child writes back and you upload a photo of their letter. The next letter answers their questions. How much would this matter to you?</strong> <em>(single choice)</em> It's the main reason I'd sign up / It's a nice extra / I wouldn't use it</p>
+<p><strong>C4. How do you feel about the letters being written with AI and then checked for accuracy?</strong> <em>(single choice)</em></p>
+<ul>
+<li>Fine, as long as they're accurate and safe</li>
+<li>Fine, if I can read each one before it's posted</li>
+<li>Unsure, I'd need to know more</li>
+<li>It would put me off</li>
+</ul>
+<p><strong>C5. If something worries you, what is it?</strong> <em>(free text, optional)</em></p>
+<h2>Section D: Price</h2>
+<p><strong>D1. Two plans. Which would you choose for your child?</strong> <em>(single choice)</em></p>
+<ul>
+<li><strong>Story Letters</strong>, £7 a month: one letter a month</li>
+<li><strong>Pen Pal from History</strong>, £12 a month: two letters a month, and your child's letters get answered</li>
+<li>Neither</li>
+</ul>
+<p><strong>D2. At what monthly price would Pen Pal from History be…</strong> <em>(free number entry, in £)</em> <em>(This is the Van Westendorp price test. Only ask it of people who didn't answer "Neither".)</em></p>
+<ul>
+<li>…so cheap you'd doubt the quality?</li>
+<li>…a bargain?</li>
+<li>…getting expensive, but you'd still consider it?</li>
+<li>…too expensive to consider?</li>
+</ul>
+<p><strong>D3. How likely are you to sign up when it launches?</strong> <em>(single choice)</em> Definitely / Probably / Might or might not / Probably not / Definitely not</p>
+<h2>Section E: Pen pals</h2>
+<p><strong>E1. Who would your child most like a letter from?</strong> <em>(pick up to three)</em></p>
+<p>Mary Anning · Isambard Kingdom Brunel · Ada Lovelace · Florence Nightingale · Mary Seacole · Walter Tull · Emmeline Pankhurst · Charles Darwin · Albert Einstein · Amelia Earhart · Cleopatra · Leonardo da Vinci · Queen Elizabeth I · Ernest Shackleton · Other (free text)</p>
+<p><strong>E2. Should letters link to what your child is learning at school?</strong> <em>(single choice)</em> Yes, that matters a lot / A bit / No, just make them fun</p>
+<h2>Section F: Gifts and staying in touch</h2>
+<p><strong>F1. Would you ask grandparents or relatives to give this as a present?</strong> <em>(single choice)</em> Yes / Maybe / No</p>
+<p><strong>F2. Want to be one of our first families?</strong> Leave your email and we'll tell you when spots open. <em>(optional email)</em></p>
+<p><strong>F3.</strong> ☐ I'm happy to get emails from Letters from History about the launch. I can unsubscribe any time. <em>(required if F2 is filled in)</em></p>
+<h2>Section G: Gift buyers (grandparents, godparents, family friends)</h2>
+<p><strong>G1. How old are the children you buy presents for?</strong> <em>(tick all that apply)</em> 5 / 6 / 7 / 8 / 9 / 10 / 11 / 12</p>
+<p><strong>G2. How much do you usually spend on a birthday or Christmas present for one of them?</strong> <em>(single choice)</em> Under £15 / £15–£30 / £30–£50 / £50–£100 / More than £100</p>
+<p><em>Show the sample letter and the description from Section C.</em></p>
+<p><strong>G3. Would you give this as a present?</strong> <em>(single choice)</em> Definitely / Probably / Maybe / Probably not / Definitely not</p>
+<p><strong>G4. Which gift would you choose?</strong> <em>(single choice)</em> 3 months for £36 / 6 months for £69 / 12 months for £132 / None</p>
+<p><strong>G5. What would make it a better present?</strong> <em>(free text, optional)</em></p>
+<p><strong>G6–G7.</strong> The same as F2 and F3: an optional email address with a consent tick box.</p>
+<h2>How to read the results</h2>
+<table>
+<thead>
+<tr>
+<th>What we measure</th>
+<th>Go</th>
+<th>Rethink</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1: 4 or 5 out of 5 ("top-2 box")</td>
+<td><strong>40% or more</strong></td>
+<td>Under 25%</td>
+</tr>
+<tr>
+<td>D1: choose either plan</td>
+<td><strong>50% or more</strong></td>
+<td>Under 30%</td>
+</tr>
+<tr>
+<td>D1: of those choosing a plan, choose Pen Pal</td>
+<td><strong>35% or more</strong> (the reply feature is the reason to exist)</td>
+<td>Under 20%</td>
+</tr>
+<tr>
+<td>D3: "Definitely" + "Probably"</td>
+<td><strong>30% or more</strong></td>
+<td>Under 15%</td>
+</tr>
+<tr>
+<td>C4: "It would put me off"</td>
+<td><strong>Under 20%</strong></td>
+<td>Over 35%: lead with "checked by a person" and the parent preview</td>
+</tr>
+<tr>
+<td>G3: "Definitely" + "Probably"</td>
+<td><strong>35% or more</strong></td>
+<td>Under 20%: drop gift marketing at launch</td>
+</tr>
+<tr>
+<td>F2/G6: emails left</td>
+<td><strong>60 or more</strong></td>
+<td>Under 25</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>People overstate what they'll buy in surveys. As a rough guide, expect <strong>about a quarter to a third</strong> of "Definitely" answers, and very few "Probably" answers, to turn into real sign-ups. Use the survey to compare options; the waitlist and deposits are the real test (see <code>validation-playbook.md</code>).</li>
+<li><strong>Split the results by A4 (home educated or at school) and by <code>?ref=</code> channel.</strong> One strong group is enough to launch to.</li>
+<li><strong>D2 price test:</strong> plot the four answers. The point where "too cheap" and "too expensive" cross is the best price. If it's well below £12, test £9.99.</li>
+<li><strong>E1:</strong> use the top three answers to choose the first pen pals for advertising and the landing page.</li>
+<li><strong>C5 and G5:</strong> read every free-text answer. Group them into themes (safety, AI, price, accuracy, effort) and fix the top two on the landing page.</li>
+</ul>
+<h2>Where to share it</h2>
+<ul>
+<li>UK home-education Facebook groups (on resource or survey days, following each group's rules)</li>
+<li>Mumsnet "Surveys and research" (it may need approval, and there can be a fee) and Netmums</li>
+<li>r/UKParenting, if surveys are allowed</li>
+<li>Friends, school-gate WhatsApp groups (ask before posting), and PTA newsletters</li>
+<li>A £50 Meta ad aimed at UK parents of children aged 5–12, and one aimed at grandparents</li>
+</ul>
+<p>As a thank-you, offer a free printable "Letter from Mary Anning" PDF to everyone who finishes the survey. Don't run a prize draw unless you've written terms for it.</p></body></html>

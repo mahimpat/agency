@@ -54,7 +54,7 @@ Royal Mail stamp prices from 7 April 2026: 2nd class letter 91p, 1st class lette
 
 This is a checklist, not legal advice. Check the current guidance for each item.
 
-- [ ] **Data protection (UK GDPR):** register with the ICO and pay the data protection fee (about £50 a year for most small businesses). Publish a privacy notice. Collect data **from parents only**, keep it to the minimum, and delete reply photos after reading.
+- [ ] **Data protection (UK GDPR):** register with the ICO and pay the data protection fee (£52 a year for most small businesses). Publish a privacy notice. Collect data **from parents only**, keep it to the minimum, and delete reply photos after reading.
 - [ ] **Children's data:** the service is bought and run by parents, so children never get accounts. Review the ICO's Age Appropriate Design Code ("Children's Code") anyway, because children's letters pass through the service.
 - [ ] **Consumer law:** online subscriptions normally carry a 14-day cancellation right under the Consumer Contracts Regulations. Show clear prices including postage, and make cancelling easy. **New subscription rules under the DMCC Act 2024** (reminder notices, easy exit) are being phased in, so check their status before launch.
 - [ ] **Advertising (ASA/CAP code):** you must be able to back up claims like "every fact checked". Keep fact-check records (the `.json` file saved with each letter). Be open that letters are written with AI help.
