@@ -27,7 +27,7 @@ from .config import (FIGURE_ORDER, LETTERS_PER_FIGURE, PARENT_REWRITES_PER_MONTH
                      REPLY_WAIT_DAYS, RETENTION_DAYS, Settings)
 from . import ratelimit
 from .emails import send_email
-from .models import Child, JobLock, Letter, Reply, Subscription, now
+from .models import Child, JobLock, Letter, Reply, SafeguardingRecord, Subscription, User, now
 from .storage import get_storage
 
 log = logging.getLogger("letters.jobs")
@@ -270,6 +270,13 @@ def send_letter(db: Session, settings: Settings, letter: Letter, services: Servi
     services = services or Services()
     storage = get_storage(settings)
     child = letter.child
+    if child.paused_at:
+        letter.status = "needs_review"  # back to the queue, ready to approve once letters resume
+        letter.note = (letter.note + " Not posted: letters to this child are paused.").strip()
+        db.commit()
+        if summary:
+            summary.errors.append(f"letter {letter.id}: child {child.id} is paused")
+        return
     try:
         if not letter.pdf_path or not storage.exists(letter.pdf_path):
             _make_pdf(settings, letter, storage.get(letter.html_path).decode("utf-8"), services)
@@ -296,6 +303,43 @@ def send_letter(db: Session, settings: Settings, letter: Letter, services: Servi
                    f"Hello {child.user.name},\n\nA letter from {name} has just been posted to {child.first_name}. "
                    "It should arrive in the next few days.\n\nWhen it arrives, you can upload "
                    f"{child.first_name}'s reply at {settings.base_url}/account\n\nLetters from History")
+
+
+def resend_letter(db: Session, settings: Settings, letter: Letter, services: Services | None = None) -> None:
+    """Post a copy of a letter that was lost in the post (the terms promise a free resend)."""
+    services = services or Services()
+    storage = get_storage(settings)
+    if letter.status != "sent" or not letter.pdf_path or not storage.exists(letter.pdf_path):
+        raise RuntimeError("Only posted letters whose PDF is still stored can be resent.")
+    if letter.child.paused_at:
+        raise RuntimeError("Letters to this child are paused.")
+    with storage.local_path(letter.pdf_path) as pdf_file:
+        result = services.send(pdf_file, letter.child.address(), live=settings.live_mail)
+    letter.resent_count += 1
+    letter.note = (letter.note + f" Resent {now():%d %b %Y} ({result.get('id')}).").strip()
+    db.commit()
+
+
+def child_subject(child: Child) -> str:
+    user = child.user
+    return f"{child.first_name} ({child.age}), child #{child.id}; parent {user.name} <{user.email}>"
+
+
+def record_safeguarding(db: Session, child: Child | None, action: str, notes: str, author: str,
+                        reply: Reply | None = None, subject: str | None = None) -> SafeguardingRecord:
+    record = SafeguardingRecord(child_id=child.id if child else None, reply_id=reply.id if reply else None,
+                                subject=subject or (child_subject(child) if child else "unknown"),
+                                action=action, notes=notes.strip()[:5000], author=author)
+    db.add(record)
+    db.commit()
+    return record
+
+
+def set_paused(db: Session, child: Child, paused: bool, reason: str, author: str) -> None:
+    child.paused_at = now() if paused else None
+    child.pause_reason = reason.strip()[:1000] if paused else ""
+    db.commit()
+    record_safeguarding(db, child, "paused" if paused else "resumed", reason or "-", author)
 
 
 def reject_letter(db: Session, letter: Letter) -> None:
@@ -384,12 +428,17 @@ def _run_due(db: Session, settings: Settings, services: Services) -> RunSummary:
     # Letters whose parent preview window has ended are posted, as promised.
     overdue = db.scalars(select(Letter).where(Letter.status == "awaiting_parent", Letter.preview_deadline <= now())).all()
     for letter in overdue:
+        if letter.child.paused_at:
+            continue  # paused by our team: nothing is posted until we resume
         letter.note = (letter.note + " Posted automatically after the preview window.").strip()
         send_letter(db, settings, letter, services, summary)
     subs = db.scalars(select(Subscription).where(Subscription.status.in_(["active", "trialing"]))).all()
     for sub in subs:
         child = sub.child
+        # Replies are always read and safety-checked, even while paused, so nothing is missed.
         read_new_replies(db, settings, child, services, summary)
+        if child.paused_at:
+            continue
 
         if sub.story_credits > 0:
             _, stint = current_figure(child)

@@ -60,3 +60,15 @@ def read_verify_token(secret_key: str, token: str, max_age: int = 7 * 24 * 3600)
         return URLSafeTimedSerializer(secret_key, salt="verify-email").loads(token, max_age=max_age)
     except (BadSignature, SignatureExpired):
         return None
+
+
+def make_unsubscribe_token(secret_key: str, user_id: int) -> str:
+    # No expiry: an unsubscribe link in an old email must keep working.
+    return URLSafeTimedSerializer(secret_key, salt="unsubscribe").dumps({"u": user_id})
+
+
+def read_unsubscribe_token(secret_key: str, token: str) -> int | None:
+    try:
+        return URLSafeTimedSerializer(secret_key, salt="unsubscribe").loads(token)["u"]
+    except (BadSignature, KeyError, TypeError):
+        return None

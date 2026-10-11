@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Safeguarding records · {{ PRODUCT }}{% endblock %}
+{% block content %}
+<h1>Safeguarding records</h1>
+<p class="small muted">Every decision about a held child's letter, and every pause or resume. Kept as long as needed to protect the child, even if the parent deletes their account. Restricted to the safeguarding lead, deputy and named reviewers.</p>
+<table>
+  <tr><th>When</th><th>Who</th><th>Action</th><th>About</th><th>Notes</th></tr>
+  {% for r in records %}
+  <tr><td>{{ r.created_at.strftime('%-d %b %Y %H:%M') }}</td><td>{{ r.author }}</td><td>{{ r.action }}</td>
+      <td>{{ r.subject }}{% if r.reply_id %}<br><span class="small muted">reply #{{ r.reply_id }}</span>{% endif %}</td>
+      <td style="white-space:pre-wrap">{{ r.notes }}</td></tr>
+  {% else %}<tr><td colspan="5" class="muted">No records yet.</td></tr>{% endfor %}
+</table>
+<p><a href="/admin">Back to admin</a></p>
+{% endblock %}

@@ -42,7 +42,7 @@ Run the tests any time: `python -m unittest discover -s tests` (no API keys need
    - Story Letters, £7.00 a month → copy its price ID into `STRIPE_PRICE_STORY`
    - Pen Pal from History, £12.00 a month → copy into `STRIPE_PRICE_PENPAL`
 3. **Developers → API keys:** copy the secret key into `STRIPE_SECRET_KEY`.
-4. **Settings → Billing → Customer portal:** turn on *cancel subscriptions* (at the end of the billing period), *update payment methods* and *invoice history*. This is the "Manage billing" button parents use.
+4. **Settings → Billing → Customer portal:** turn on *cancel subscriptions* (at the end of the billing period), *update payment methods* and *invoice history*. To let parents switch between plans, also turn on *switch plans* and add both prices. The app follows the switch automatically. This is the "Manage billing" button parents use.
 5. **Webhooks.** For local testing, install the [Stripe CLI](https://docs.stripe.com/stripe-cli) and run:
    ```bash
    stripe listen --forward-to localhost:8000/stripe/webhook
@@ -109,6 +109,15 @@ Keep the region in the UK or EU, and name your providers in `HOSTING_PROVIDER` a
 4. **Have a solicitor review `/privacy` and `/terms`.** They were drafted to fit how this product actually works, but they aren't legal advice. Pay particular attention to children's data, the 14-day cancellation wording, and the DMCC Act 2024 subscription rules as they come into force.
 5. Read `docs/uk-launch.md` for the full UK checklist.
 
+## 6b. Check everything is connected
+
+```bash
+python -m app.manage check                 # every service, nothing sent or charged
+python -m app.manage check --stannp-proof  # also makes a free Stannp test proof: open it and check the address window
+```
+
+Fix anything marked FAIL before going live. Run it again after every deploy.
+
 ## 7. Go live
 
 - [ ] Stripe: switch to **live** keys, create the same two prices in live mode, and add a live webhook endpoint (new `whsec_`).
@@ -122,6 +131,13 @@ Keep the region in the UK or EU, and name your providers in `HOSTING_PROVIDER` a
 - [ ] Name a **Designated Safeguarding Lead** and a deputy in `docs/safeguarding.md`, and set `ADMIN_EMAIL` to an inbox the lead checks every day.
 - [ ] The lead and anyone reviewing letters complete basic safeguarding training and get a basic DBS check.
 - [ ] Test the hold flow: upload a test reply saying "my dad hits me", run the job, and check you get the URGENT email and the reply appears under "held" in `/admin`.
+
+## Admin tools for v1.0
+
+- **Pause a child's letters** (e.g. while a safeguarding concern is handled): from a held reply, tick "Also pause letters", or use the Paused children section. Replies are still read and checked while paused. Resuming needs a reason for the record.
+- **Safeguarding records** (`/admin/safeguarding`): closing a held reply requires notes. Every decision, pause and resume is logged with who did it and when, and kept even if the parent deletes their account.
+- **Resend a lost letter:** "Resend (lost)" in Recently posted. It posts another copy of the same PDF.
+- **Marketing emails:** only to parents who opted in. Always send them with `send_marketing_email`, which adds the unsubscribe link. Parents can also change this in their account.
 
 ## Day-to-day running
 

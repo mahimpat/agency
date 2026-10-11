@@ -93,6 +93,11 @@
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <button class="btn ghost small" type="submit">Manage billing, invoices or cancel</button>
   </form>
+  <form method="post" action="/account/preferences" class="small" style="margin-bottom:12px">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="check" style="display:inline-flex"><input type="checkbox" name="marketing" value="true" {% if user.marketing_opt_in %}checked{% endif %} onchange="this.form.submit()"> Send me occasional news about new pen pals and offers</label>
+    <noscript><button class="btn ghost small" type="submit">Save</button></noscript>
+  </form>
   <p class="small"><a href="/account/export">Download all your data</a> (JSON)</p>
   <details>
     <summary class="small">Delete my account</summary>

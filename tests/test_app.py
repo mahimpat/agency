@@ -124,9 +124,9 @@ class AppTestCase(unittest.TestCase):
         admin.post("/login", data={"csrf": token, "email": "admin@example.com", "password": "admin password 1"})
         return admin
 
-    def admin_post(self, admin, path):
+    def admin_post(self, admin, path, **data):
         token = re.search(r'name="csrf" value="([^"]+)"', admin.get("/admin").text).group(1)
-        return admin.post(path, data={"csrf": token}, follow_redirects=False)
+        return admin.post(path, data={"csrf": token, **data}, follow_redirects=False)
 
 
 class PublicAndAuthTests(AppTestCase):
@@ -314,7 +314,7 @@ class LetterFlowTests(AppTestCase):
         admin = self.make_admin()
         self.assertIn("mentions being hurt", admin.get("/admin").text)
         self.assertIn("0808 800 5000", admin.get("/admin").text)  # safeguarding steps shown to the reviewer
-        self.admin_post(admin, "/admin/replies/1/release")
+        self.admin_post(admin, "/admin/replies/1/release", notes="Pillow fight in a game, false alarm.")
         self.services.reply_result = None
         self.run_job()
         self.assertEqual(self.services.written[-1]["kind"], "reply")
@@ -338,7 +338,7 @@ class LetterFlowTests(AppTestCase):
         admin = self.make_admin()
         self.assertEqual(admin.get("/admin/replies/1/photo").status_code, 200)
         self.assertEqual(self.client.get("/admin/replies/1/photo").status_code, 404)  # parents can't
-        self.admin_post(admin, "/admin/replies/1/dismiss")
+        self.admin_post(admin, "/admin/replies/1/dismiss", notes="Called the council children's services.")
         self.assertEqual(list(self.settings.uploads_dir.iterdir()), [])  # deleted after review
 
     def test_no_reply_in_time_becomes_follow_up_and_reject_returns_credit(self):

@@ -109,8 +109,19 @@ def grant_credits(sub: Subscription) -> None:
         sub.reply_credit_at = now()
 
 
-def handle_event(db: Session, event: dict) -> str:
-    """Apply one Stripe event. Returns a short description (for logs and tests)."""
+def _subscription_price(subscription: dict) -> str | None:
+    items = (subscription.get("items") or {}).get("data") or []
+    price = items[0].get("price") if items else None
+    return price.get("id") if isinstance(price, dict) else price
+
+
+def _plan_for(prices: dict, price_id: str | None) -> str | None:
+    return next((plan for plan, pid in prices.items() if pid and pid == price_id), None)
+
+
+def handle_event(db: Session, event: dict, settings_prices: dict | None = None) -> str:
+    """settings_prices maps plan -> Stripe price ID, used to follow plan switches."""
+    # Apply one Stripe event. Returns a short description (for logs and tests).
     if db.get(ProcessedEvent, event["id"]):
         return "duplicate"
     kind = event["type"]
@@ -151,6 +162,13 @@ def handle_event(db: Session, event: dict) -> str:
             sub.stripe_subscription_id = obj.get("id")
             sub.status = "canceled" if kind.endswith("deleted") else obj.get("status", sub.status)
             outcome = f"status {sub.status} {sub.id}"
+            # The parent may have switched plan in the billing portal: follow the price.
+            new_plan = _plan_for(settings_prices, _subscription_price(obj)) if settings_prices else None
+            if new_plan and new_plan != sub.plan:
+                outcome += f", plan {sub.plan} -> {new_plan}"
+                sub.plan = new_plan
+                if not PLANS[new_plan]["reply"]:
+                    sub.reply_credits = 0
 
     db.add(ProcessedEvent(id=event["id"]))
     db.commit()

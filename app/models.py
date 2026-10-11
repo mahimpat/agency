@@ -50,6 +50,9 @@ class Child(Base):
     parent_preview: Mapped[bool] = mapped_column(Boolean, default=False)
     # The parent's request for the next letter, after they asked for a rewrite.
     next_letter_note: Mapped[str] = mapped_column(Text, default="")
+    # Paused by our team (e.g. while a safeguarding concern is handled): no letters are written or posted.
+    paused_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    pause_reason: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     user: Mapped[User] = relationship(back_populates="children")
     subscription: Mapped["Subscription | None"] = relationship(back_populates="child", uselist=False)
@@ -123,7 +126,22 @@ class Letter(Base):
     cost: Mapped[str | None] = mapped_column(String(20), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    resent_count: Mapped[int] = mapped_column(Integer, default=0)
     child: Mapped[Child] = relationship(back_populates="letters")
+
+
+class SafeguardingRecord(Base):
+    """What a person saw and did about a child's letter. Kept as long as needed to protect the
+    child, so it doesn't depend on the account still existing: it stores a snapshot of who."""
+    __tablename__ = "safeguarding_records"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    child_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    reply_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    subject: Mapped[str] = mapped_column(Text)  # e.g. "Maya (9), child #3; parent Priya <p@example.com>"
+    action: Mapped[str] = mapped_column(String(30))  # released, dismissed, paused, resumed, note
+    notes: Mapped[str] = mapped_column(Text)
+    author: Mapped[str] = mapped_column(String(320))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
 
 
 class ProcessedEvent(Base):

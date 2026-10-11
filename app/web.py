@@ -23,10 +23,10 @@ from letters import render
 from . import billing, google_auth, jobs, ratelimit
 from .config import COMPANY, FIGURE_ORDER, PLANS, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
 from .emails import send_email
-from .models import Child, Letter, Reply, Subscription, User, make_sessionmaker
+from .models import Child, Letter, Reply, SafeguardingRecord, Subscription, User, make_sessionmaker
 from .models import now as models_now
 from .security import (csrf_ok, csrf_token, hash_password, make_reset_token, make_verify_token, read_reset_token,
-                       read_verify_token, verify_password)
+                       read_unsubscribe_token, read_verify_token, verify_password)
 from .storage import content_type, get_storage
 
 log = logging.getLogger("letters.web")
@@ -55,6 +55,13 @@ def init_error_alerts(settings: Settings) -> None:
                     include_local_variables=False, traces_sample_rate=0)
 
 
+# Forms that redirect to Stripe need those hosts in form-action. Letter previews set a stricter policy of their own.
+CSP = ("default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; "
+       "script-src 'self' 'unsafe-inline'; frame-src 'self'; frame-ancestors 'self'; base-uri 'self'; "
+       "object-src 'none'; form-action 'self' https://checkout.stripe.com https://billing.stripe.com "
+       "https://accounts.google.com")
+
+
 class Redirect(Exception):
     def __init__(self, url: str):
         self.url = url
@@ -72,6 +79,20 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     app.add_middleware(SessionMiddleware, secret_key=settings.secret_key, same_site="lax",
                        https_only=settings.secure_cookies, max_age=60 * 60 * 24 * 30)
     app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        headers = response.headers
+        headers.setdefault("Content-Security-Policy", CSP)
+        headers.setdefault("X-Content-Type-Options", "nosniff")
+        headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+        headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
+        headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        if settings.secure_cookies:
+            headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        return response
     templates = Jinja2Templates(directory=HERE / "templates")
     templates.env.globals.update(PREVIEW_HOURS=PREVIEW_HOURS, COMPANY=COMPANY, PRODUCT=PRODUCT, PLANS=PLANS, FIGURE_NAMES=FIGURE_NAMES,
                                  STATUS_LABELS=STATUS_LABELS, contact_email=settings.contact_email,
@@ -605,6 +626,34 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                        f"{child.first_name}'s letters before they're posted.")
         return RedirectResponse("/account", status_code=303)
 
+    @app.post("/account/preferences", dependencies=[Depends(check_csrf)])
+    def preferences(request: Request, user: User = Depends(require_user), db: Session = Depends(db_session),
+                    marketing: bool = Form(False)):
+        user.marketing_opt_in = marketing
+        db.commit()
+        flash(request, "Saved. " + ("We'll send you occasional news and offers." if marketing
+                                    else "You won't get news or offers. You'll still get emails about your letters."))
+        return RedirectResponse("/account", status_code=303)
+
+    @app.get("/unsubscribe/{token}", response_class=HTMLResponse)
+    def unsubscribe_page(request: Request, token: str, db: Session = Depends(db_session)):
+        user_id = read_unsubscribe_token(settings.secret_key, token)
+        if not user_id or not db.get(User, user_id):
+            return page(request, "message.html", 400, title="That link doesn't work",
+                        message="Log in and change your email preferences in your account instead.")
+        return page(request, "unsubscribe.html", token=token)
+
+    @app.post("/unsubscribe/{token}")
+    def unsubscribe(request: Request, token: str, db: Session = Depends(db_session)):
+        # The signed token is the proof, so this works from an email (including one-click unsubscribe).
+        user = db.get(User, read_unsubscribe_token(settings.secret_key, token) or 0)
+        if not user:
+            raise HTTPException(404)
+        user.marketing_opt_in = False
+        db.commit()
+        return page(request, "message.html", title="You've been unsubscribed",
+                    message="You won't get news or offers from us any more. You'll still get emails about your letters.")
+
     @app.get("/account/export")
     def export(user: User = Depends(require_user)):
         data = {
@@ -640,6 +689,10 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                 for key in (letter.pdf_path, letter.html_path):
                     if key:
                         storage.delete(key)
+        # Safeguarding records are kept as long as needed to protect the child, even after deletion.
+        for child in user.children:
+            for record in db.scalars(select(SafeguardingRecord).where(SafeguardingRecord.child_id == child.id)):
+                record.notes += f"\n[{models_now():%d %b %Y}] Parent deleted their account."
         db.delete(user)
         db.commit()
         request.session.clear()
@@ -654,7 +707,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             event = billing.parse_event(settings, payload, request.headers.get("stripe-signature"))
         except Exception:  # noqa: BLE001 - bad signature or payload
             return Response(status_code=400)
-        outcome = billing.handle_event(db, event)
+        outcome = billing.handle_event(db, event, settings.stripe_prices)
         log.info("stripe %s %s: %s", event["type"], event["id"], outcome)
         return {"received": True}
 
@@ -679,10 +732,11 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         recent = db.scalars(select(Letter).where(Letter.status == "sent").order_by(Letter.sent_at.desc()).limit(20)).all()
         with_parents = db.scalars(select(Letter).where(Letter.status == "awaiting_parent")
                                   .order_by(Letter.preview_deadline)).all()
+        paused = db.scalars(select(Child).where(Child.paused_at.is_not(None)).order_by(Child.paused_at)).all()
         subs = db.scalars(select(Subscription)).all()
         counts = {s: sum(1 for x in subs if x.status == s) for s in ("active", "pending", "past_due", "canceled")}
         return page(request, "admin.html", review=review, held_replies=held_replies, recent=recent, counts=counts,
-                    with_parents=with_parents,
+                    with_parents=with_parents, paused=paused,
                     live_mail=settings.live_mail, review_all=settings.review_all,
                     checks={l.id: json.loads(l.checks_json or "[]") for l in review},
                     letters={l.id: json.loads(l.letter_json) if l.letter_json else None for l in review},
@@ -702,6 +756,9 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if letter.status not in ("needs_review", "failed") or not letter.letter_json:
             flash(request, "That letter can't be sent from here.")
             return RedirectResponse("/admin", status_code=303)
+        if letter.child.paused_at:
+            flash(request, f"Letters to {letter.child.first_name} are paused. Resume them first.")
+            return RedirectResponse("/admin", status_code=303)
         letter.status = "approved"
         db.commit()
         jobs.release_letter(db, settings, letter, app.state.services)
@@ -719,10 +776,17 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
 
     @app.post("/admin/replies/{reply_id}/{action}", dependencies=[Depends(check_csrf)])
     def reply_action(request: Request, reply_id: int, action: str, admin: User = Depends(require_admin),
-                     db: Session = Depends(db_session)):
+                     db: Session = Depends(db_session), notes: str = Form(""), pause: bool = Form(False)):
         reply = db.get(Reply, reply_id)
         if not reply or reply.status != "held" or action not in ("release", "dismiss"):
             raise HTTPException(404)
+        if not notes.strip():
+            flash(request, "Write down what you saw and what you did before closing a held reply (safeguarding record).")
+            return RedirectResponse("/admin", status_code=303)
+        jobs.record_safeguarding(db, reply.child, "released" if action == "release" else "dismissed", notes,
+                                 admin.email, reply=reply)
+        if pause and not reply.child.paused_at:
+            jobs.set_paused(db, reply.child, True, f"Held reply #{reply.id}: {notes}", admin.email)
         reply.status = "ready" if action == "release" else "dismissed"
         if reply.photo_path:  # reviewed: the photo is no longer needed
             storage.delete(reply.photo_path)
@@ -730,6 +794,35 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         db.commit()
         flash(request, f"Reply {reply.id} {'released for an answer' if action == 'release' else 'dismissed'}.")
         return RedirectResponse("/admin", status_code=303)
+
+    @app.post("/admin/children/{child_id}/pause", dependencies=[Depends(check_csrf)])
+    def pause_child(request: Request, child_id: int, admin: User = Depends(require_admin),
+                    db: Session = Depends(db_session), reason: str = Form(""), resume: bool = Form(False)):
+        child = db.get(Child, child_id)
+        if not child:
+            raise HTTPException(404)
+        if not reason.strip():
+            flash(request, "Give a reason: it goes into the safeguarding record.")
+            return RedirectResponse("/admin", status_code=303)
+        jobs.set_paused(db, child, not resume, reason, admin.email)
+        flash(request, f"Letters to {child.first_name} (child #{child.id}) {'resumed' if resume else 'paused'}.")
+        return RedirectResponse("/admin", status_code=303)
+
+    @app.post("/admin/letters/{letter_id}/resend", dependencies=[Depends(check_csrf)])
+    def resend(request: Request, letter_id: int, admin: User = Depends(require_admin),
+               db: Session = Depends(db_session)):
+        letter = _admin_letter(db, letter_id)
+        try:
+            jobs.resend_letter(db, settings, letter, app.state.services)
+            flash(request, f"Letter {letter.id} resent to {letter.child.first_name}.")
+        except Exception as e:  # noqa: BLE001
+            flash(request, f"Couldn't resend letter {letter.id}: {e}")
+        return RedirectResponse("/admin", status_code=303)
+
+    @app.get("/admin/safeguarding", response_class=HTMLResponse)
+    def safeguarding_log(request: Request, admin: User = Depends(require_admin), db: Session = Depends(db_session)):
+        records = db.scalars(select(SafeguardingRecord).order_by(SafeguardingRecord.created_at.desc())).all()
+        return page(request, "safeguarding_log.html", records=records)
 
     @app.get("/admin/replies/{reply_id}/photo")
     def held_photo(reply_id: int, admin: User = Depends(require_admin), db: Session = Depends(db_session)):

@@ -7,10 +7,29 @@
   Posting mode: {% if live_mail %}<b>LIVE</b> (approved letters are printed and posted){% else %}<b>TEST</b> (Stannp proofs only; set LIVE_MAIL=true to post){% endif %}.
   Review: {% if review_all %}every letter{% else %}flagged letters only{% endif %}.
 </p>
-<form method="post" action="/admin/run" style="margin-bottom:24px">
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
+<form method="post" action="/admin/run">
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <button class="btn ghost small" type="submit">Run the daily job now</button>
 </form>
+<a class="btn ghost small" href="/admin/safeguarding">Safeguarding records</a>
+</div>
+
+{% if paused %}
+<h2>Paused children ({{ paused|length }})</h2>
+<p class="small muted">No letters are written or posted to these children. Their replies are still read and checked.</p>
+{% for c in paused %}
+<section class="card">
+  <b>{{ c.first_name }} ({{ c.age }}), child #{{ c.id }}</b> · paused {{ c.paused_at.strftime('%-d %b %Y') }}
+  <p class="small">{{ c.pause_reason }}</p>
+  <form method="post" action="/admin/children/{{ c.id }}/pause" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="resume" value="true">
+    <input type="text" name="reason" placeholder="Why it's OK to resume (for the record)" required style="max-width:420px">
+    <button class="btn small" type="submit">Resume letters</button>
+  </form>
+</section>
+{% endfor %}
+{% endif %}
 
 <h2>Letters to check ({{ review|length }})</h2>
 {% for l in review %}
@@ -39,6 +58,7 @@ P.S. {{ data.postscript }}</div>
   </details>
   {% if l.pdf_path %}<p class="small"><a href="/letters/{{ l.id }}.pdf" target="_blank">Open the print PDF</a></p>{% endif %}
   {% endif %}
+  {% if l.child.paused_at %}<p class="issue">Letters to this child are paused: approving won't post it.</p>{% endif %}
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
     {% if data and l.status in ['needs_review', 'failed'] %}
     <form method="post" action="/admin/letters/{{ l.id }}/approve"><input type="hidden" name="csrf" value="{{ csrf }}">
@@ -74,12 +94,16 @@ P.S. {{ data.postscript }}</div>
   {% if t %}<div class="letter-preview">{{ t.text }}</div>{% endif %}
   {% if r.photo_path %}<p class="small"><a href="/admin/replies/{{ r.id }}/photo" target="_blank">View the original photo</a> (deleted once you release or dismiss this reply)</p>{% endif %}
   <p class="small">Parent: {{ r.child.user.name }} · <a href="mailto:{{ r.child.user.email }}">{{ r.child.user.email }}</a></p>
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <form method="post" action="/admin/replies/{{ r.id }}/release"><input type="hidden" name="csrf" value="{{ csrf }}">
-      <button class="btn small" type="submit">It's fine: write an answer</button></form>
-    <form method="post" action="/admin/replies/{{ r.id }}/dismiss"><input type="hidden" name="csrf" value="{{ csrf }}">
-      <button class="btn ghost small" type="submit">Dismiss (handled personally)</button></form>
-  </div>
+  <form method="post" style="margin-top:10px">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="field"><label for="notes-{{ r.id }}">Safeguarding record <span class="hint">What you saw, what you did, who you contacted and when (required)</span></label>
+      <textarea id="notes-{{ r.id }}" name="notes" required maxlength="5000" style="min-height:80px"></textarea></div>
+    <div class="field"><label class="check"><input type="checkbox" name="pause" value="true"> Also pause letters to {{ r.child.first_name }} while this is handled</label></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn small" type="submit" formaction="/admin/replies/{{ r.id }}/release">It's fine: write an answer</button>
+      <button class="btn ghost small" type="submit" formaction="/admin/replies/{{ r.id }}/dismiss">Dismiss (handled personally)</button>
+    </div>
+  </form>
 </section>
 {% else %}
 <p class="muted">None.</p>
@@ -97,11 +121,13 @@ P.S. {{ data.postscript }}</div>
 
 <h2 style="margin-top:32px">Recently posted</h2>
 <table>
-  <tr><th>#</th><th>Letter</th><th>Posted</th><th>Cost</th><th>Proof</th></tr>
+  <tr><th>#</th><th>Letter</th><th>Posted</th><th>Cost</th><th>Proof</th><th></th></tr>
   {% for l in recent %}
-  <tr><td>{{ l.id }}</td><td>{{ FIGURE_NAMES.get(l.figure, l.figure) }} → {{ l.child.first_name }} ({{ l.kind }})</td>
+  <tr><td>{{ l.id }}</td><td>{{ FIGURE_NAMES.get(l.figure, l.figure) }} → {{ l.child.first_name }} ({{ l.kind }}){% if l.resent_count %} <span class="pill">resent ×{{ l.resent_count }}</span>{% endif %}</td>
     <td>{{ l.sent_at.strftime('%-d %b %H:%M') if l.sent_at else '' }}</td><td>{{ l.cost or '' }}</td>
-    <td>{% if l.proof_url %}<a href="{{ l.proof_url }}" target="_blank" rel="noopener">PDF</a>{% endif %}</td></tr>
-  {% else %}<tr><td colspan="5" class="muted">Nothing posted yet.</td></tr>{% endfor %}
+    <td>{% if l.proof_url %}<a href="{{ l.proof_url }}" target="_blank" rel="noopener">PDF</a>{% endif %}</td>
+    <td><form method="post" action="/admin/letters/{{ l.id }}/resend" onsubmit="return confirm('Post another copy of this letter? Only do this if the family says it never arrived.')">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><button class="linkbtn small" type="submit">Resend (lost)</button></form></td></tr>
+  {% else %}<tr><td colspan="6" class="muted">Nothing posted yet.</td></tr>{% endfor %}
 </table>
 {% endblock %}

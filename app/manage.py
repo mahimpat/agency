@@ -2,6 +2,7 @@
 
   python -m app.manage run-due              write and post the letters that are due (run daily)
   python -m app.manage make-admin EMAIL     give an existing account access to /admin
+  python -m app.manage check [--stannp-proof]   check every service is set up (nothing sent or charged)
 """
 
 import argparse
@@ -23,7 +24,13 @@ def main() -> None:
     sub.add_parser("run-due", help="Write and post the letters that are due")
     p = sub.add_parser("make-admin", help="Give an account access to /admin")
     p.add_argument("email")
+    p = sub.add_parser("check", help="Check every service is set up (nothing sent or charged)")
+    p.add_argument("--stannp-proof", action="store_true", help="Also create a free Stannp test proof")
     args = parser.parse_args()
+
+    if args.command == "check":
+        from .check import print_report, run_checks
+        sys.exit(0 if print_report(run_checks(Settings(), stannp_proof=args.stannp_proof)) else 1)
 
     settings = Settings()
     db = make_sessionmaker(settings.database_url)()
