@@ -55,6 +55,9 @@ Run the tests any time: `python -m unittest discover -s tests` (no API keys need
    - `invoice.payment_failed`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
+   - `charge.refunded` (so a refunded gift's code stops working)
+
+   Gifts need no extra Stripe setup: they're one-off payments priced in the app (£36, £69, £132). Test one at `/gift`, then redeem the code at `/redeem` in a private window.
 6. Test a sign-up with card `4242 4242 4242 4242` (any future date and any CVC). The child should show **active** in the account page, and `/admin` should show 1 active subscription.
 
 ## 3. Claude and Stannp

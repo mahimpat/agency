@@ -84,6 +84,10 @@ class Subscription(Base):
     story_credits: Mapped[int] = mapped_column(Integer, default=0)
     reply_credits: Mapped[int] = mapped_column(Integer, default=0)
     reply_credit_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    # Gift subscriptions: paid once by someone else; the daily job adds each month's letters.
+    gift_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    gift_months_left: Mapped[int] = mapped_column(Integer, default=0)
+    next_credit_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now, onupdate=now)
     user: Mapped[User] = relationship(back_populates="subscriptions")
@@ -128,6 +132,29 @@ class Letter(Base):
     sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     resent_count: Mapped[int] = mapped_column(Integer, default=0)
     child: Mapped[Child] = relationship(back_populates="letters")
+
+
+class Gift(Base):
+    """A Pen Pal gift: paid once by the giver, redeemed by the child's parent with the code."""
+    __tablename__ = "gifts"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    months: Mapped[int] = mapped_column(Integer)
+    price_pence: Mapped[int] = mapped_column(Integer)
+    buyer_name: Mapped[str] = mapped_column(String(120))
+    buyer_email: Mapped[str] = mapped_column(String(320))
+    child_first_name: Mapped[str] = mapped_column(String(60), default="")  # optional, for the certificate
+    message: Mapped[str] = mapped_column(Text, default="")
+    # pending (at checkout), paid, redeemed, expired, refunded
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    stripe_checkout_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    stripe_payment_intent: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    certificate_path: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    redeemed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    redeemed_by_user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class SafeguardingRecord(Base):

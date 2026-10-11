@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Give Letters from History · {{ PRODUCT }}{% endblock %}
+{% block width %}narrow{% endblock %}
+{% block content %}
+<h1>Give Letters from History</h1>
+<p class="muted">A gift of Pen Pal from History: real letters through the letterbox from history's great minds, and when the child writes back, they answer. Pay once, with nothing to renew.</p>
+<form method="post" action="/gift" class="card">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <h2>How long?</h2>
+  <div class="choice field">
+    {% for months, pence in options.items() %}
+    <label><input type="radio" name="months" value="{{ months }}" {% if form.months|int == months %}checked{% endif %}>
+      <span><b>{{ months }} months</b>, £{{ '%d' % (pence // 100) }}{% if pence % 100 %}.{{ '%02d' % (pence % 100) }}{% endif %}{% if pence < months * 1200 %} <span class="hint">(save £{{ (months * 1200 - pence) // 100 }})</span>{% endif %}</span></label>
+    {% endfor %}
+  </div>
+
+  <h2 style="margin-top:26px">The certificate</h2>
+  <div class="field"><label for="child_first_name">Child's first name <span class="hint">(optional, printed on the certificate)</span></label><input type="text" id="child_first_name" name="child_first_name" value="{{ form.child_first_name or '' }}" maxlength="60"></div>
+  <div class="field"><label for="message">A short message <span class="hint">(optional, up to 300 characters)</span></label><textarea id="message" name="message" maxlength="300">{{ form.message or '' }}</textarea></div>
+
+  <h2 style="margin-top:26px">About you</h2>
+  <div class="field"><label for="buyer_name">Your name <span class="hint">(as it should appear: "Granny and Grandpa" is fine)</span></label><input type="text" id="buyer_name" name="buyer_name" value="{{ form.buyer_name or '' }}" maxlength="120" required></div>
+  <div class="field"><label for="buyer_email">Your email <span class="hint">(we send the certificate here)</span></label><input type="email" id="buyer_email" name="buyer_email" value="{{ form.buyer_email or '' }}" autocomplete="email" required></div>
+  <div class="field"><label class="check"><input type="checkbox" name="agree" value="true" required> I've read the <a href="/privacy" target="_blank">privacy policy</a> and agree to the <a href="/terms#gifts" target="_blank">terms</a>.</label></div>
+  <button class="btn" type="submit">Continue to secure payment</button>
+  <p class="small muted" style="margin-top:12px">You'll get a printable certificate with a gift code. The child's parent redeems it and adds the address, so you don't need it. UK addresses only. Redeem within 12 months.</p>
+</form>
+<p class="small muted">Been given a gift? <a href="/redeem">Redeem your code</a></p>
+{% endblock %}

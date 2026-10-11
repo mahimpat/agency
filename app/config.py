@@ -16,6 +16,11 @@ PLANS = {
                "price_env": "STRIPE_PRICE_PENPAL"},
 }
 
+# Pen Pal gifts: months -> price in pence. Paid once; no renewal. Redeem within GIFT_VALID_DAYS.
+GIFT_OPTIONS = {3: 3600, 6: 6900, 12: 13200}
+GIFT_VALID_DAYS = 365
+GIFT_MONTH_DAYS = 30  # each gift month adds a month of Pen Pal letters
+
 # Each child spends a few months with one pen pal, then meets the next.
 # Starts with UK curriculum favourites; the first pen pal is a fossil hunter, because dinosaurs.
 # Mixed so that science, engineering, exploration, leaders and the arts take turns.
@@ -35,7 +40,7 @@ PREVIEW_HOURS = 48  # parents who preview letters have this long before a letter
 RATE_LIMITS = {
     "login_ip": (20, 15 * 60), "login_email": (10, 15 * 60),
     "signup_ip": (5, 60 * 60), "forgot_ip": (5, 60 * 60), "forgot_email": (3, 60 * 60),
-    "verify_resend": (3, 60 * 60), "upload_user": (10, 60 * 60), "changes_user": (10, 60 * 60),
+    "verify_resend": (3, 60 * 60), "redeem_ip": (10, 60 * 60), "gift_ip": (10, 60 * 60), "upload_user": (10, 60 * 60), "changes_user": (10, 60 * 60),
 }
 PARENT_REWRITES_PER_MONTH = int(os.environ.get("PARENT_REWRITES_PER_MONTH", "2"))
 REPLY_UPLOADS_PER_MONTH = int(os.environ.get("REPLY_UPLOADS_PER_MONTH", "4"))

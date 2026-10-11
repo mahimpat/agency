@@ -25,7 +25,11 @@
   </div>
   <p class="small muted">We post to UK addresses only for now.</p>
 
-  {% if not editing %}
+  {% if gift %}
+  <h2 style="margin-top:26px">Your gift</h2>
+  <div class="flash" style="margin:0 0 18px"><b>{{ gift.months }} months of Pen Pal from History</b>, from {{ gift.buyer_name }}. Two letters a month, and your child's letters get answered. Nothing to pay.</div>
+  <input type="hidden" name="plan" value="penpal">
+  {% elif not editing %}
   <h2 style="margin-top:26px">Choose a plan</h2>
   <div class="choice field">
     <label><input type="radio" name="plan" value="penpal" {% if plan == 'penpal' %}checked{% endif %}> <span><b>Pen Pal from History</b>, £12 a month. Two letters a month, and your child's letters get answered.</span></label>
@@ -35,8 +39,13 @@
   <div class="field"><label class="check"><input type="checkbox" name="parent_preview" value="true" {% if not editing or form.parent_preview %}checked{% endif %}> Let me read each letter before it's posted. <span class="hint">We'll email you a preview. If you don't respond within {{ PREVIEW_HOURS // 24 }} days, it's posted automatically. You can change this any time.</span></label></div>
   {% if not editing %}
   <div class="field"><label class="check"><input type="checkbox" name="guardian" value="true" required> I'm this child's parent or guardian, or I have their parent's permission to sign them up.</label></div>
+  {% if gift %}
+  <button class="btn" type="submit">Start the gift</button>
+  <p class="small muted" style="margin-top:12px">Postage included. When the gift ends, letters stop unless you choose to carry on.</p>
+  {% else %}
   <button class="btn" type="submit">Continue to payment</button>
   <p class="small muted" style="margin-top:12px">Postage included. Cancel any time from your account.</p>
+  {% endif %}
   {% else %}
   <button class="btn" type="submit">Save changes</button>
   <a class="btn ghost" href="/account" style="margin-left:8px">Cancel</a>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Thank you · {{ PRODUCT }}{% endblock %}
+{% block width %}narrow{% endblock %}
+{% block content %}
+<h1>Thank you!</h1>
+{% if gift.status == 'pending' %}
+<div class="card">
+  <p>We're just confirming your payment with the bank. Your gift certificate will be emailed to <b>{{ gift.buyer_email }}</b> within a few minutes.</p>
+  <p class="small muted">You can refresh this page in a moment, too.</p>
+</div>
+{% else %}
+<div class="card">
+  <p>Your gift of <b>{{ gift.months }} months of Pen Pal from History</b>{% if gift.child_first_name %} for {{ gift.child_first_name }}{% endif %} is ready. We've also emailed it to <b>{{ gift.buyer_email }}</b>.</p>
+  <p class="small muted" style="margin-bottom:4px">Gift code</p>
+  <p style="font:600 22px/1.2 ui-monospace,monospace;letter-spacing:.06em;margin-top:0">{{ gift.code }}</p>
+  {% if certificate %}<p><a class="btn" href="{{ certificate }}" target="_blank">Open the printable certificate</a></p>{% endif %}
+  <p class="small muted">Print it for a card, or forward the email to the child's parent. They redeem the code at <b>/redeem</b> and add the address. Please redeem by {{ gift.expires_at.strftime('%-d %B %Y') }}.</p>
+</div>
+{% endif %}
+{% endblock %}

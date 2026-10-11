@@ -15,7 +15,9 @@
   <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline">
     <h2>{{ child.first_name }}, {{ child.age }}</h2>
     {% if sub %}
-      {% if sub.status == 'active' %}<span class="pill ok">{{ PLANS[sub.plan].name }} · active</span>
+      {% if sub.gift_id and not sub.stripe_subscription_id and sub.status == 'active' %}<span class="pill ok">Gift · {{ PLANS[sub.plan].name }}</span>
+      {% elif sub.status == 'gift_ended' %}<span class="pill">Gift ended</span>
+      {% elif sub.status in ['active', 'trialing'] %}<span class="pill ok">{{ PLANS[sub.plan].name }} · active</span>
       {% elif sub.status == 'pending' %}<span class="pill warn">Payment not finished</span>
       {% elif sub.status == 'past_due' %}<span class="pill bad">Payment problem</span>
       {% else %}<span class="pill">{{ sub.status|replace('_', ' ') }}</span>{% endif %}
@@ -30,7 +32,13 @@
   </div>
   {% endfor %}
 
-  {% if sub and sub.status in ['pending', 'canceled', 'incomplete_expired'] %}
+  {% if sub and sub.gift_id and not sub.stripe_subscription_id and sub.status == 'active' %}
+    <p class="small muted">{% if sub.gift_months_left %}A gift: {{ sub.gift_months_left }} more month{{ 's' if sub.gift_months_left != 1 }} of letters to come after this one. Nothing to pay.{% else %}This is the last month of the gift.{% endif %}</p>
+    {% if not sub.gift_months_left %}<p><a class="btn" href="/checkout/{{ sub.id }}">Keep the letters coming ({{ PLANS['penpal'].price_label }})</a></p>{% endif %}
+  {% elif sub and sub.status == 'gift_ended' %}
+    <p class="small muted">The gift has ended. We hope {{ child.first_name }} loved the letters.</p>
+    <p><a class="btn" href="/checkout/{{ sub.id }}">Continue Pen Pal from History ({{ PLANS['penpal'].price_label }})</a></p>
+  {% elif sub and sub.status in ['pending', 'canceled', 'incomplete_expired'] %}
     <p><a class="btn" href="/checkout/{{ sub.id }}">{% if sub.status == 'pending' %}Finish setting up{% else %}Restart{% endif %} {{ PLANS[sub.plan].name }}</a></p>
   {% endif %}
   {% if sub and sub.status == 'past_due' %}
@@ -62,7 +70,7 @@
     <noscript><button class="btn ghost small" type="submit">Save</button></noscript>
   </form>
 
-  {% if sub and PLANS[sub.plan].reply and sub.status == 'active' %}
+  {% if sub and PLANS[sub.plan].reply and sub.status in ['active', 'trialing'] %}
   <details style="margin-top:18px">
     <summary><b>Upload {{ child.first_name }}'s reply</b></summary>
     <form method="post" action="/children/{{ child.id }}/reply" enctype="multipart/form-data" style="margin-top:14px">

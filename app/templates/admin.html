@@ -119,6 +119,16 @@ P.S. {{ data.postscript }}</div>
   {% else %}<tr><td colspan="3" class="muted">None.</td></tr>{% endfor %}
 </table>
 
+<h2 style="margin-top:32px">Gifts</h2>
+<table>
+  <tr><th>Code</th><th>Months</th><th>From</th><th>Status</th><th>Paid</th><th>Redeem by</th></tr>
+  {% for g in recent_gifts %}
+  <tr><td>{{ g.code }}</td><td>{{ g.months }}</td><td>{{ g.buyer_name }}{% if g.child_first_name %} → {{ g.child_first_name }}{% endif %}</td>
+    <td>{{ g.status }}</td><td>{{ g.paid_at.strftime('%-d %b %Y') if g.paid_at else '' }}</td>
+    <td>{{ g.expires_at.strftime('%-d %b %Y') if g.expires_at else '' }}</td></tr>
+  {% else %}<tr><td colspan="6" class="muted">No gifts yet.</td></tr>{% endfor %}
+</table>
+
 <h2 style="margin-top:32px">Recently posted</h2>
 <table>
   <tr><th>#</th><th>Letter</th><th>Posted</th><th>Cost</th><th>Proof</th><th></th></tr>

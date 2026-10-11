@@ -5,6 +5,9 @@
 <h1>Almost there</h1>
 <div class="card">
   <p><b>{{ PLANS[sub.plan].name }}</b> for {{ sub.child.first_name }}: {{ PLANS[sub.plan].price_label }}, postage included.</p>
+  {% if sub.gift_id %}
+  <p class="small">{% if trial_end %}The gift has already paid for this month, so your first payment is on <b>{{ trial_end.strftime('%-d %B %Y') }}</b>, when it runs out.{% else %}Letters carry on straight away.{% endif %}</p>
+  {% endif %}
   <p class="muted small">You'll pay securely with Stripe. We never see or store your card details. Your subscription renews monthly until you cancel, and you can cancel any time from your account.</p>
   {% if not user.email_verified_at %}
   <div class="flash">Please confirm your email first: open the link we sent to <b>{{ user.email }}</b>, then come back here.

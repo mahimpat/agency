@@ -20,10 +20,10 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from letters import render
 
-from . import billing, google_auth, jobs, ratelimit
-from .config import COMPANY, FIGURE_ORDER, PLANS, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
+from . import billing, gifts, google_auth, jobs, ratelimit
+from .config import COMPANY, FIGURE_ORDER, GIFT_OPTIONS, PLANS, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
 from .emails import send_email
-from .models import Child, Letter, Reply, SafeguardingRecord, Subscription, User, make_sessionmaker
+from .models import Child, Gift, Letter, Reply, SafeguardingRecord, Subscription, User, make_sessionmaker
 from .models import now as models_now
 from .security import (csrf_ok, csrf_token, hash_password, make_reset_token, make_verify_token, read_reset_token,
                        read_unsubscribe_token, read_verify_token, verify_password)
@@ -139,7 +139,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             user = current_user(request, db)
             flashes = request.session.pop("flash", [])
             return templates.TemplateResponse(request, template, {
-                "user": user, "csrf": csrf_token(request.session), "flashes": flashes, **context},
+                "user": user, "csrf": csrf_token(request.session), "flashes": flashes,
+                "redeeming": request.session.get("gift_code"), **context},
                 status_code=status_code)
         finally:
             db.close()
@@ -148,8 +149,16 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         request.session.setdefault("flash", []).append(message)
 
     def login(request: Request, user: User) -> None:
+        gift_code = request.session.get("gift_code")  # a parent part-way through redeeming a gift
         request.session.clear()
         request.session["uid"] = user.id
+        if gift_code:
+            request.session["gift_code"] = gift_code
+
+    def after_login(request: Request, user: User) -> str:
+        if request.session.get("gift_code"):
+            return "/children/new"
+        return "/admin" if user.is_admin else "/account"
 
     def client_ip(request: Request) -> str:
         return request.client.host if request.client else "unknown"
@@ -239,7 +248,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if not user or not verify_password(password, user.password_hash):
             return page(request, "login.html", 400, errors=["That email and password don't match."], email=email)
         login(request, user)
-        return RedirectResponse("/admin" if user.is_admin else "/account", status_code=303)
+        return RedirectResponse(after_login(request, user), status_code=303)
 
     # --- Sign in with Google ---------------------------------------------------
 
@@ -284,7 +293,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                 user.email_verified_at = models_now()
             db.commit()
             login(request, user)
-            return RedirectResponse("/admin" if user.is_admin else "/account", status_code=303)
+            return RedirectResponse(after_login(request, user), status_code=303)
         # New parent: they still confirm the privacy policy and terms before an account exists.
         plan = request.session.get("google_plan", "penpal")
         request.session["google_profile"] = profile
@@ -384,6 +393,86 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         flash(request, f"We've sent a new confirmation link to {user.email}.")
         return RedirectResponse(request.headers.get("referer") or "/account", status_code=303)
 
+    # --- gifts ---------------------------------------------------------------
+
+    @app.get("/gift", response_class=HTMLResponse)
+    def gift_form(request: Request, cancelled: str = ""):
+        if cancelled:
+            flash(request, "Payment was cancelled, so nothing was charged. You can try again below.")
+        return page(request, "gift.html", options=GIFT_OPTIONS, form={"months": 6})
+
+    @app.post("/gift", dependencies=[Depends(check_csrf)])
+    def gift_buy(request: Request, db: Session = Depends(db_session), months: int = Form(0),
+                 buyer_name: str = Form(""), buyer_email: str = Form(""), child_first_name: str = Form(""),
+                 message: str = Form(""), agree: bool = Form(False)):
+        form = dict(months=months, buyer_name=buyer_name, buyer_email=buyer_email,
+                    child_first_name=child_first_name, message=message)
+        if limited(request, db, "gift_ip", client_ip(request)):
+            return too_many(request)
+        email = buyer_email.strip().lower()
+        errors = []
+        if months not in GIFT_OPTIONS:
+            errors.append("Choose how many months to give.")
+        if not buyer_name.strip():
+            errors.append("Enter your name, so the family knows who it's from.")
+        if "@" not in email or "." not in email.split("@")[-1]:
+            errors.append("Enter a valid email address: we send the gift certificate there.")
+        if len(message) > 300:
+            errors.append("Keep the message to 300 characters so it fits on the certificate.")
+        if not agree:
+            errors.append("Please confirm you've read the privacy policy and agree to the terms.")
+        if errors:
+            return page(request, "gift.html", 400, errors=errors, options=GIFT_OPTIONS, form=form)
+        gift = gifts.create_gift(db, months, buyer_name, email, child_first_name, message)
+        try:
+            url = gifts.checkout_url(settings, db, gift)
+        except Exception:  # noqa: BLE001
+            log.exception("Gift checkout failed")
+            return page(request, "gift.html", 503, options=GIFT_OPTIONS, form=form,
+                        errors=["We couldn't start payment just now. Please try again in a moment."])
+        return RedirectResponse(url, status_code=303)
+
+    @app.get("/gift/thanks", response_class=HTMLResponse)
+    def gift_thanks(request: Request, session_id: str = "", db: Session = Depends(db_session)):
+        gift = gifts.confirm_from_stripe(settings, db, session_id, app.state.services.to_pdf) if session_id else None
+        if not gift:
+            raise HTTPException(404)
+        link = f"/gift/certificate/{gifts.certificate_token(settings, gift)}" if gift.certificate_path else None
+        return page(request, "gift_thanks.html", gift=gift, certificate=link)
+
+    @app.get("/gift/certificate/{token}")
+    def gift_certificate(token: str, db: Session = Depends(db_session)):
+        gift = gifts.gift_from_token(settings, db, token)
+        if not gift or not gift.certificate_path or gift.status == "refunded":
+            raise HTTPException(404)
+        store = get_storage(settings)
+        if not store.exists(gift.certificate_path):
+            raise HTTPException(404)
+        return Response(store.get(gift.certificate_path), media_type=content_type(gift.certificate_path),
+                        headers={"Content-Disposition": 'inline; filename="letters-from-history-gift.'
+                                 + gift.certificate_path.rsplit(".", 1)[-1] + '"'})
+
+    @app.get("/redeem", response_class=HTMLResponse)
+    def redeem_form(request: Request, code: str = ""):
+        return page(request, "redeem.html", code=code)
+
+    @app.post("/redeem", dependencies=[Depends(check_csrf)])
+    def redeem_post(request: Request, db: Session = Depends(db_session), code: str = Form(...)):
+        if limited(request, db, "redeem_ip", client_ip(request)):
+            return too_many(request)
+        gift, reason = gifts.find_redeemable(db, code)
+        if not gift:
+            return page(request, "redeem.html", 400, code=code, errors=[reason])
+        request.session["gift_code"] = gift.code
+        if current_user(request, db):
+            return RedirectResponse("/children/new", status_code=303)
+        return RedirectResponse("/signup?plan=penpal", status_code=303)
+
+    @app.post("/redeem/cancel", dependencies=[Depends(check_csrf)])
+    def redeem_cancel(request: Request):
+        request.session.pop("gift_code", None)
+        return RedirectResponse("/", status_code=303)
+
     # --- parent account -----------------------------------------------------
 
     @app.get("/account", response_class=HTMLResponse)
@@ -396,8 +485,20 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         return page(request, "account.html", children=user.children)
 
     @app.get("/children/new", response_class=HTMLResponse)
-    def child_form(request: Request, user: User = Depends(require_user), plan: str = "penpal"):
-        return page(request, "child_form.html", plan=plan if plan in PLANS else "penpal", form={})
+    def child_form(request: Request, user: User = Depends(require_user), db: Session = Depends(db_session),
+                   plan: str = "penpal"):
+        return page(request, "child_form.html", plan=plan if plan in PLANS else "penpal", form={},
+                    gift=redeeming_gift(request, db))
+
+    def redeeming_gift(request: Request, db: Session) -> Gift | None:
+        """The gift this parent is redeeming, if the code is still good (it is checked again on use)."""
+        code = request.session.get("gift_code")
+        if not code:
+            return None
+        gift, _ = gifts.find_redeemable(db, code)
+        if not gift:
+            request.session.pop("gift_code", None)
+        return gift
 
     @app.post("/children/new", dependencies=[Depends(check_csrf)])
     def child_create(request: Request, user: User = Depends(require_user), db: Session = Depends(db_session),
@@ -414,8 +515,11 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             errors.append("Letters are written for children aged 5 to 12.")
         if plan not in PLANS:
             errors.append("Choose a plan.")
+        gift = redeeming_gift(request, db)
+        if request.session.get("gift_code") and not gift:
+            errors.append("That gift code can no longer be used. Please check it on the redeem page.")
         if errors:
-            return page(request, "child_form.html", 400, errors=errors, plan=plan, form=form)
+            return page(request, "child_form.html", 400, errors=errors, plan=plan, form=form, gift=gift)
         user = db.merge(user)
         child = Child(user_id=user.id, first_name=first_name.strip()[:60], age=age, interests=interests[:500],
                       avoid=avoid[:500], recipient_name=recipient_name.strip()[:120], line1=line1.strip()[:200],
@@ -423,9 +527,15 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                       parent_preview=parent_preview)
         db.add(child)
         db.flush()
-        sub = Subscription(user_id=user.id, child_id=child.id, plan=plan, status="pending")
+        sub = Subscription(user_id=user.id, child_id=child.id, plan="penpal" if gift else plan, status="pending")
         db.add(sub)
         db.commit()
+        if gift:
+            gifts.redeem(db, gift, sub, user.id)
+            request.session.pop("gift_code", None)
+            flash(request, f"The gift is set up! {child.first_name}'s first letter, an introduction, will be written "
+                           "in the next day or two, checked, and posted.")
+            return RedirectResponse("/account", status_code=303)
         return RedirectResponse(f"/checkout/{sub.id}", status_code=303)
 
     CHILD_FIELDS = ("first_name", "interests", "avoid", "recipient_name", "line1", "line2", "town", "postcode")
@@ -475,7 +585,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         sub = db.get(Subscription, sub_id)
         if not sub or sub.user_id != user.id:
             raise HTTPException(404)
-        return page(request, "checkout.html", sub=sub)
+        return page(request, "checkout.html", sub=sub, trial_end=billing.gift_trial_end(sub))
 
     @app.post("/checkout/{sub_id}", dependencies=[Depends(check_csrf)])
     def checkout(request: Request, sub_id: int, user: User = Depends(require_user),
@@ -483,7 +593,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         sub = db.get(Subscription, sub_id)
         if not sub or sub.user_id != user.id:
             raise HTTPException(404)
-        if sub.status not in ("pending", "canceled", "incomplete_expired"):
+        if not billing.can_checkout(sub):
             flash(request, "That subscription is already active.")
             return RedirectResponse("/account", status_code=303)
         if not user.email_verified_at:
@@ -707,7 +817,13 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             event = billing.parse_event(settings, payload, request.headers.get("stripe-signature"))
         except Exception:  # noqa: BLE001 - bad signature or payload
             return Response(status_code=400)
-        outcome = billing.handle_event(db, event, settings.stripe_prices)
+
+        def gift_paid(gift_id: int, payment_intent: str | None) -> None:
+            gift = db.get(Gift, gift_id)
+            if gift:
+                gifts.mark_paid(settings, db, gift, payment_intent, app.state.services.to_pdf)
+
+        outcome = billing.handle_event(db, event, settings.stripe_prices, gift_paid=gift_paid)
         log.info("stripe %s %s: %s", event["type"], event["id"], outcome)
         return {"received": True}
 
@@ -735,7 +851,9 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         paused = db.scalars(select(Child).where(Child.paused_at.is_not(None)).order_by(Child.paused_at)).all()
         subs = db.scalars(select(Subscription)).all()
         counts = {s: sum(1 for x in subs if x.status == s) for s in ("active", "pending", "past_due", "canceled")}
-        return page(request, "admin.html", review=review, held_replies=held_replies, recent=recent, counts=counts,
+        recent_gifts = db.scalars(select(Gift).where(Gift.status != "pending")
+                                  .order_by(Gift.created_at.desc()).limit(30)).all()
+        return page(request, "admin.html", review=review, recent_gifts=recent_gifts, held_replies=held_replies, recent=recent, counts=counts,
                     with_parents=with_parents, paused=paused,
                     live_mail=settings.live_mail, review_all=settings.review_all,
                     checks={l.id: json.loads(l.checks_json or "[]") for l in review},

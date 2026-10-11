@@ -6,6 +6,7 @@ period that has been paid for.
 """
 
 import logging
+from datetime import timedelta, timezone
 
 import stripe
 from sqlalchemy import select
@@ -32,6 +33,23 @@ def ensure_customer(settings: Settings, db: Session, user: User) -> str:
     return user.stripe_customer_id
 
 
+def can_checkout(sub: Subscription) -> bool:
+    """Not paying yet, or a gift that has ended or is in its last month (so the family can carry on)."""
+    if sub.status in ("pending", "canceled", "incomplete_expired", "gift_ended"):
+        return True
+    return bool(sub.gift_id and not sub.stripe_subscription_id and sub.status == "active"
+                and sub.gift_months_left == 0)
+
+
+def gift_trial_end(sub: Subscription):
+    """When continuing during a gift's last month, the first charge waits until the gift runs out.
+    Stripe needs a trial end at least 48 hours away; closer than that, billing just starts now."""
+    if sub.gift_id and sub.status == "active" and sub.next_credit_at and \
+            sub.next_credit_at > now() + timedelta(hours=49):
+        return sub.next_credit_at
+    return None
+
+
 def checkout_url(settings: Settings, db: Session, user: User, sub: Subscription) -> str:
     """Start Stripe Checkout for one child's subscription and return the URL to send the parent to."""
     price = settings.stripe_prices.get(sub.plan)
@@ -39,13 +57,17 @@ def checkout_url(settings: Settings, db: Session, user: User, sub: Subscription)
         raise RuntimeError(f"Set {PLANS[sub.plan]['price_env']} to the Stripe price ID for this plan.")
     customer = ensure_customer(settings, db, user)
     metadata = {"subscription_row_id": str(sub.id), "child_id": str(sub.child_id)}
+    subscription_data = {"metadata": metadata}
+    trial_end = gift_trial_end(sub)
+    if trial_end:
+        subscription_data["trial_end"] = int(trial_end.replace(tzinfo=timezone.utc).timestamp())
     session = stripe.checkout.Session.create(
         mode="subscription",
         customer=customer,
         line_items=[{"price": price, "quantity": 1}],
         client_reference_id=str(sub.id),
         metadata=metadata,
-        subscription_data={"metadata": metadata},
+        subscription_data=subscription_data,
         allow_promotion_codes=True,
         success_url=f"{settings.base_url}/account?checkout=success",
         cancel_url=f"{settings.base_url}/account?checkout=cancelled",
@@ -119,8 +141,9 @@ def _plan_for(prices: dict, price_id: str | None) -> str | None:
     return next((plan for plan, pid in prices.items() if pid and pid == price_id), None)
 
 
-def handle_event(db: Session, event: dict, settings_prices: dict | None = None) -> str:
-    """settings_prices maps plan -> Stripe price ID, used to follow plan switches."""
+def handle_event(db: Session, event: dict, settings_prices: dict | None = None, gift_paid=None) -> str:
+    """settings_prices maps plan -> Stripe price ID, used to follow plan switches.
+    gift_paid(gift_id, payment_intent) is called when a one-off gift payment completes."""
     # Apply one Stripe event. Returns a short description (for logs and tests).
     if db.get(ProcessedEvent, event["id"]):
         return "duplicate"
@@ -128,21 +151,35 @@ def handle_event(db: Session, event: dict, settings_prices: dict | None = None) 
     obj = event["data"]["object"]
     outcome = "ignored"
 
-    if kind == "checkout.session.completed" and obj.get("mode") == "subscription":
+    if kind == "checkout.session.completed" and obj.get("mode") == "payment":
+        gift_id = (obj.get("metadata") or {}).get("gift_id")
+        if gift_id and gift_paid and obj.get("payment_status") == "paid":
+            gift_paid(int(gift_id), obj.get("payment_intent"))
+            outcome = f"gift {gift_id} paid"
+
+    elif kind == "charge.refunded":
+        from .gifts import handle_refund
+        outcome = handle_refund(db, obj.get("payment_intent"))
+
+    elif kind == "checkout.session.completed" and obj.get("mode") == "subscription":
         metadata = obj.get("metadata") or {}
         if obj.get("client_reference_id") and "subscription_row_id" not in metadata:
             metadata = {**metadata, "subscription_row_id": obj["client_reference_id"]}
         sub = _find_subscription(db, obj.get("subscription"), metadata)
         if sub:
             sub.stripe_subscription_id = obj.get("subscription")
-            if sub.status == "pending":
-                sub.status = "active"
+            if sub.status in ("pending", "gift_ended", "canceled", "incomplete_expired") or sub.gift_id:
+                sub.status = "active"  # includes a family continuing after a gift
             outcome = f"linked subscription {sub.id}"
 
     elif kind == "invoice.paid":
         stripe_id, metadata = _invoice_subscription(obj)
         sub = _find_subscription(db, stripe_id, metadata)
-        if sub and obj.get("billing_reason") in {"subscription_create", "subscription_cycle", None}:
+        # A family continuing in a gift's last month gets a free trial invoice first: the gift
+        # already paid for that month's letters, so only real payments add credits for them.
+        trial_for_gift = bool(sub and sub.gift_id and obj.get("amount_paid") == 0)
+        if sub and obj.get("billing_reason") in {"subscription_create", "subscription_cycle", None} \
+                and not trial_for_gift:
             if stripe_id and not sub.stripe_subscription_id:
                 sub.stripe_subscription_id = stripe_id
             sub.status = "active"
