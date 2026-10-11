@@ -1,0 +1,22 @@
+{
+  "figure": "amelia-earhart",
+  "child": "Leo",
+  "child_reply": "Dear Amelia, thank you for your leter. I built a Lego plane it is red like yours. wer you scard when you flew over the ocean all alone? what did you eat on the plane? I lost my frist tooth. From Leo",
+  "letter": {
+    "greeting": "Dear Leo,",
+    "body": [
+      "Thank you for your wonderful letter! A red Lego plane, just like my red plane? That made me smile all the way up to the clouds.",
+      "You asked if I was scared flying over the ocean all alone. Here is the truth: sometimes I was. The night was dark, a storm rumbled, and ice tried to stick to my wings. But I had practiced and practiced, and I knew my plane very well. Being brave does not mean you never feel scared. It means you keep going carefully, even when you do.",
+      "You also asked what I ate. On that long flight, I mostly sipped tomato juice through a straw! It kept me going for about fifteen hours, all the way to a farmer's field in Northern Ireland.",
+      "And you lost your first tooth! Congratulations, Leo. That is a big moment, a bit like a first flight."
+    ],
+    "signoff": "Your friend in the sky,\nAmelia",
+    "postscript": "If you could fly your Lego plane anywhere in the whole world, where would you go?",
+    "real_history": [
+      "On 20-21 May 1932, Amelia Earhart became the first woman to fly solo nonstop across the Atlantic Ocean, in a red Lockheed Vega.",
+      "The flight took about 15 hours. She met storms and ice on the way, and landed safely in a farmer's pasture near Derry, Northern Ireland.",
+      "She reported that her only food on the flight was a can of tomato juice, sipped through a straw.",
+      "Storytelling: Amelia never wrote to children in the future. This letter imagines what she might say to Leo, using only true facts about her life."
+    ]
+  }
+}

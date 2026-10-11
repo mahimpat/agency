@@ -1,0 +1,23 @@
+{
+  "figure": "leonardo-da-vinci",
+  "child": "Sam",
+  "letter": {
+    "greeting": "Dear Sam,",
+    "body": [
+      "Forgive the ink spots on this page. I write quickly when an idea is chasing me, and this morning one chased me all the way across Milan. I am Leonardo, from the little town of Vinci, and I am told you are an inventor. Then we are already friends.",
+      "When I was young, I learned my trade in the workshop of Master Verrocchio in Florence. We painted, carved and built machines, all under one roof. I learned there that artists and engineers must both do the same thing first: look very, very carefully.",
+      "These days I am filling my notebooks with birds. I watch how they tilt their wings to turn, and how they ride the wind without flapping. I have drawn many designs for a machine that might let a person fly. None of them flies yet. But each drawing teaches me something the last one did not.",
+      "If you ever see my notebooks, you will notice something strange: I write backwards, from right to left. I am left-handed, and it suits me. To read it, you need a mirror. I have written one line for you at the bottom of this page so you can try.",
+      "They also tell me you play a game where you kick a ball. I would very much like to draw how your leg moves when you kick it. Everything that moves has a secret, Sam. The fun is finding it."
+    ],
+    "signoff": "Your fellow inventor,\nLeonardo",
+    "postscript": "What is the best invention you have ever dreamed up? Draw it for me if you can.",
+    "real_history": [
+      "Leonardo da Vinci was born in 1452 near Vinci, close to Florence, Italy. He was a painter, engineer and inventor.",
+      "As a teenager he trained in the workshop of the artist Andrea del Verrocchio in Florence.",
+      "He was left-handed and often wrote in mirror writing, from right to left. Thousands of pages of his notebooks survive today.",
+      "He studied how birds fly and drew designs for flying machines, but none were built as working machines in his time.",
+      "Storytelling: the ink spots and the idea chasing him across Milan are imagined, and Leonardo never wrote to anyone in the future."
+    ]
+  }
+}

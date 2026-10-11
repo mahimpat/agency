@@ -1,0 +1,23 @@
+{
+  "figure": "einstein",
+  "child": "Maya",
+  "letter": {
+    "greeting": "Dear Maya,",
+    "body": [
+      "A most curious thing happened this morning. I sat down at my desk here in Princeton to think about the universe, and instead my pen began writing to you, a girl who lives many years in my future! I do not understand how this letter will reach you. But I have learned that the best mysteries are the ones we cannot yet explain.",
+      "I am told you love space. So do I! When I was about five years old, my father showed me a compass. No matter how I turned it, the little needle pointed the same way, as if an invisible hand were pushing it. I could not stop wondering what that invisible thing was. I think that wondering is where all my science began.",
+      "Here is something I worked out about space: it is not stiff and empty like a box. Heavy things, like the Sun, bend space around them, a little like a bowling ball sitting on a trampoline. Even light, the fastest thing there is, curves as it passes by. In 1919, astronomers watched starlight bend around the Sun during an eclipse, just as I had predicted. I was very pleased, and also a little relieved!",
+      "I hear you draw comics and have a cat named Biscuit. When I was sixteen, I liked to imagine pictures in my head, such as racing alongside a beam of light. Perhaps you and I think in the same way.",
+      "Now I must practice my violin before supper. Mozart is very patient with my mistakes. My neighbors, perhaps less so."
+    ],
+    "signoff": "Your friend across time,\nAlbert",
+    "postscript": "If you drew a comic about Biscuit traveling through space, what would happen in it? I would very much like to know.",
+    "real_history": [
+      "Albert Einstein (1879-1955) was a physicist. From 1933 he lived and worked in Princeton, New Jersey, USA.",
+      "The compass story is true: Einstein later described how a compass his father showed him as a small boy filled him with wonder.",
+      "In 1915 Einstein explained gravity as the bending of space and time. In 1919, astronomers measured starlight bending around the Sun during a solar eclipse, and he became world-famous. The trampoline is our way of picturing it.",
+      "At about 16, he imagined chasing a beam of light. This 'thought experiment' helped lead him to his theory of special relativity.",
+      "Storytelling: Einstein never wrote to children in the future, and the joke about his neighbors is ours. But he really did play the violin all his life, and he answered letters from real children."
+    ]
+  }
+}

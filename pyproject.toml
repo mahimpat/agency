@@ -1,19 +1,19 @@
 [project]
-name = "agency"
+name = "letters-from-history"
 version = "0.1.0"
-description = "Toolkit for running a productized AI content agency"
+description = "AI agents that write personalized, fact-checked letters from historical figures to kids"
 requires-python = ">=3.10"
-dependencies = ["anthropic"]
+dependencies = ["anthropic>=1.13", "pydantic>=2"]
 
 [project.scripts]
-agency = "agency.cli:main"
+letters = "letters.cli:main"
 
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["agency"]
+packages = ["letters"]
 
 [tool.setuptools.package-data]
-agency = ["prompts/*.md"]
+letters = ["prompts/*.md", "figures/*.md", "fonts/*.woff2"]

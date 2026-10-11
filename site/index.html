@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Letters from History | History writes back</title>
+<meta name="description" content="Real letters in your child's mailbox from Einstein, Amelia Earhart, Cleopatra and Leonardo da Vinci. Written for your child, fact-checked, and when your child writes back, they answer.">
+<meta property="og:title" content="Letters from History: history writes back">
+<meta property="og:description" content="Real letters from history's greatest minds, written to your child. When your child writes back, they answer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Homemade+Apple&family=IM+Fell+English:ital@0;1&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f7f3ea;
+  --paper-deep: #efe8d9;
+  --ink: #26221d;
+  --ink-soft: #625a4e;
+  --accent: #9f3328;
+  --accent-ink: #fff8f2;
+  --rule: #d6cbb5;
+  --blue-ink: #1e2a55;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Lora', Georgia, serif; font-size: 18px; line-height: 1.6; }
+a { color: var(--accent); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+h1, h2, .display { font-family: 'IM Fell English', Georgia, serif; font-weight: 400; letter-spacing: -0.005em; }
+
+.btn { display: inline-block; border: 0; cursor: pointer; text-decoration: none; background: var(--accent); color: var(--accent-ink);
+  font: 600 17px/1 'Lora', Georgia, serif; padding: 17px 26px; border-radius: 6px;
+  transition: transform 140ms var(--ease-out), background-color 200ms ease; }
+.btn:active { transform: scale(0.97); }
+.btn:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, .swatch:focus-visible { outline: 3px solid #d99a2b; outline-offset: 3px; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--rule); }
+
+header { padding: 20px 0; border-bottom: 1px solid var(--rule); }
+header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { font-family: 'IM Fell English', Georgia, serif; font-size: 24px; color: var(--ink); text-decoration: none; }
+.logo i { color: var(--accent); }
+header .btn { padding: 12px 18px; font-size: 15px; }
+
+/* Hero */
+.hero { padding: 56px 0 72px; }
+.hero .wrap { display: grid; grid-template-columns: 1fr 1.05fr; gap: 56px; align-items: center; }
+.kicker { font: 600 13px/1 'Lora', serif; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 18px; }
+h1 { font-size: clamp(44px, 6.4vw, 72px); line-height: 1.02; margin: 0 0 22px; }
+.lede { font-size: 20px; color: var(--ink-soft); margin: 0 0 30px; max-width: 34ch; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.facts { margin-top: 18px; font-size: 15px; color: var(--ink-soft); }
+
+/* The exchange: a child's pencil letter and the real airmail reply */
+.exchange { position: relative; min-height: 640px; margin-top: 30px; }
+.sheet { position: absolute; box-shadow: 0 1px 1px rgba(40,30,15,.08), 0 20px 40px -22px rgba(40,30,15,.45); }
+.kid { width: 58%; left: 0; top: 0; transform: rotate(-3.5deg); padding: 22px 22px 26px 46px;
+  background: #fffefa repeating-linear-gradient(transparent 0 33px, #bcd3ea 33px 34px);
+  background-position: 0 14px; font-family: 'Caveat', cursive; font-size: 22px; line-height: 34px; color: #55524d; }
+.kid::before { content: ""; position: absolute; top: 0; bottom: 0; left: 32px; width: 1.5px; background: #e4a3a3; }
+.airmail { width: 76%; right: 0; top: 170px; transform: rotate(1.5deg); padding: 34px 32px 30px;
+  background: #eef1f3; font-family: 'Caveat', cursive; font-size: 21px; line-height: 1.28; color: var(--blue-ink); }
+.airmail::before, .airmail::after { content: ""; position: absolute; left: 0; right: 0; height: 9px;
+  background: repeating-linear-gradient(135deg, #b8322b 0 14px, transparent 14px 20px, #1f3f7a 20px 34px, transparent 34px 40px); }
+.airmail::before { top: 10px; } .airmail::after { bottom: 10px; }
+.airmail p { margin: 0 0 10px; }
+.airmail .sig { font-family: 'Homemade Apple', cursive; font-size: 24px; margin-top: 4px; }
+.note { position: absolute; font-family: 'Caveat', cursive; font-size: 20px; color: var(--accent); }
+.note.n1 { left: 3%; top: -30px; }
+.note.n2 { left: 0; top: 400px; max-width: 21%; line-height: 1.15; }
+.u { text-decoration: underline; text-decoration-color: rgba(159,51,40,.55); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+section { padding: 72px 0; border-top: 1px solid var(--rule); }
+section.alt { background: var(--paper-deep); }
+h2 { font-size: clamp(34px, 4.6vw, 48px); line-height: 1.1; margin: 0 0 12px; }
+.sub { color: var(--ink-soft); margin: 0 0 40px; max-width: 58ch; }
+
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+.step { border-top: 2px solid var(--ink); padding-top: 16px; }
+.step .num { font-family: 'IM Fell English', serif; font-style: italic; font-size: 20px; color: var(--accent); }
+.step h3 { margin: 4px 0 8px; font-size: 21px; }
+.step p { margin: 0; color: var(--ink-soft); font-size: 16.5px; }
+
+/* Stationery swatches: each figure's real letter design */
+.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.swatch { display: block; text-decoration: none; color: inherit; transition: transform 200ms var(--ease-out); }
+.swatch:active { transform: scale(0.98); }
+.mini { aspect-ratio: 8.5 / 11; padding: 22px 18px; font-size: 12.5px; line-height: 1.45; overflow: hidden; position: relative;
+  box-shadow: 0 1px 1px rgba(40,30,15,.08), 0 14px 28px -18px rgba(40,30,15,.5); }
+.mini .to { margin-bottom: 8px; }
+.mini::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40%; background: linear-gradient(transparent, var(--fade)); }
+.m-typed { --fade: #fdfcf8; background: #fdfcf8; outline: 1px solid #e4dccb; font-family: 'Special Elite', monospace; color: #26231f; }
+.m-air { --fade: #eef1f3; background: #eef1f3; font-family: 'Caveat', cursive; font-size: 16.5px; line-height: 1.25; color: var(--blue-ink); }
+.m-air::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 6px;
+  background: repeating-linear-gradient(135deg, #b8322b 0 9px, transparent 9px 13px, #1f3f7a 13px 22px, transparent 22px 26px); }
+.m-papyrus { --fade: #e2cd99; background: linear-gradient(90deg, rgba(0,0,0,.03), transparent 30%, rgba(0,0,0,.04) 70%, transparent),
+  repeating-linear-gradient(0deg, rgba(120,85,35,.08) 0 1px, transparent 1px 5px), #e4d09e; font-family: 'IM Fell English', serif; color: #2a1b0e; font-size: 13.5px; }
+.m-parch { --fade: #eddcb6; background: radial-gradient(circle at 20% 25%, rgba(150,100,40,.12), transparent 35%), #eddcb6;
+  font-family: 'IM Fell English', serif; font-style: italic; color: #4a2c14; font-size: 13.5px; }
+.swatch b { display: block; margin-top: 14px; font-size: 17px; }
+.swatch span { font-size: 14.5px; color: var(--ink-soft); }
+
+.benefits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 48px; }
+.benefit h3 { margin: 0 0 4px; font-size: 20px; }
+.benefit p { margin: 0; color: var(--ink-soft); font-size: 16.5px; }
+
+.plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 840px; }
+.plan { background: #fffdf8; border: 1px solid var(--rule); padding: 28px; }
+.plan.best { border: 2px solid var(--ink); }
+.plan .label { font: 600 12px/1 'Lora', serif; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); height: 12px; margin-bottom: 12px; }
+.plan h3 { margin: 0; font-size: 22px; }
+.price { font-family: 'IM Fell English', serif; font-size: 48px; line-height: 1.1; margin: 8px 0 2px; }
+.price small { font-family: 'Lora', serif; font-size: 16px; color: var(--ink-soft); }
+.plan ul { padding-left: 20px; margin: 14px 0 0; font-size: 16.5px; }
+.plan li { margin-bottom: 6px; }
+.founding { margin-top: 26px; font-size: 16.5px; color: var(--ink-soft); max-width: 60ch; }
+
+.signup { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: start; }
+form { background: #fffdf8; border: 1px solid var(--rule); padding: 28px; }
+label { display: block; font-size: 15px; font-weight: 600; margin: 0 0 6px; }
+.field { margin-bottom: 18px; }
+input[type=text], input[type=email], select { width: 100%; font: 17px 'Lora', Georgia, serif; color: var(--ink); background: #fff;
+  border: 1.5px solid var(--rule); border-radius: 4px; padding: 12px 14px; transition: border-color 160ms ease; }
+.choice { display: grid; gap: 10px; }
+.choice label { font-weight: 400; display: flex; gap: 10px; align-items: flex-start; border: 1.5px solid var(--rule); border-radius: 4px; padding: 12px 14px;
+  cursor: pointer; background: #fff; transition: border-color 160ms ease, background-color 160ms ease; }
+.choice label:has(input:checked) { border-color: var(--ink); background: #fbf7ee; }
+.choice input { margin-top: 5px; accent-color: var(--accent); }
+.consent { font-weight: 400; font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; color: var(--ink-soft); }
+.consent input { margin-top: 4px; accent-color: var(--accent); }
+.hidden { position: absolute; left: -9999px; }
+form .btn { width: 100%; }
+.error { color: var(--accent); font-size: 15px; margin-top: 10px; min-height: 1em; }
+.thanks { display: none; text-align: center; padding: 20px 8px; }
+.thanks.show { display: block; }
+.thanks h3 { font-family: 'IM Fell English', serif; font-weight: 400; font-size: 32px; margin: 0 0 8px; }
+
+details { border-bottom: 1px solid var(--rule); padding: 16px 0; }
+summary { cursor: pointer; font-weight: 600; font-size: 18px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; font-size: 22px; line-height: 1; color: var(--accent); transition: transform 200ms var(--ease-out); }
+details[open] summary::after { transform: rotate(45deg); }
+details p { margin: 10px 0 0; color: var(--ink-soft); font-size: 16.5px; }
+footer { padding: 36px 0 48px; color: var(--ink-soft); font-size: 14.5px; text-align: center; border-top: 1px solid var(--rule); }
+
+@media (max-width: 900px) {
+  .hero .wrap, .signup { grid-template-columns: 1fr; }
+  .steps, .plans, .benefits { grid-template-columns: 1fr; }
+  .swatches { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  .logo { font-size: 20px; }
+  header .btn { padding: 10px 12px; font-size: 14px; }
+  .exchange { min-height: 700px; }
+  .kid { width: 88%; font-size: 20px; }
+  .airmail { width: 94%; top: 250px; padding: 30px 22px 26px; font-size: 19.5px; }
+  .note.n1 { top: -30px; }
+  .note.n2 { display: none; }
+  .swatches { gap: 14px; }
+  .mini { padding: 16px 12px; font-size: 10.5px; }
+  .m-air { font-size: 14px; }
+}
+/* Hero letters arrive once on load: rare, first-time moment, so a little delight is earned. */
+.arrive { opacity: 0; transform: translateY(14px) rotate(var(--r, 0deg)); animation: arrive 520ms var(--ease-out) var(--d, 0ms) forwards; }
+@keyframes arrive { to { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)); } }
+/* Stationery slides out from below as it scrolls into view (clip reveal), staggered 60ms. */
+.reveal .mini { clip-path: inset(0 0 100% 0); transition: clip-path 600ms cubic-bezier(0.77, 0, 0.175, 1) var(--d, 0ms); }
+.reveal.in .mini { clip-path: inset(0 0 0 0); }
+/* Button label crossfade with a touch of blur so the text swap reads as one change. */
+.btn-label { display: inline-block; transition: opacity 120ms ease, filter 120ms ease; }
+.btn-label.swapping { opacity: 0; filter: blur(2px); }
+.btn:disabled { cursor: progress; opacity: .85; }
+/* Thank-you note enters from a slight offset, never from nothing. */
+.thanks { opacity: 1; transform: none; transition: opacity 260ms var(--ease-out), transform 260ms var(--ease-out); }
+@starting-style { .thanks.show { opacity: 0; transform: translateY(8px); } }
+/* Hover only where hover exists; touch screens get press feedback instead. */
+@media (hover: hover) and (pointer: fine) {
+        }
+/* Reduced motion: keep fades that aid comprehension, drop movement. */
+@media (prefers-reduced-motion: reduce) {
+  .arrive { transform: rotate(var(--r, 0deg)); animation: fade 200ms ease forwards; }
+  @keyframes fade { to { opacity: 1; } }
+  .reveal .mini { clip-path: none; transition: none; }
+  .swatch, .btn, .thanks { transition: opacity 200ms ease, background-color 200ms ease; }
+  .swatch:hover, .btn:active { transform: none; }
+}
+</style>
+<!-- Analytics (optional): uncomment and set your free GoatCounter code to count visits.
+<script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+-->
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#">Letters <i>from</i> History</a>
+    <a class="btn ghost" href="#join">Join the waitlist</a>
+  </div>
+</header>
+
+<main>
+<section class="hero" style="border-top:0">
+  <div class="wrap">
+    <div>
+      <p class="kicker">Real letters in your child's mailbox</p>
+      <h1>History writes back.</h1>
+      <p class="lede">Einstein, Amelia Earhart, Cleopatra and Leonardo da Vinci write letters to your child about the things your child loves. When your child writes back, the next letter <em>answers them</em>.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#join">Reserve a founding spot</a>
+        <a class="btn ghost" href="#pen-pals">See the letters</a>
+      </div>
+      <p class="facts">Ages 5–12 · Printed and mailed · Every fact checked before it's sent</p>
+    </div>
+
+    <div class="exchange" aria-label="Example: Leo's handwritten letter and Amelia Earhart's reply">
+      <div class="sheet kid arrive" style="--r:-3.5deg">Dear Amelia, I built a Lego plane it is red like yours. wer you scard when you flew over the ocean all alone? what did you eat on the plane? I lost my frist tooth. From Leo</div>
+      <div class="note n1 arrive" style="--r:-2deg; --d:120ms">Leo, age 7, writes in pencil ↓</div>
+      <div class="sheet airmail arrive" style="--r:1.5deg; --d:260ms">
+        <p>Dear Leo,</p>
+        <p>A red Lego plane, just like my red plane? That made me smile all the way up to the clouds.</p>
+        <p>You asked if I was scared flying over the ocean all alone. <span class="u">Here is the truth: sometimes I was.</span> But I had practiced and practiced. Being brave does not mean you never feel scared. It means you keep going carefully, even when you do.</p>
+        <p>You also asked what I ate. <span class="u">I mostly sipped tomato juice through a straw!</span></p>
+        <p>And you lost your first tooth! Congratulations, Leo.</p>
+        <div>Your friend in the sky,</div>
+        <div class="sig">Amelia</div>
+      </div>
+      <div class="note n2 arrive" style="--r:-3deg; --d:420ms">Amelia answers every question →</div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="sub">A pen pal from history who actually reads what your child writes.</p>
+    <div class="steps">
+      <div class="step"><div class="num">One</div><h3>Tell us about your child</h3><p>Their name, age, and what they love: dinosaurs, space, soccer, drawing. Every letter is written for them alone.</p></div>
+      <div class="step"><div class="num">Two</div><h3>A letter arrives by mail</h3><p>Printed on stationery from the figure's own era, with a "Real history" card on the back to read together.</p></div>
+      <div class="step"><div class="num">Three</div><h3>Your child writes back</h3><p>Snap a photo of their handwritten reply. The next letter answers their questions and remembers their news.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pen-pals">
+  <div class="wrap">
+    <h2>Every pen pal writes on their own paper</h2>
+    <p class="sub">Einstein types. Amelia writes on airmail paper. Cleopatra writes on papyrus. Leonardo leaves a line of mirror writing to decode. Tap one to see a full letter.</p>
+    <div class="swatches">
+      <a class="swatch reveal" href="samples/einstein-to-maya.pdf" target="_blank" rel="noopener">
+        <div class="mini m-typed"><div class="to">Dear Maya,</div>A most curious thing happened this morning. I sat down at my desk here in Princeton to think about the universe, and instead my pen began writing to you…</div>
+        <b>Albert Einstein</b><span>Space, light and big questions</span>
+      </a>
+      <a class="swatch reveal" href="samples/earhart-to-leo.pdf" target="_blank" rel="noopener" style="--d:60ms">
+        <div class="mini m-air"><div class="to">Dear Leo,</div>Thank you for your wonderful letter! A red Lego plane, just like my red plane? That made me smile all the way up to the clouds…</div>
+        <b>Amelia Earhart</b><span>Flight, courage and adventure</span>
+      </a>
+      <a class="swatch reveal" href="samples/cleopatra-to-sofia.pdf" target="_blank" rel="noopener" style="--d:120ms">
+        <div class="mini m-papyrus"><div class="to">Greetings, Sofia,</div>I am Cleopatra, Queen of Egypt, and I write to you from my palace in Alexandria, where the sea breeze smells of salt…</div>
+        <b>Cleopatra</b><span>Ancient Egypt and the Nile</span>
+      </a>
+      <a class="swatch reveal" href="samples/leonardo-to-sam.pdf" target="_blank" rel="noopener" style="--d:180ms">
+        <div class="mini m-parch"><div class="to">Dear Sam,</div>Forgive the ink spots on this page. I write quickly when an idea is chasing me, and this morning one chased me all the way across Milan…</div>
+        <b>Leonardo da Vinci</b><span>Art, inventions and nature</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <h2>Why parents sign up</h2>
+    <p class="sub">History stops being dates in a textbook and becomes a friend who writes back.</p>
+    <div class="benefits">
+      <div class="benefit"><h3>Kids who want to write</h3><p>Nothing gets a reluctant writer going like a question from Einstein they're dying to answer.</p></div>
+      <div class="benefit"><h3>Screen-free and real</h3><p>Paper, ink and a mailbox. Getting real mail with your own name on it never stops being exciting.</p></div>
+      <div class="benefit"><h3>Every fact checked</h3><p>Letters are written from a verified fact sheet for each figure and checked again before printing. Anything imagined is marked on the "Real history" card.</p></div>
+      <div class="benefit"><h3>Made for homeschool</h3><p>A living-history supplement that sparks conversation, map work and trips to the library.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="plans">
+  <div class="wrap">
+    <h2>Two simple plans</h2>
+    <p class="sub">Cancel anytime. Gift plans for grandparents are on the way.</p>
+    <div class="plans">
+      <div class="plan">
+        <div class="label"></div>
+        <h3>Story Letters</h3>
+        <div class="price">$8<small> a month</small></div>
+        <ul>
+          <li>1 personalized letter a month</li>
+          <li>A new historical figure every few months</li>
+          <li>"Real history" card with every letter</li>
+        </ul>
+      </div>
+      <div class="plan best">
+        <div class="label">What most families choose</div>
+        <h3>Pen Pal from History</h3>
+        <div class="price">$14<small> a month</small></div>
+        <ul>
+          <li>2 letters a month</li>
+          <li><b>Your child writes back, and the next letter answers them</b></li>
+          <li>The story continues, letter after letter</li>
+          <li>"Real history" card with every letter</li>
+        </ul>
+      </div>
+    </div>
+    <p class="founding"><b>Founding families</b> get 30% off for life and help choose the next historical figures. Reserving a spot is free.</p>
+  </div>
+</section>
+
+<section class="alt" id="join">
+  <div class="wrap signup">
+    <div>
+      <h2>Reserve a founding spot</h2>
+      <p class="sub" style="margin-bottom:16px">We're opening to a small group of founding families first. Join the list and you'll be first in line, at 30% off for life.</p>
+      <p class="facts">We only collect information from parents, never from children. We'll only email you about Letters from History, and you can unsubscribe anytime.</p>
+    </div>
+
+    <form name="waitlist" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="company" id="waitlist" novalidate>
+      <input type="hidden" name="form-name" value="waitlist">
+      <input type="hidden" name="source" id="source">
+      <p class="hidden"><label>Leave this empty <input name="company"></label></p>
+
+      <div id="form-fields">
+        <div class="field"><label for="name">Your first name</label><input type="text" id="name" name="name" autocomplete="given-name" required></div>
+        <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" autocomplete="email" required></div>
+        <div class="field"><label for="ages">Your child's age (or ages)</label><input type="text" id="ages" name="child_ages" placeholder="e.g. 7 and 10" required></div>
+        <div class="field">
+          <label>Which plan would you choose?</label>
+          <div class="choice">
+            <label><input type="radio" name="plan" value="pen-pal-14" checked> <span><b>Pen Pal from History</b>, $14 a month: they write back</span></label>
+            <label><input type="radio" name="plan" value="story-8"> <span><b>Story Letters</b>, $8 a month</span></label>
+            <label><input type="radio" name="plan" value="gift"> <span>I'd buy it as a <b>gift</b> (6 or 12 months)</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="country">Country</label>
+          <select id="country" name="country">
+            <option>United States</option><option>Canada</option><option>United Kingdom</option>
+            <option>Australia</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label class="consent"><input type="checkbox" name="consent" value="yes" required> I'm a parent or guardian and I'm happy to get emails about Letters from History.</label></div>
+        <button class="btn" type="submit"><span class="btn-label">Reserve my spot</span></button>
+        <div class="error" id="error" role="alert"></div>
+      </div>
+
+      <div class="thanks" id="thanks" role="status">
+        <h3>You're on the list.</h3>
+        <p>Thank you. We'll email you before founding spots open. Keep an eye on your mailbox.</p>
+        <p id="deposit" style="display:none"><a class="btn" id="deposit-link" href="#">Lock it in with a $1 deposit</a><br><span class="facts">Fully refundable.</span></p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" style="max-width: 780px">
+    <h2>Questions</h2>
+    <details><summary>Who writes the letters?</summary><p>Letters are written with the help of AI, in each figure's voice, from a verified fact sheet for every figure. A separate fact-checking step reviews each letter before it's printed, and anything imagined (like letters traveling through time) is clearly marked on the "Real history" card.</p></details>
+    <details><summary>What ages is it for?</summary><p>Ages 5–12. Letters match your child's reading level: shorter with simple words for young children (great for reading aloud), richer for older kids.</p></details>
+    <details><summary>How does writing back work?</summary><p>Your child writes on any paper, or on the back of the letter. You snap a photo and upload it. The next letter answers their questions and responds to their news.</p></details>
+    <details><summary>What about difficult history?</summary><p>Every figure has age-appropriate guidelines. Letters are warm and encouraging, and you can tell us about topics you'd like us to avoid.</p></details>
+    <details><summary>What about privacy?</summary><p>We collect information from parents only, never directly from children, and only what we need to write and mail the letters. Reply photos are deleted after they're read. We never ask your child for personal details.</p></details>
+    <details><summary>Where do you ship?</summary><p>We're starting in the United States. Join the waitlist from anywhere: it helps us decide where to go next.</p></details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">Letters from History · Made with care for curious kids</div>
+</footer>
+
+<script>
+// Optional: paste a Stripe Payment Link here to offer a $1 refundable deposit after signup.
+const DEPOSIT_URL = "";
+
+(function () {
+  const params = new URLSearchParams(location.search);
+  document.getElementById("source").value =
+    params.get("utm_source") || params.get("ref") || document.referrer || "direct";
+
+  // Stationery samples slide out as they scroll into view, once.
+  const revealables = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) { entry.target.classList.add("in"); io.unobserve(entry.target); }
+      }
+    }, { rootMargin: "0px 0px -80px 0px" });
+    revealables.forEach((el) => io.observe(el));
+  } else {
+    revealables.forEach((el) => el.classList.add("in"));
+  }
+
+  const form = document.getElementById("waitlist");
+  const error = document.getElementById("error");
+  const button = form.querySelector("button[type=submit]");
+  const label = button.querySelector(".btn-label");
+
+  function setLabel(text) {
+    label.classList.add("swapping");
+    setTimeout(() => { label.textContent = text; label.classList.remove("swapping"); }, 120);
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    error.textContent = "";
+    if (!form.checkValidity()) {
+      error.textContent = "Please add your name, a valid email and your child's age, and tick the box.";
+      return;
+    }
+    button.disabled = true;
+    setLabel("Saving…");
+    try {
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(new FormData(form)).toString(),
+      });
+      if (!response.ok) throw new Error(response.status);
+      document.getElementById("form-fields").style.display = "none";
+      document.getElementById("thanks").classList.add("show");
+      if (DEPOSIT_URL) {
+        document.getElementById("deposit-link").href = DEPOSIT_URL;
+        document.getElementById("deposit").style.display = "block";
+      }
+    } catch (e) {
+      error.textContent = "Something went wrong. Please try again in a moment.";
+      button.disabled = false;
+      setLabel("Reserve my spot");
+    }
+  });
+})();
+</script>
+</body>
+</html>
