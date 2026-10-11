@@ -21,11 +21,11 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from letters import render
 
-from . import billing, gifts, google_auth, jobs, ratelimit
+from . import billing, gifts, google_auth, jobs, ratelimit, referrals
 from .seasonal import christmas_notice
-from .config import COMPANY, FIGURE_ORDER, GIFT_OPTIONS, GIFT_SEND_AHEAD_DAYS, PLANS, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
+from .config import COMPANY, FIGURE_ORDER, GIFT_OPTIONS, GIFT_SEND_AHEAD_DAYS, PLANS, REFERRAL_FRIEND_PERCENT, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
 from .emails import send_email
-from .models import Child, Gift, Letter, Reply, SafeguardingRecord, Subscription, User, make_sessionmaker
+from .models import Child, Gift, Letter, Referral, Reply, SafeguardingRecord, Subscription, User, make_sessionmaker
 from .models import now as models_now
 from .security import (csrf_ok, csrf_token, hash_password, make_reset_token, make_verify_token, read_reset_token,
                        read_unsubscribe_token, read_verify_token, verify_password)
@@ -162,6 +162,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             return templates.TemplateResponse(request, template, {
                 "user": user, "csrf": csrf_token(request.session), "flashes": flashes,
                 "redeeming": request.session.get("gift_code"),
+                "invited": bool(request.session.get("referral")) and not user,
+                "REFERRAL_FRIEND_PERCENT": REFERRAL_FRIEND_PERCENT,
                 "christmas": christmas_notice(models_now().date()), **context},
                 status_code=status_code)
         finally:
@@ -254,6 +256,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                     **source_fields(request))
         db.add(user)
         db.commit()
+        record_referral(request, db, user)
         send_verification(user)
         login(request, user)
         return RedirectResponse(f"/children/new?plan={plan}", status_code=303)
@@ -350,6 +353,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                     landing=(request.session.get("src") or {}).get("landing", ""), **source_fields(request))
         db.add(user)
         db.commit()
+        record_referral(request, db, user)
         login(request, user)
         return RedirectResponse(f"/children/new?plan={plan}", status_code=303)
 
@@ -416,6 +420,21 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         send_verification(user)
         flash(request, f"We've sent a new confirmation link to {user.email}.")
         return RedirectResponse(request.headers.get("referer") or "/account", status_code=303)
+
+    # --- referrals -----------------------------------------------------------
+
+    @app.get("/r/{code}")
+    def invite_link(request: Request, code: str, db: Session = Depends(db_session)):
+        referrer = referrals.find_referrer(db, code)
+        if referrer and not current_user(request, db):
+            request.session["referral"] = referrer.referral_code
+            request.session.setdefault("src", {"source": "referral", "campaign": "", "landing": "/r"})
+        return RedirectResponse("/", status_code=303)
+
+    def record_referral(request: Request, db: Session, user: User) -> None:
+        code = request.session.pop("referral", None)
+        if code:
+            referrals.record_signup(db, user, code)
 
     # --- gifts ---------------------------------------------------------------
 
@@ -515,13 +534,19 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     # --- parent account -----------------------------------------------------
 
     @app.get("/account", response_class=HTMLResponse)
-    def account(request: Request, user: User = Depends(require_user), checkout: str = ""):
+    def account(request: Request, user: User = Depends(require_user), db: Session = Depends(db_session),
+                checkout: str = ""):
         if checkout == "success":
             flash(request, "Thank you! Your subscription is set up. The first letter will be written in the next "
                            "day or two, checked, and posted.")
         elif checkout == "cancelled":
             flash(request, "Checkout was cancelled. You can finish it any time below.")
-        return page(request, "account.html", children=user.children)
+        me = db.get(User, user.id)
+        # Families who've started letters can invite others (not before: they haven't seen one yet).
+        invite = referrals.link_for(settings, db, me) if any(
+            s.status in ("active", "trialing", "past_due", "gift_ended") for s in me.subscriptions) else None
+        return page(request, "account.html", children=me.children, invite=invite,
+                    invite_stats=referrals.stats(db, me))
 
     @app.get("/children/new", response_class=HTMLResponse)
     def child_form(request: Request, user: User = Depends(require_user), db: Session = Depends(db_session),
@@ -624,7 +649,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         sub = db.get(Subscription, sub_id)
         if not sub or sub.user_id != user.id:
             raise HTTPException(404)
-        return page(request, "checkout.html", sub=sub, trial_end=billing.gift_trial_end(sub))
+        return page(request, "checkout.html", sub=sub, trial_end=billing.gift_trial_end(sub),
+                    friend_discount=referrals.discount_applies(db, db.merge(user)))
 
     @app.post("/checkout/{sub_id}", dependencies=[Depends(check_csrf)])
     def checkout(request: Request, sub_id: int, user: User = Depends(require_user),
@@ -890,6 +916,13 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         for child in user.children:
             for record in db.scalars(select(SafeguardingRecord).where(SafeguardingRecord.child_id == child.id)):
                 record.notes += f"\n[{models_now():%d %b %Y}] Parent deleted their account."
+        # Referrals: drop unfinished ones; rewarded ones stay (ids and amounts only) to match Stripe's records.
+        for referral in db.scalars(select(Referral).where(
+                (Referral.referrer_id == user.id) | (Referral.friend_id == user.id))):
+            if referral.status != "rewarded":
+                db.delete(referral)
+        for friend in db.scalars(select(User).where(User.referred_by_id == user.id)):
+            friend.referred_by_id = None
         db.delete(user)
         db.commit()
         request.session.clear()
@@ -1058,7 +1091,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             r["gifts"] += 1
             r["gift_pence"] += g.price_pence
         table = sorted(rows.items(), key=lambda kv: (-kv[1]["paying"] - kv[1]["gifts"], -kv[1]["signups"]))
-        return page(request, "sources.html", table=table, days=days)
+        recent_referrals = db.scalars(select(Referral).order_by(Referral.created_at.desc()).limit(50)).all()
+        return page(request, "sources.html", table=table, days=days, recent_referrals=recent_referrals)
 
     @app.get("/admin/safeguarding", response_class=HTMLResponse)
     def safeguarding_log(request: Request, admin: User = Depends(require_admin), db: Session = Depends(db_session)):

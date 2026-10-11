@@ -255,7 +255,8 @@ class WelcomeFlyerTests(AppTestCase):
         flyer_html = [h for h in self.services.pdfs if "For grown-ups" in h]
         self.assertEqual(len(flyer_html), 1)
         self.assertIn("Send us their letter", flyer_html[0])  # Pen Pal: how to send replies
-        self.assertIn("/?ref=flyer", flyer_html[0])
+        self.assertIn("/r/", flyer_html[0])  # the family's own invite link
+        self.assertIn("Invite a friend, get a free month", flyer_html[0])
         self.assertNotIn("Dear Maya", flyer_html[0])  # nothing for the child in it
 
         # Once a letter has been posted, later letters (even a new pen pal's introduction) have no flyer.
@@ -271,14 +272,28 @@ class WelcomeFlyerTests(AppTestCase):
         self.assertEqual(self.pdf_pages(letter.id), 2)
         db.close()
 
-    def test_flyer_is_made_once_per_version(self):
+    def test_each_family_gets_their_own_invite_link(self):
         from app import jobs
         for n, email in enumerate(["a@example.com", "b@example.com"]):
             if n:
                 self.client.post("/logout", data={"csrf": self.csrf("/account")})
             self.activate(self.signup(email=email), stripe_id=f"sub_{n}", event_suffix=str(n))
         jobs.run_due(self.db, self.settings, self.services)
-        self.assertEqual(sum("For grown-ups" in h for h in self.services.pdfs), 1)
+        flyers = [h for h in self.services.pdfs if "For grown-ups" in h]
+        self.assertEqual(len(flyers), 2)
+        import re
+        links = {re.search(re.escape(self.settings.base_url.split("://")[1]) + r"/r/([A-Z0-9]+)", h).group(1) for h in flyers}
+        self.assertEqual(len(links), 2)
+
+    def test_shared_flyer_is_made_once_per_version(self):
+        from app.flyer import flyer_pdf
+        made = []
+        def to_pdf(html, path):
+            made.append(html)
+            return self.services._pdf(html, path)
+        flyer_pdf(self.settings, "penpal", to_pdf)
+        flyer_pdf(self.settings, "penpal", to_pdf)
+        self.assertEqual(len(made), 1)
 
     def test_story_plan_flyer_and_switch_off(self):
         from app import jobs

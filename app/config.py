@@ -20,6 +20,11 @@ PLANS = {
 GIFT_OPTIONS = {3: 3600, 6: 6900, 12: 13200}
 GIFT_VALID_DAYS = 365
 GIFT_MONTH_DAYS = 30  # each gift month adds a month of Pen Pal letters
+# Referrals: the friend gets REFERRAL_FRIEND_PERCENT off their first month; the referrer gets one
+# month of their own plan free, once the friend has paid and stayed REFERRAL_HOLD_DAYS.
+REFERRAL_FRIEND_PERCENT = int(os.environ.get("REFERRAL_FRIEND_PERCENT", "50"))
+REFERRAL_HOLD_DAYS = int(os.environ.get("REFERRAL_HOLD_DAYS", "14"))
+REFERRAL_MAX_PER_YEAR = int(os.environ.get("REFERRAL_MAX_PER_YEAR", "12"))
 GIFT_SEND_AHEAD_DAYS = 120  # buyers can schedule the gift email up to this far ahead
 
 # Each child spends a few months with one pen pal, then meets the next.

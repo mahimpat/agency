@@ -30,6 +30,9 @@ class User(Base):
     source: Mapped[str] = mapped_column(String(100), default="", index=True)
     campaign: Mapped[str] = mapped_column(String(200), default="")
     landing: Mapped[str] = mapped_column(String(200), default="")
+    # Referrals: this parent's own invite code (made when first needed), and who invited them.
+    referral_code: Mapped[str | None] = mapped_column(String(16), unique=True, nullable=True)
+    referred_by_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     children: Mapped[list["Child"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -171,6 +174,23 @@ class Gift(Base):
     sent_to_recipient_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     source: Mapped[str] = mapped_column(String(100), default="", index=True)
     campaign: Mapped[str] = mapped_column(String(200), default="")
+
+
+class Referral(Base):
+    """One family inviting another. The friend gets money off their first month; the referrer gets a
+    free month once the friend has paid and stayed long enough (see app/referrals.py)."""
+    __tablename__ = "referrals"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    referrer_id: Mapped[int] = mapped_column(Integer, index=True)
+    friend_id: Mapped[int] = mapped_column(Integer, unique=True)  # a family can only be referred once
+    # signed_up, paid (discount used; waiting out the hold period), rewarded, not_rewarded
+    status: Mapped[str] = mapped_column(String(20), default="signed_up", index=True)
+    friend_sub_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reward_pence: Mapped[int] = mapped_column(Integer, default=0)
+    note: Mapped[str] = mapped_column(String(300), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    rewarded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class SafeguardingRecord(Base):

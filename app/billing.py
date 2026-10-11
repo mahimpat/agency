@@ -61,6 +61,11 @@ def checkout_url(settings: Settings, db: Session, user: User, sub: Subscription)
     trial_end = gift_trial_end(sub)
     if trial_end:
         subscription_data["trial_end"] = int(trial_end.replace(tzinfo=timezone.utc).timestamp())
+    # A family invited by a friend gets money off their first month. Stripe allows either a set
+    # discount or customer-entered promotion codes, not both.
+    from . import referrals
+    offer = ({"discounts": [{"coupon": referrals.coupon_id(settings)}]} if referrals.discount_applies(db, user)
+             else {"allow_promotion_codes": True})
     session = stripe.checkout.Session.create(
         mode="subscription",
         customer=customer,
@@ -68,7 +73,7 @@ def checkout_url(settings: Settings, db: Session, user: User, sub: Subscription)
         client_reference_id=str(sub.id),
         metadata=metadata,
         subscription_data=subscription_data,
-        allow_promotion_codes=True,
+        **offer,
         success_url=f"{settings.base_url}/account?checkout=success",
         cancel_url=f"{settings.base_url}/account?checkout=cancelled",
     )
@@ -205,6 +210,8 @@ def handle_event(db: Session, event: dict, settings_prices: dict | None = None, 
             sub.status = "active"
             if not sub.started_at:
                 sub.started_at = now()  # paid billing starts: the 6-monthly reminders count from here
+                from .referrals import on_first_payment
+                on_first_payment(db, sub)
             grant_credits(sub)
             outcome = f"credited subscription {sub.id}"
 

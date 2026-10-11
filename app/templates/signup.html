@@ -4,6 +4,7 @@
 {% block content %}
 <h1>Create your account</h1>
 {% if christmas %}<div class="flash" role="note">{{ christmas.text }}</div>{% endif %}
+{% if invited %}<div class="flash">A friend invited you, so your first month is {{ REFERRAL_FRIEND_PERCENT }}% off.</div>{% endif %}
 <p class="muted">{% if redeeming %}You'll add your child's details next. No card needed.{% else %}You'll add your child's details next, then choose how to pay.{% endif %}</p>
 {% if redeeming %}
 <div class="flash">You're redeeming gift <b>{{ redeeming }}</b>. Create an account (or <a href="/login">log in</a>), then add your child's details.

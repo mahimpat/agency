@@ -13,7 +13,7 @@ from pathlib import Path
 
 import segno
 
-from .config import COMPANY, PLANS, PRODUCT, Settings
+from .config import COMPANY, PLANS, PRODUCT, REFERRAL_FRIEND_PERCENT, Settings
 from .storage import get_storage
 
 HERE = Path(__file__).parent
@@ -74,10 +74,11 @@ ul { margin: 1.5mm 0 0; padding-left: 4.5mm; } li { margin-bottom: 1mm; break-in
 """
 
 
-def flyer_html(settings: Settings, plan: str) -> str:
+def flyer_html(settings: Settings, plan: str, invite: str | None = None) -> str:
     site = settings.base_url.rstrip("/")
     short = escape(site.replace("https://", "").replace("http://", ""))
-    account, share, gift = f"{site}/account", f"{site}/?ref=flyer", f"{site}/gift?ref=flyer"
+    account, share, gift = f"{site}/account", invite or f"{site}/?ref=flyer", f"{site}/gift?ref=flyer"
+    share_text = escape(share.replace("https://", "").replace("http://", ""))
     replies = PLANS[plan]["reply"]
     contact = escape(settings.contact_email)
     if replies:
@@ -134,8 +135,9 @@ def flyer_html(settings: Settings, plan: str) -> str:
   or write to <b>{contact}</b>.</p>
   <p class="hand">{"Thank you for joining us at the very start." if settings.flyer_founding else "Thank you for joining us."} ~ The Letters from History team</p>
   <div class="cards">
-    <div class="card"><h2>Know a family who'd love this?</h2>
-      <p>Pass on this link, or let them scan the code.</p><p class="url">{short}/?ref=flyer</p>{_qr(share)}</div>
+    <div class="card"><h2>{"Invite a friend, get a free month" if invite else "Know a family who'd love this?"}</h2>
+      <p>{f"Share your own link: they get {REFERRAL_FRIEND_PERCENT}% off their first month, and once they've been with us two weeks, your next month is free." if invite else "Pass on this link, or let them scan the code."}</p>
+      <p class="url">{share_text}</p>{_qr(share)}</div>
     <div class="card"><h2>A present for someone special</h2>
       <p>Give 3, 6 or 12 months of Pen Pal from History. Paid once, nothing to renew, and the certificate arrives by email.</p>
       <p class="url">{short}/gift?ref=flyer</p>{_qr(gift)}</div>
@@ -151,16 +153,18 @@ def flyer_html(settings: Settings, plan: str) -> str:
 </body></html>"""
 
 
-def flyer_pdf(settings: Settings, plan: str, to_pdf) -> bytes:
-    """The flyer for this plan as PDF bytes, made once per version and kept in storage."""
-    html = flyer_html(settings, plan)
+def flyer_pdf(settings: Settings, plan: str, to_pdf, invite: str | None = None) -> bytes:
+    """The flyer as PDF bytes. With a family's own invite link it's made for them; without one it's
+    the same for everyone on the plan, so it's made once per version and kept in storage."""
+    html = flyer_html(settings, plan, invite)
     key = f"flyers/welcome-{plan}-{hashlib.sha256(html.encode()).hexdigest()[:12]}.pdf"
     store = get_storage(settings)
-    if store.exists(key):
+    if invite is None and store.exists(key):
         return store.get(key)
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "flyer.pdf"
         to_pdf(html, path)
         data = path.read_bytes()
-    store.put(key, data, "application/pdf")
+    if invite is None:
+        store.put(key, data, "application/pdf")
     return data

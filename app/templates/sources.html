@@ -18,5 +18,15 @@
     <td>{{ r.gifts }}</td><td>£{{ '%.2f' % (r.gift_pence / 100) }}</td></tr>
   {% else %}<tr><td colspan="8" class="muted">No sign-ups in this period.</td></tr>{% endfor %}
 </table>
+<h2 style="margin-top:32px">Recent referrals</h2>
+<table>
+  <tr><th>#</th><th>Inviter</th><th>New family</th><th>Status</th><th>Joined</th><th>Paid</th><th>Reward</th><th>Note</th></tr>
+  {% for r in recent_referrals %}
+  <tr><td>{{ r.id }}</td><td>user {{ r.referrer_id }}</td><td>user {{ r.friend_id }}</td><td>{{ r.status|replace('_', ' ') }}</td>
+    <td>{{ r.created_at.strftime('%-d %b') }}</td><td>{{ r.paid_at.strftime('%-d %b') if r.paid_at else '' }}</td>
+    <td>{% if r.reward_pence %}£{{ '%.2f' % (r.reward_pence / 100) }}{% endif %}</td><td class="small">{{ r.note }}</td></tr>
+  {% else %}<tr><td colspan="8" class="muted">No referrals yet.</td></tr>{% endfor %}
+</table>
+
 <p class="small muted">Example links: <code>/?ref=fb-homeed-1</code>, <code>/gift?utm_source=meta&amp;utm_medium=paid&amp;utm_campaign=xmas-grandparents</code>. <a href="/admin">Back to admin</a></p>
 {% endblock %}

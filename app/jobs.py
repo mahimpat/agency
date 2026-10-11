@@ -27,7 +27,7 @@ from letters import llm, mail, pdf, pipeline, render
 
 from .config import (FIGURE_ORDER, LETTERS_PER_FIGURE, PARENT_REWRITES_PER_MONTH, PLANS, PREVIEW_HOURS,
                      REPLY_WAIT_DAYS, RETENTION_DAYS, Settings)
-from . import gifts, ratelimit, reminders
+from . import gifts, ratelimit, referrals, reminders
 from .emails import send_email
 from .models import Child, JobLock, Letter, Reply, SafeguardingRecord, Subscription, User, now
 from .flyer import flyer_pdf
@@ -175,7 +175,8 @@ def _make_pdf(settings: Settings, letter: Letter, html: str, services: Services)
         pages = services.to_pdf(html, path)  # the letter's own pages, checked by the caller
         data = path.read_bytes()
         if _first_letter(letter) and settings.welcome_flyer:
-            data = with_flyer(data, flyer_pdf(settings, letter.child.subscription.plan, services.to_pdf))
+            invite = referrals.link_for(settings, object_session(letter), letter.child.user)
+            data = with_flyer(data, flyer_pdf(settings, letter.child.subscription.plan, services.to_pdf, invite))
         storage.put(key, data, "application/pdf")
     letter.pdf_path = key
     return pages
@@ -455,6 +456,7 @@ def _run_due(db: Session, settings: Settings, services: Services) -> RunSummary:
     ratelimit.prune(db)
     apply_retention(db, settings)
     gifts.run_gift_months(db, settings)  # gift subscriptions get each month's letters here
+    referrals.run_rewards(db, settings)  # free months for families whose invited friends stayed
     reminders.run_reminders(db, settings)  # 6-monthly "your subscription continues" emails
     # Letters whose parent preview window has ended are posted, as promised.
     overdue = db.scalars(select(Letter).where(Letter.status == "awaiting_parent", Letter.preview_deadline <= now())).all()
