@@ -13,7 +13,7 @@ from pathlib import Path
 
 import segno
 
-from .config import COMPANY, PLANS, PRODUCT, REFERRAL_FRIEND_PERCENT, Settings
+from .config import COMPANY, PLANS, PRODUCT, REFERRAL_FRIEND_PERCENT, REFERRAL_HOLD_DAYS, Settings
 from .storage import get_storage
 
 HERE = Path(__file__).parent
@@ -31,6 +31,10 @@ def _fonts() -> str:
         faces.append(f"@font-face{{font-family:'{family}';font-style:{style};font-weight:400 700;"
                      f"src:url(data:font/woff2;base64,{data}) format('woff2');}}")
     return "\n".join(faces)
+
+
+def _hold() -> str:
+    return "two weeks" if REFERRAL_HOLD_DAYS == 14 else f"{REFERRAL_HOLD_DAYS} days"
 
 
 def _qr(url: str) -> str:
@@ -136,7 +140,7 @@ def flyer_html(settings: Settings, plan: str, invite: str | None = None) -> str:
   <p class="hand">{"Thank you for joining us at the very start." if settings.flyer_founding else "Thank you for joining us."} ~ The Letters from History team</p>
   <div class="cards">
     <div class="card"><h2>{"Invite a friend, get a free month" if invite else "Know a family who'd love this?"}</h2>
-      <p>{f"Share your own link: they get {REFERRAL_FRIEND_PERCENT}% off their first month, and once they've been with us two weeks, your next month is free." if invite else "Pass on this link, or let them scan the code."}</p>
+      <p>{f"Share your own link: they get {REFERRAL_FRIEND_PERCENT}% off their first month, and once they've been with us {_hold()}, your next month is free." if invite else "Pass on this link, or let them scan the code."}</p>
       <p class="url">{share_text}</p>{_qr(share)}</div>
     <div class="card"><h2>A present for someone special</h2>
       <p>Give 3, 6 or 12 months of Pen Pal from History. Paid once, nothing to renew, and the certificate arrives by email.</p>

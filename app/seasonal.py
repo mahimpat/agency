@@ -23,7 +23,7 @@ def christmas_notice(today: date) -> dict | None:
     last = last_order_day(today.year)
     if today <= last:
         return {"in_time": True, "last": last,
-                "text": f"Christmas: sign up by {last:%A %-d December} for the first letter to arrive before "
+                "text": f"Christmas: sign up by {last:%A %-d %B} for the first letter to arrive before "
                         "Christmas. Gift certificates arrive by email straight away, so you can give one right up "
                         "to Christmas Day."}
     return {"in_time": False, "last": last,

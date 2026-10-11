@@ -65,7 +65,7 @@ def checkout_url(settings: Settings, db: Session, user: User, sub: Subscription)
     # discount or customer-entered promotion codes, not both.
     from . import referrals
     offer = ({"discounts": [{"coupon": referrals.coupon_for(settings, db, user)}]}
-             if referrals.discount_applies(db, user)
+             if referrals.discount_applies(db, user, sub)
              else {"allow_promotion_codes": True})
     session = stripe.checkout.Session.create(
         mode="subscription",
@@ -203,7 +203,10 @@ def handle_event(db: Session, event: dict, settings_prices: dict | None = None, 
         sub = _find_subscription(db, stripe_id, metadata)
         # A family continuing in a gift's last month gets a free trial invoice first: the gift
         # already paid for that month's letters, so only real payments add credits for them.
-        trial_for_gift = bool(sub and sub.gift_id and obj.get("amount_paid") == 0)
+        # A trial invoice has nothing on it (subtotal 0); a month made free by a 100% code still has
+        # the plan's price before the discount, so it counts as a paid month.
+        subtotal = obj.get("subtotal", obj.get("amount_paid"))
+        trial_for_gift = bool(sub and sub.gift_id and subtotal == 0)
         if sub and obj.get("billing_reason") in {"subscription_create", "subscription_cycle", None} \
                 and not trial_for_gift:
             if stripe_id and not sub.stripe_subscription_id:

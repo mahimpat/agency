@@ -27,14 +27,15 @@ CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 
 def code_for(db: Session, user: User) -> str:
-    """The parent's invite code, made the first time it's needed."""
+    """The parent's invite code, made the first time it's needed. Flushed, not committed: the caller's
+    transaction decides when it's saved (callers in a request or job always commit afterwards)."""
     if not user.referral_code:
         while True:
             code = "".join(secrets.choice(CODE_ALPHABET) for _ in range(6))
             if not db.scalar(select(User).where(User.referral_code == code)):
                 break
         user.referral_code = code
-        db.commit()
+        db.flush()
     return user.referral_code
 
 
@@ -119,12 +120,18 @@ def _referral(db: Session, friend: User) -> Referral | None:
     return db.scalar(select(Referral).where(Referral.friend_id == friend.id))
 
 
-def discount_applies(db: Session, friend: User) -> bool:
-    """A referred family gets the discount on their first paid subscription only."""
+def discount_applies(db: Session, friend: User, sub: Subscription | None = None) -> bool:
+    """A referred family gets the discount once: on their first child's subscription, before any payment.
+    With `sub`, also checks that this is that subscription, and that it doesn't start with a gift's
+    free last month (Stripe would spend a one-off discount on that £0 invoice)."""
+    from .billing import gift_trial_end
     referral = _referral(db, friend)
-    if not referral or referral.status != "signed_up":
+    if not referral or referral.status != "signed_up" or any(s.started_at for s in friend.subscriptions):
         return False
-    return not any(sub.started_at for sub in friend.subscriptions)
+    if sub is not None:
+        if sub.id != min(s.id for s in friend.subscriptions) or gift_trial_end(sub):
+            return False
+    return True
 
 
 def friend_offer(db: Session, friend: User) -> tuple[int, int]:
@@ -217,13 +224,14 @@ def run_rewards(db: Session, settings: Settings) -> int:
             db.commit()
             continue
         referral.status, referral.reward_pence, referral.rewarded_at, referral.note = "rewarded", amount, now(), ""
+        invite = link_for(settings, db, referrer)
         db.commit()
         rewarded += 1
         send_email(settings, referrer.email, "Thank you! Your next month of letters is free",
                    f"Hello {referrer.name},\n\nA family you invited has joined Letters from History. Thank you! "
                    f"We've added £{amount / 100:.2f} to your account, so your next month is free. It comes off your "
                    "next bill automatically.\n\n"
-                   f"Your invite link, if you'd like to share it again: {link_for(settings, db, referrer)}\n\n"
+                   f"Your invite link, if you'd like to share it again: {invite}\n\n"
                    "Letters from History")
     return rewarded
 

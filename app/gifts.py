@@ -14,7 +14,7 @@ from pathlib import Path
 
 import stripe
 from itsdangerous import BadSignature, URLSafeSerializer
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from letters.render import GRAIN, _font_faces
@@ -116,34 +116,47 @@ def mark_paid(settings: Settings, db: Session, gift: Gift, payment_intent: str |
                   "Print the certificate for a card, or forward this email to the child's parent. They'll add the "
                   "child's details when they redeem it; no card is needed.\n\n")
                + "Letters from History")
-    send_due_to_recipients(settings, db)
+    if gift.send_on and gift.send_on <= now():
+        send_to_recipient(settings, db, gift)  # chosen day is today: no need to wait for the daily job
     return True
 
 
 def send_due_to_recipients(settings: Settings, db: Session) -> int:
     """Email gifts to the families on the day the buyer chose. The address is cleared once sent."""
-    sent = 0
     due = db.scalars(select(Gift).where(Gift.status == "paid", Gift.send_on.is_not(None),
                                         Gift.sent_to_recipient_at.is_(None), Gift.send_on <= now())).all()
-    for gift in due:
-        if not gift.recipient_email:
-            continue
-        link = f"{settings.base_url}/gift/certificate/{certificate_token(settings, gift)}"
-        who = gift.child_first_name or "your child"
-        send_email(settings, gift.recipient_email, f"A gift for {who} from {gift.buyer_name}",
-                   f"Hello,\n\n{gift.buyer_name} has given {who} {months_label(gift.months)} of Letters from History: "
-                   "real letters through the letterbox from history's great minds, written just for them. When "
-                   "they write back, the next letter answers.\n\n"
-                   + (f"Their message: \"{gift.message}\"\n\n" if gift.message else "")
-                   + f"The gift certificate (print it if you like): {link}\n\nGift code: {gift.code}\n"
-                   f"To start, a parent or guardian redeems the code at {settings.base_url}/redeem and adds the child's "
-                   f"details and a UK address. No card is needed. Please redeem by {gift.expires_at:%d %B %Y}.\n\n"
-                   "Letters from History")
-        gift.sent_to_recipient_at = now()
-        gift.recipient_email = ""
-        sent += 1
+    return sum(send_to_recipient(settings, db, gift) for gift in due)
+
+
+def send_to_recipient(settings: Settings, db: Session, gift: Gift) -> bool:
+    """Send one scheduled gift email. The gift is claimed first (one atomic update), so the daily job
+    and a payment arriving at the same moment can't both send it. If sending fails, the claim is
+    released and the address kept, so the next daily run tries again."""
+    if not gift.recipient_email:
+        return False
+    claimed = db.execute(update(Gift).where(Gift.id == gift.id, Gift.sent_to_recipient_at.is_(None))
+                         .values(sent_to_recipient_at=now())).rowcount
     db.commit()
-    return sent
+    if not claimed:
+        return False
+    db.refresh(gift)
+    link = f"{settings.base_url}/gift/certificate/{certificate_token(settings, gift)}"
+    who = gift.child_first_name or "your child"
+    ok = send_email(settings, gift.recipient_email, f"A gift for {who} from {gift.buyer_name}",
+                    f"Hello,\n\n{gift.buyer_name} has given {who} {months_label(gift.months)} of Letters from History: "
+                    "real letters through the letterbox from history's great minds, written just for them. When "
+                    "they write back, the next letter answers.\n\n"
+                    + (f"Their message: \"{gift.message}\"\n\n" if gift.message else "")
+                    + f"The gift certificate (print it if you like): {link}\n\nGift code: {gift.code}\n"
+                    f"To start, a parent or guardian redeems the code at {settings.base_url}/redeem and adds the child's "
+                    f"details and a UK address. No card is needed. Please redeem by {gift.expires_at:%d %B %Y}.\n\n"
+                    "Letters from History")
+    if ok:
+        gift.recipient_email = ""
+    else:
+        gift.sent_to_recipient_at = None
+    db.commit()
+    return ok
 
 
 def confirm_from_stripe(settings: Settings, db: Session, session_id: str, to_pdf) -> Gift | None:
@@ -281,6 +294,9 @@ def run_gift_months(db: Session, settings: Settings) -> None:
                        f"To keep the letters coming: {settings.base_url}/checkout/{sub.id}\n\nLetters from History")
     for gift in db.scalars(select(Gift).where(Gift.status == "paid", Gift.expires_at < now())).all():
         gift.status = "expired"
+    # A scheduled email that will never be sent (redeemed early, refunded, expired): drop the address now.
+    for gift in db.scalars(select(Gift).where(Gift.status != "paid", Gift.recipient_email != "")).all():
+        gift.recipient_email = ""
     db.commit()
     forget_old_gifts(db, settings)
 
@@ -301,6 +317,7 @@ def forget_old_gifts(db: Session, settings: Settings) -> None:
             get_storage(settings).delete(gift.certificate_path)
             gift.certificate_path = None
         gift.buyer_name, gift.buyer_email, gift.child_first_name, gift.message = "", "", "", ""
+        gift.recipient_email = ""
     db.commit()
 
 

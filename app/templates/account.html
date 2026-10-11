@@ -106,13 +106,13 @@
 {% if invite %}
 <section class="card" id="invite">
   <h2>Invite a friend, get a free month</h2>
-  <p>Share your link with another family. They get <b>{{ REFERRAL_FRIEND_PERCENT }}% off their first month</b>, and when they've been with us for two weeks, <b>your next month is free</b>.</p>
+  <p>Share your link with another family. They get <b>{{ REFERRAL_FRIEND_PERCENT }}% off their first month</b>, and when they've been with us for {{ REFERRAL_HOLD_DAYS }} days, <b>your next month is free</b>.</p>
   <div class="field"><label for="invite-link">Your invite link</label>
     <input type="text" id="invite-link" value="{{ invite }}" readonly onclick="this.select()"></div>
   <p class="small"><a href="mailto:?subject={{ 'Letters from History: half price first month'|urlencode }}&amp;body={{ ('My child gets letters from history\'s great minds, and they answer when you write back. Here\'s ' ~ REFERRAL_FRIEND_PERCENT ~ '% off your first month: ' ~ invite)|urlencode }}">Share by email</a>
     · <a href="https://wa.me/?text={{ ('Letters from History: real letters from history\'s great minds that answer your child. ' ~ REFERRAL_FRIEND_PERCENT ~ '% off your first month: ' ~ invite)|urlencode }}" target="_blank" rel="noopener">Share on WhatsApp</a></p>
   {% if invite_stats.joined %}
-  <p class="small muted">{{ invite_stats.joined }} famil{{ 'y has' if invite_stats.joined == 1 else 'ies have' }} joined through your link{% if invite_stats.rewarded %}, and you've earned £{{ '%.2f' % (invite_stats.credit_pence / 100) }} in free months{% endif %}{% if invite_stats.waiting %} ({{ invite_stats.waiting }} still in their first two weeks){% endif %}. Thank you!</p>
+  <p class="small muted">{{ invite_stats.joined }} famil{{ 'y has' if invite_stats.joined == 1 else 'ies have' }} joined through your link{% if invite_stats.rewarded %}, and you've earned £{{ '%.2f' % (invite_stats.credit_pence / 100) }} in free months{% endif %}{% if invite_stats.waiting %} ({{ invite_stats.waiting }} still in their first {{ REFERRAL_HOLD_DAYS }} days){% endif %}. Thank you!</p>
   {% endif %}
   <p class="small muted">Up to 12 free months a year. New families only. <a href="/terms#referrals">Terms</a></p>
 </section>

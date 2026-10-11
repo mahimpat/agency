@@ -573,6 +573,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         # Families who've started letters can invite others (not before: they haven't seen one yet).
         invite = referrals.link_for(settings, db, me) if any(
             s.status in ("active", "trialing", "past_due", "gift_ended") for s in me.subscriptions) else None
+        db.commit()  # keeps a newly made invite code
         return page(request, "account.html", children=me.children, invite=invite,
                     invite_stats=referrals.stats(db, me))
 
@@ -678,7 +679,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if not sub or sub.user_id != user.id:
             raise HTTPException(404)
         me = db.get(User, user.id)
-        discount = referrals.discount_applies(db, me)
+        discount = referrals.discount_applies(db, me, sub)
         return page(request, "checkout.html", sub=sub, trial_end=billing.gift_trial_end(sub),
                     friend_offer=referrals.offer_text(*referrals.friend_offer(db, me)) if discount else "",
                     can_add_code=not discount and not me.referred_by_id and not sub.gift_id

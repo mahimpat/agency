@@ -275,6 +275,7 @@ class GiftTests(AppTestCase):
         # Stripe's £0 trial invoice doesn't add letters: the gift already paid for this month.
         self.webhook({"id": "evt_trial_inv", "object": "event", "type": "invoice.paid",
                       "data": {"object": {"object": "invoice", "billing_reason": "subscription_create", "amount_paid": 0,
+                                          "subtotal": 0,
                                           "parent": {"subscription_details": {"subscription": "sub_t",
                                                      "metadata": {"subscription_row_id": str(sub_id)}}}}}})
         db = self.db

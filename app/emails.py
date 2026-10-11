@@ -9,10 +9,12 @@ from .config import Settings
 log = logging.getLogger("letters.email")
 
 
-def send_email(settings: Settings, to: str, subject: str, body: str) -> None:
+def send_email(settings: Settings, to: str, subject: str, body: str) -> bool:
+    """Returns False if the email couldn't be sent (the error is logged). Without SMTP set up
+    (development), the email goes to the log and counts as sent."""
     if not settings.smtp_host:
         log.warning("Email (SMTP not configured) to=%s subject=%s\n%s", to, subject, body)
-        return
+        return True
     message = EmailMessage()
     message["From"] = settings.mail_from
     message["To"] = to
@@ -26,6 +28,8 @@ def send_email(settings: Settings, to: str, subject: str, body: str) -> None:
             smtp.send_message(message)
     except (smtplib.SMTPException, OSError):
         log.exception("Could not send email to %s", to)
+        return False
+    return True
 
 
 def send_marketing_email(settings: Settings, user, subject: str, body: str) -> bool:

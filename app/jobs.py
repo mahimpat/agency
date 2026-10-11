@@ -175,8 +175,13 @@ def _make_pdf(settings: Settings, letter: Letter, html: str, services: Services)
         pages = services.to_pdf(html, path)  # the letter's own pages, checked by the caller
         data = path.read_bytes()
         if _first_letter(letter) and settings.welcome_flyer:
-            invite = referrals.link_for(settings, object_session(letter), letter.child.user)
-            data = with_flyer(data, flyer_pdf(settings, letter.child.subscription.plan, services.to_pdf, invite))
+            # The flyer is a nice extra: if it can't be made, the letter still goes, without it.
+            try:
+                invite = referrals.link_for(settings, object_session(letter), letter.child.user)
+                data = with_flyer(data, flyer_pdf(settings, letter.child.subscription.plan, services.to_pdf, invite))
+            except Exception:  # noqa: BLE001
+                log.exception("Welcome flyer failed for letter %s; posting the letter without it", letter.id)
+                letter.note = (letter.note + " Welcome flyer couldn't be made, so it was left out.").strip()
         storage.put(key, data, "application/pdf")
     letter.pdf_path = key
     return pages
