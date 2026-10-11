@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Letters from History: Team Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+@page { size: A4; margin: 16mm 16mm 18mm; @bottom-left { content: "Letters from History · Team briefing · Forem Innovations"; font: 8pt Lora, Georgia, serif; color: #8a8174; } @bottom-right { content: counter(page); font: 8pt Lora, Georgia, serif; color: #8a8174; } }
+@page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; color: #26221d; font: 10.5pt/1.5 'Lora', Georgia, serif; }
+h1, h2, .display { font-family: 'IM Fell English', Georgia, serif; font-weight: 400; letter-spacing: -0.005em; }
+h2 { font-size: 26pt; line-height: 1.1; margin: 0 0 4mm; }
+h3 { font-size: 12pt; margin: 5mm 0 1.5mm; }
+p { margin: 0 0 3mm; }
+ul, ol { margin: 0 0 3mm; padding-left: 5mm; }
+li { margin-bottom: 1.2mm; }
+.kicker { font: 600 8pt/1 'Lora', serif; letter-spacing: .16em; text-transform: uppercase; color: #9f3328; margin: 0 0 3mm; }
+.lede { font-size: 12pt; color: #4f483e; margin-bottom: 6mm; }
+.muted { color: #6b6255; }
+.small { font-size: 8.5pt; }
+section { break-before: page; }
+.accent { color: #9f3328; }
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 5mm; font-size: 9.5pt; }
+th, td { text-align: left; padding: 2mm 2.5mm; border-bottom: 0.6pt solid #d6cbb5; vertical-align: top; }
+th { font-weight: 600; border-bottom: 1.2pt solid #26221d; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7mm; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; }
+.box { background: #f7f3ea; border: 0.6pt solid #d6cbb5; padding: 4mm 5mm; margin-bottom: 4mm; break-inside: avoid; }
+.box h3 { margin-top: 0; }
+.stat { font-family: 'IM Fell English', serif; font-size: 24pt; line-height: 1; color: #9f3328; }
+.shot { width: 100%; border: 0.6pt solid #d6cbb5; box-shadow: 0 2mm 5mm -3mm rgba(40,30,15,.35); display: block; }
+.caption { font-size: 8.5pt; color: #6b6255; margin-top: 2mm; }
+.step { border-top: 1.4pt solid #26221d; padding-top: 2.5mm; }
+.step .n { font-family: 'IM Fell English', serif; font-style: italic; color: #9f3328; font-size: 11pt; }
+.step h3 { margin: 1mm 0; }
+.step p { font-size: 9.5pt; color: #4f483e; }
+.pill { display: inline-block; white-space: nowrap; font-size: 8pt; padding: .6mm 2.5mm; border-radius: 99px; background: #efe8d9; color: #4f483e; }
+.pill.ok { background: #e3efe4; color: #2f6b3a; } .pill.todo { background: #f8ecd6; color: #8a5a12; }
+
+/* Cover */
+.cover { page: cover; height: 297mm; padding: 28mm 22mm; position: relative; overflow: hidden; break-before: avoid;
+  background: radial-gradient(ellipse at 80% 30%, #fbf7ee, #f2ead9 70%); }
+.cover h1 { font-size: 54pt; line-height: 1; margin: 0 0 6mm; }
+.cover .tag { font-family: 'IM Fell English', serif; font-style: italic; font-size: 22pt; color: #9f3328; margin-bottom: 10mm; }
+.cover .intro { font-size: 13pt; max-width: 105mm; color: #4f483e; }
+.cover .meta { position: absolute; left: 22mm; bottom: 22mm; font-size: 9.5pt; color: #6b6255; }
+.cover .letters { position: absolute; right: -6mm; bottom: 30mm; width: 120mm; height: 150mm; }
+.cover .letters img { position: absolute; width: 88mm; box-shadow: 0 3mm 8mm -3mm rgba(40,30,15,.45); }
+.cover .letters img:nth-child(1) { right: 34mm; top: 0; transform: rotate(-6deg); }
+.cover .letters img:nth-child(2) { right: 4mm; top: 22mm; transform: rotate(4deg); }
+
+/* Pipeline diagram */
+.flow { display: grid; grid-template-columns: 1fr; gap: 0; margin: 3mm 0 5mm; }
+.node { border: 0.8pt solid #26221d; background: #fffdf8; padding: 2.5mm 4mm; font-size: 9.5pt; break-inside: avoid; }
+.node b { display: block; font-size: 10pt; }
+.node.ai { border-color: #1e2a55; background: #f1f3f8; }
+.node.human { border-color: #9f3328; background: #fbf1ee; }
+.node.safe { border-color: #2f6b3a; background: #eef5ef; }
+.arrow { text-align: center; color: #8a8174; font-size: 10pt; line-height: 1; padding: 1mm 0; }
+.legend span { display: inline-block; margin-right: 5mm; font-size: 8.5pt; }
+.legend i { display: inline-block; width: 3mm; height: 3mm; border: 0.8pt solid; vertical-align: -0.4mm; margin-right: 1.5mm; }
+
+.letters-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; }
+.letters-grid figure { margin: 0; }
+.letters-grid img { width: 100%; border: 0.6pt solid #d6cbb5; box-shadow: 0 1.5mm 4mm -2mm rgba(40,30,15,.35); display: block; }
+.letters-grid figcaption { font-size: 8.5pt; color: #4f483e; margin-top: 1.5mm; }
+</style>
+</head>
+<body>
+
+<!-- 1. Cover -->
+<div class="cover">
+  <p class="kicker">Team briefing · October 2026</p>
+  <h1>Letters from History</h1>
+  <div class="tag">History writes back.</div>
+  <p class="intro">Real, personalised letters from history's great minds, posted to children across the UK. When a child writes back, the next letter answers them.</p>
+  <div class="letters">
+    <img src="img/letter-earhart-to-leo.jpg" alt="">
+    <img src="img/letter-anning-to-oliver.jpg" alt="">
+  </div>
+  <div class="meta">A product of <b>Forem Innovations</b><br>Status: built and tested end to end in test mode. Not yet launched.</div>
+</div>
+
+<!-- 2. The idea -->
+<section>
+  <p class="kicker">The idea</p>
+  <h2>A pen pal from history who actually listens</h2>
+  <p class="lede">Children aged 5 to 12 get beautifully printed letters through the letterbox from figures like Mary Anning, Isambard Kingdom Brunel and Ada Lovelace. Each letter is written for that child. When the child writes back, the pen pal answers their actual questions.</p>
+
+  <div class="grid3" style="margin-bottom:6mm">
+    <div class="box"><div class="stat">126,000</div><p class="small">children home educated in England (autumn 2025, DfE), up from 111,700 a year earlier: our first audience</p></div>
+    <div class="box"><div class="stat">£7 / £12</div><p class="small">a month for Story Letters (1 letter) or Pen Pal from History (2 letters, one answering the child)</p></div>
+    <div class="box"><div class="stat">~80%</div><p class="small">estimated gross margin after printing, postage, AI and card fees</p></div>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <h3>Why families will pay</h3>
+      <ul>
+        <li><b>Screen-free and real.</b> Paper, ink and a letter with their name on it.</li>
+        <li><b>It gets children writing.</b> Few things motivate a reluctant writer like a question from a pen pal.</li>
+        <li><b>History that sticks.</b> Every letter comes with a "Real history" card for parent and child to read together.</li>
+        <li><b>Perfect gift.</b> Grandparents are a natural second audience.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Why we're different</h3>
+      <ul>
+        <li>Existing services (Heritage Letter, Letters From Afar, History By Mail; Banjo Robinson in the UK) send <b>the same letter to every child</b>. We found none that answers a child's own letter.</li>
+        <li>AI makes truly personal, two-way letters affordable. People check them.</li>
+        <li>Every pen pal writes on <b>stationery from their own era</b>, so each letter feels like a real object.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box" style="margin-top:4mm">
+    <h3>Why it can run with a small team</h3>
+    <p style="margin:0">AI agents write, fact-check and lay out every letter. Stannp prints and posts them through Royal Mail, and Stripe takes payments. The team's daily job is <b>reviewing</b>: approving letters and handling any child's letter that needs a person. That takes minutes a day, not hours.</p>
+  </div>
+</section>
+
+<!-- 3. Family journey -->
+<section>
+  <p class="kicker">For families</p>
+  <h2>How it works</h2>
+  <div class="grid3" style="margin:3mm 0 5mm">
+    <div class="step"><div class="n">One</div><h3>Sign up</h3><p>Parent adds their child: first name, age, what they love, anything to avoid, and the address. They choose a plan and pay securely with Stripe.</p></div>
+    <div class="step"><div class="n">Two</div><h3>An introduction arrives</h3><p>The first pen pal introduces themselves. Parents can choose to preview every letter before it's posted.</p></div>
+    <div class="step"><div class="n">Three</div><h3>The child writes back</h3><p>The parent snaps a photo of the reply. The next letter answers it. Every few months, a new pen pal takes over.</p></div>
+  </div>
+  <img class="shot" src="img/landing.png" alt="Home page" style="height:100mm;object-fit:cover;object-position:top">
+  <p class="caption">The home page. The hero shows the core promise: Leo's own letter, and Amelia Earhart's answer to every question in it.</p>
+  <div class="grid2" style="margin-top:5mm">
+    <div><img class="shot" src="img/account.png" alt="Parent account" style="height:58mm;object-fit:cover;object-position:top"><p class="caption">The parent's account: letters, preview, reply upload, billing and their data.</p></div>
+    <div><img class="shot" src="img/child.png" alt="Child sign-up form" style="height:58mm;object-fit:cover;object-position:top"><p class="caption">Adding a child: only what the letters need, nothing more.</p></div>
+  </div>
+</section>
+
+<!-- 4. The letters -->
+<section>
+  <p class="kicker">The product</p>
+  <h2>The letters</h2>
+  <p class="lede">Each pen pal writes on paper from their own time, and every letter is written for one child. These are real sample letters, rendered exactly as they print on A4. The address shows through the envelope window.</p>
+  <div class="letters-grid">
+    <figure><img src="img/letter-anning-to-oliver.jpg" alt=""><figcaption><b>Mary Anning → Oliver, 7.</b> Introduction. Victorian laid paper, ammonite sketch.</figcaption></figure>
+    <figure><img src="img/letter-einstein-to-maya.jpg" alt=""><figcaption><b>Einstein → Maya, 9.</b> Typed page, pencil note, ink signature.</figcaption></figure>
+    <figure><img src="img/letter-earhart-to-leo.jpg" alt=""><figcaption><b>Amelia Earhart → Leo, 7.</b> Answers Leo's own questions. Airmail paper.</figcaption></figure>
+    <figure><img src="img/letter-cleopatra-to-sofia.jpg" alt=""><figcaption><b>Cleopatra → Sofia, 10.</b> Papyrus, "translated from the Greek".</figcaption></figure>
+    <figure><img src="img/letter-leonardo-to-sam.jpg" alt=""><figcaption><b>Leonardo → Sam, 11.</b> Parchment, with a line of mirror writing to decode.</figcaption></figure>
+    <figure><img src="img/back-anning.jpg" alt=""><figcaption><b>The back of every letter.</b> A "Real history" card and space to write back.</figcaption></figure>
+  </div>
+</section>
+
+<!-- 5. Pen pals and letter types -->
+<section>
+  <p class="kicker">The product</p>
+  <h2>Our pen pals</h2>
+  <p class="lede">Eleven pen pals at launch, led by figures UK children meet in the history curriculum. Each has a verified fact sheet: the only facts a letter may use, plus "handle with care" rules.</p>
+  <table>
+    <tr><th>#</th><th>Pen pal</th><th>Writes from</th><th>Children discover</th></tr>
+    <tr><td>1</td><td><b>Mary Anning</b></td><td>Lyme Regis, 1820s-30s</td><td>Fossils, ichthyosaurs, the Jurassic Coast</td></tr>
+    <tr><td>2</td><td><b>Isambard Kingdom Brunel</b></td><td>Westminster, 1840s-50s</td><td>Railways, bridges, iron steamships</td></tr>
+    <tr><td>3</td><td><b>Ada Lovelace</b></td><td>London, 1840s</td><td>Machines, maths, the first computer program</td></tr>
+    <tr><td>4</td><td><b>Florence Nightingale</b></td><td>London, 1857-65</td><td>Nursing, hygiene, statistics</td></tr>
+    <tr><td>5</td><td><b>Charles Darwin</b></td><td>Down House, Kent</td><td>HMS Beagle, Galápagos, observation</td></tr>
+    <tr><td>6</td><td><b>Mary Seacole</b></td><td>London, 1857-60</td><td>Jamaica, travel, healing, courage</td></tr>
+    <tr><td>7</td><td><b>William Shakespeare</b></td><td>Bankside, 1599-1608</td><td>The Globe, plays, words we still use</td></tr>
+    <tr><td>8-11</td><td>Einstein · Amelia Earhart · Leonardo da Vinci · Cleopatra</td><td>Their own eras</td><td>Space, flight, inventions, ancient Egypt</td></tr>
+  </table>
+  <div class="grid2">
+    <div>
+      <h3>A friendship, not a series of leaflets</h3>
+      <ul>
+        <li><b>Introduction:</b> the first letter from every new pen pal.</li>
+        <li><b>Story:</b> a new chapter of their life, linked to the child's interests.</li>
+        <li><b>Reply:</b> answers every question in the child's letter.</li>
+        <li><b>Follow-up:</b> if no reply comes within 3 weeks.</li>
+        <li><b>Farewell:</b> after 3 letters, a goodbye. "Next month, a new pen pal from another time will write to you."</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Accuracy rules every letter follows</h3>
+      <ul>
+        <li>Only facts from the figure's fact sheet. No invented dates, events or quotations.</li>
+        <li>Pen pals never know their own future, so there are no spoilers about their deaths.</li>
+        <li>Anything imaginative (e.g. letters travelling through time) is marked on the Real history card.</li>
+        <li>British English, at the child's reading level.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Behind the scenes -->
+<section>
+  <p class="kicker">Behind the scenes</p>
+  <h2>How a letter is made</h2>
+  <p class="legend"><span><i style="border-color:#1e2a55;background:#f1f3f8"></i>AI agent</span><span><i style="border-color:#2f6b3a;background:#eef5ef"></i>Safety check</span><span><i style="border-color:#9f3328;background:#fbf1ee"></i>A person</span><span><i style="border-color:#26221d"></i>Service</span></p>
+  <div class="grid2" style="align-items:start">
+    <div class="flow">
+      <div class="node">Stripe: payment received<span class="small muted"> → letter credits for this month</span></div>
+      <div class="arrow">↓</div>
+      <div class="node ai"><b>Reply reader</b>Writes out the child's handwriting from the photo and lists their questions</div>
+      <div class="arrow">↓</div>
+      <div class="node safe"><b>Two safety checks</b>AI risk assessment, plus a word screen. Personal details removed. Worrying letters held for a person</div>
+      <div class="arrow">↓</div>
+      <div class="node ai"><b>Writer</b>Writes in the pen pal's voice from the verified fact sheet</div>
+      <div class="arrow">↓ ↑ revise up to twice</div>
+      <div class="node ai"><b>Fact-checker</b>Independent check for accuracy, spoilers, child safety and reading level</div>
+      <div class="arrow">↓</div>
+      <div class="node human"><b>Our review</b>A person approves every letter at launch</div>
+      <div class="arrow">↓</div>
+      <div class="node human"><b>Parent preview (optional)</b>Approve, ask for changes, or it posts after 48 hours</div>
+      <div class="arrow">↓</div>
+      <div class="node">Stannp prints A4, double-sided, window envelope → Royal Mail 2nd class</div>
+    </div>
+    <div>
+      <h3>Why this design</h3>
+      <p>Each AI step has <b>one job</b>, and the fact-checker is separate from the writer, so mistakes get caught rather than repeated. Every letter's fact-check record is saved, which lets us back up the claim that "every fact is checked".</p>
+      <h3>What the AI sees</h3>
+      <p>The child's <b>first name, age, interests</b> and the words of their reply. It <b>never</b> sees surnames, addresses, emails or the parent's details.</p>
+      <h3>Letter types and rotation</h3>
+      <p>Which pen pal a child has, and whether the next letter is an introduction, story or farewell, is worked out from the letters already sent. Rejected letters never throw the rotation off.</p>
+      <h3>Daily job</h3>
+      <p>Once a day a scheduler triggers the run: read new replies, write the letters that payments allow, and queue them for review. Letters a parent hasn't responded to within 48 hours are posted.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Safety -->
+<section>
+  <p class="kicker">Safeguarding</p>
+  <h2>Keeping children safe</h2>
+  <p class="lede">Children will sometimes tell a pen pal things they haven't told anyone. We designed for that from the start, and we treat it as the most important part of the product.</p>
+  <table>
+    <tr><th style="width:30%">Layer</th><th>What it does</th></tr>
+    <tr><td><b>Parents only</b></td><td>Children have no accounts and no contact with anyone. Only a parent or guardian can sign up and upload replies.</td></tr>
+    <tr><td><b>AI safeguarding assessment</b></td><td>Every reply is graded none, low, high or urgent. It also flags inappropriate content, attempts to instruct the AI, and letters that don't look like a child wrote them.</td></tr>
+    <tr><td><b>Word screen (no AI)</b></td><td>Words about being hurt, self-harm, secrets, fear of an adult, running away, neglect or bullying <b>force a hold even if the AI says the letter is fine</b>. Tested against exactly that case.</td></tr>
+    <tr><td><b>Personal details removed</b></td><td>Addresses, phone numbers, emails, postcodes and social media handles are stripped out before anything is stored or written.</td></tr>
+    <tr><td><b>Hold, don't reply</b></td><td>A held reply gets no automatic answer. The safeguarding lead is emailed immediately, with URGENT in the subject when needed, and the photo is kept until a person has reviewed it.</td></tr>
+    <tr><td><b>Safe outgoing letters</b></td><td>Letters never ask for personal details, never repeat them, never promise meetings, calls or gifts, and never suggest secrets from parents. Low-level sadness (e.g. a pet died) gets a brief, kind acknowledgement and a nudge to talk to a trusted grown-up.</td></tr>
+    <tr><td><b>People</b></td><td>We approve every letter at launch. A named Designated Safeguarding Lead follows a written policy that sets out when to call 999, contact the council's children's services, or get advice from the NSPCC (0808 800 5000).</td></tr>
+  </table>
+  <p class="small muted">The automatic checks help a person notice. They never replace a person's judgement. False alarms are expected and fine. Full policy: docs/safeguarding.md.</p>
+</section>
+
+<!-- 8. Parent preview -->
+<section>
+  <p class="kicker">Parent preview</p>
+  <h2>Parents see every letter first, if they want to</h2>
+  <div class="grid2" style="align-items:start">
+    <div>
+      <img class="shot" src="img/preview.jpg" alt="Parent preview page">
+      <p class="caption">The preview shows the letter exactly as it will print.</p>
+    </div>
+    <div>
+      <h3>How it works</h3>
+      <ol>
+        <li>We check and approve the letter first, so parents only see letters that have passed review.</li>
+        <li>The parent gets an email: "Mary Anning has written to Maya".</li>
+        <li>They <b>approve</b> it (posted today), <b>ask for changes</b> (e.g. "mention her new puppy, Pip"), or do nothing, and it posts after <b>48 hours</b>.</li>
+      </ol>
+      <h3>Limits that protect our costs</h3>
+      <ul>
+        <li>At most <b>2 rewrites per child per month</b>.</li>
+        <li>A rewrite reuses the same letter credit, so <b>it never creates extra letters</b>.</li>
+        <li>Change requests: 500 characters maximum, personal details removed, and they can't override accuracy or safety.</li>
+        <li>Every rewrite is checked by us again.</li>
+        <li>Child replies: at most <b>4 uploads per child per month</b>.</li>
+      </ul>
+      <p class="small muted">Preview is a per-child setting, on by default at sign-up and changeable any time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9. Operations -->
+<section>
+  <p class="kicker">Operations</p>
+  <h2>Running it day to day</h2>
+  <div class="grid2" style="align-items:start">
+    <div>
+      <img class="shot" src="img/admin.png" alt="Admin page">
+      <p class="caption">The admin page: letters to check, children's letters held for a person (with the safeguarding steps right there), letters waiting on parents, and recent posting with costs.</p>
+    </div>
+    <div>
+      <h3>Daily (5-10 minutes)</h3>
+      <ul>
+        <li>Read and approve letters, or reject them for a fresh rewrite (the credit is returned).</li>
+        <li>Handle any held child's letter the same day, following the safeguarding policy.</li>
+      </ul>
+      <h3>Monthly</h3>
+      <ul>
+        <li>Stripe: check for failed payments.</li>
+        <li>Stannp: check costs against our records.</li>
+        <li>Read a few posted letters end to end.</li>
+      </ul>
+      <h3>Switches we control</h3>
+      <table>
+        <tr><td><b>LIVE_MAIL</b></td><td>Off = Stannp test proofs only. On = really printed and posted.</td></tr>
+        <tr><td><b>REVIEW_ALL</b></td><td>On = we approve every letter. Later, off = only flagged letters wait for us.</td></tr>
+      </table>
+      <h3>Roles we need</h3>
+      <ul>
+        <li><b>Safeguarding lead</b> and a deputy (basic training + DBS check)</li>
+        <li><b>Letter reviewer(s)</b></li>
+        <li><b>Growth:</b> home-education groups, Mumsnet, grandparent gifting</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 10. Numbers -->
+<section>
+  <p class="kicker">Business</p>
+  <h2>The numbers</h2>
+  <p class="lede">All figures are estimates from current UK prices. They'll be replaced with real data from our first months.</p>
+  <table>
+    <tr><th>Per subscriber per month</th><th>Story Letters (£7)</th><th>Pen Pal from History (£12)</th></tr>
+    <tr><td>Print, envelope and 2nd class postage (Stannp, ~£0.88 a letter)</td><td>£0.88</td><td>£1.76</td></tr>
+    <tr><td>AI: writing, fact-checking, reading replies</td><td>~£0.15</td><td>~£0.30</td></tr>
+    <tr><td>Card payments (Stripe UK)</td><td>~£0.31</td><td>~£0.38</td></tr>
+    <tr><th>Gross margin</th><th>~£5.66 (81%)</th><th>~£9.56 (80%)</th></tr>
+  </table>
+  <div class="grid3">
+    <div class="box"><div class="stat">300</div><p class="small">subscribers ≈ <b>£3,000/month</b> revenue (at a £10 average)</p></div>
+    <div class="box"><div class="stat">1,000</div><p class="small">subscribers ≈ <b>£10,000/month</b>: our year-one stretch goal</p></div>
+    <div class="box"><div class="stat">£90k</div><p class="small">turnover before VAT registration applies (then 20% of the price goes to VAT)</p></div>
+  </div>
+  <h3>Where customers come from</h3>
+  <ul>
+    <li><b>UK home-education communities:</b> Facebook groups, co-ops, Instagram home-ed accounts.</li>
+    <li><b>Mumsnet and Netmums:</b> Banjo Robinson, a UK pen-pal service, ran a Mumsnet product test with 88% parent satisfaction.</li>
+    <li><b>Grandparent gifting:</b> a prepaid "12 letters from history" plan for Christmas.</li>
+    <li><b>Word of mouth:</b> a child opening a letter that answers their own question is our best advert.</li>
+  </ul>
+  <h3>Risks we're managing</h3>
+  <ul>
+    <li><b>Accuracy:</b> verified fact sheets, an independent fact-checker, and human review.</li>
+    <li><b>Children's safety and data:</b> layered safeguarding, UK GDPR, data from parents only.</li>
+    <li><b>Novelty wearing off:</b> stories that continue, pen pals that rotate, and replies that get answered.</li>
+    <li><b>Cost abuse:</b> caps on rewrites and uploads, and every letter is paid for first.</li>
+  </ul>
+</section>
+
+<!-- 11. Status -->
+<section>
+  <p class="kicker">Where we are</p>
+  <h2>Status and next steps</h2>
+  <div class="grid2" style="align-items:start">
+    <div>
+      <h3>Built</h3>
+      <table>
+        <tr><td><span class="pill ok">done</span></td><td>Parent accounts, child profiles, reply uploads, data export and deletion</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>Stripe subscriptions (£7/£12), billing portal, payment webhooks</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>AI writer, fact-checker and reply reader; 11 pen pals; era stationery</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>Layered safeguarding and safeguarding policy</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>Admin review, parent preview, cost limits</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>Stannp UK print-and-post integration (test proofs by default)</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>Privacy policy and terms (Forem Innovations), launch guide</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>43 automated tests covering accounts, billing, letters, safety and preview</td></tr>
+      </table>
+      <p class="small muted">Tech: Python (FastAPI), Postgres (Supabase, London) or SQLite, Claude by Anthropic, Stripe, Stannp, Chromium for print PDFs, Docker.</p>
+    </div>
+    <div>
+      <h3>Before launch</h3>
+      <table>
+        <tr><td><span class="pill todo">to do</span></td><td>Run end to end with live keys in test mode, and check Stannp proofs (address window)</td></tr>
+        <tr><td><span class="pill todo">to do</span></td><td>Hosting (UK/EU), Postgres, daily scheduler, email provider</td></tr>
+        <tr><td><span class="pill todo">to do</span></td><td>Company details, ICO registration, data processing terms with suppliers</td></tr>
+        <tr><td><span class="pill todo">to do</span></td><td>Solicitor review of privacy policy and terms</td></tr>
+        <tr><td><span class="pill todo">to do</span></td><td>Name a Safeguarding Lead and deputy; training and DBS checks</td></tr>
+        <tr><td><span class="pill todo">to do</span></td><td>Database migrations (Alembic) before real customer data</td></tr>
+      </table>
+      <h3>The plan</h3>
+      <ol>
+        <li><b>Weeks 1-2:</b> test mode end to end; send 5-10 real letters to friends' children and film the reactions (with permission).</li>
+        <li><b>Weeks 3-4:</b> legal, safeguarding and hosting; then a soft launch to founding families.</li>
+        <li><b>Month 2+:</b> home-ed communities, Mumsnet and a Christmas gift campaign.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
