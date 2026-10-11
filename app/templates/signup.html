@@ -4,7 +4,7 @@
 {% block content %}
 <h1>Create your account</h1>
 {% if christmas %}<div class="flash" role="note">{{ christmas.text }}</div>{% endif %}
-{% if invited %}<div class="flash">A friend invited you, so your first month is {{ REFERRAL_FRIEND_PERCENT }}% off.</div>{% endif %}
+{% if invite_offer %}<div class="flash">You've been invited: <b>{{ invite_offer }}</b>.</div>{% endif %}
 <p class="muted">{% if redeeming %}You'll add your child's details next. No card needed.{% else %}You'll add your child's details next, then choose how to pay.{% endif %}</p>
 {% if redeeming %}
 <div class="flash">You're redeeming gift <b>{{ redeeming }}</b>. Create an account (or <a href="/login">log in</a>), then add your child's details.
@@ -23,6 +23,7 @@
   <div class="field"><label for="name">Your first name</label><input type="text" id="name" name="name" value="{{ name or '' }}" autocomplete="given-name" required></div>
   <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" value="{{ email or '' }}" autocomplete="email" required></div>
   <div class="field"><label for="password">Password <span class="hint">(at least 10 characters)</span></label><input type="password" id="password" name="password" minlength="10" autocomplete="new-password" required></div>
+  {% if not invite_offer %}<div class="field"><label for="invite_code">Invite code <span class="hint">(optional)</span></label><input type="text" id="invite_code" name="invite_code" value="{{ invite_code or '' }}" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40"></div>{% endif %}
   <div class="field"><label class="check"><input type="checkbox" name="agree" value="true" required> I've read the <a href="/privacy" target="_blank">privacy policy</a> and agree to the <a href="/terms" target="_blank">terms</a>.</label></div>
   <div class="field"><label class="check"><input type="checkbox" name="marketing" value="true"> Send me occasional news about new pen pals and offers. (Optional. Unsubscribe any time.)</label></div>
   <button class="btn" type="submit">Continue</button>

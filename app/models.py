@@ -181,8 +181,10 @@ class Referral(Base):
     free month once the friend has paid and stayed long enough (see app/referrals.py)."""
     __tablename__ = "referrals"
     id: Mapped[int] = mapped_column(primary_key=True)
-    referrer_id: Mapped[int] = mapped_column(Integer, index=True)
+    # The family who gets the free month. None for a custom code with no one to reward.
+    referrer_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     friend_id: Mapped[int] = mapped_column(Integer, unique=True)  # a family can only be referred once
+    code_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # a custom code, if used
     # signed_up, paid (discount used; waiting out the hold period), rewarded, not_rewarded
     status: Mapped[str] = mapped_column(String(20), default="signed_up", index=True)
     friend_sub_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -191,6 +193,22 @@ class Referral(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     rewarded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class ReferralCode(Base):
+    """A custom code made by the admin, e.g. for a blogger, a PTA or a podcast: its own offer, limits,
+    and optionally a customer account that earns a free month per family that joins with it."""
+    __tablename__ = "referral_codes"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(24), unique=True, index=True)
+    label: Mapped[str] = mapped_column(String(120), default="")  # who it's for, e.g. "Sarah's home-ed blog"
+    percent_off: Mapped[int] = mapped_column(Integer)
+    months: Mapped[int] = mapped_column(Integer, default=1)  # how many months the discount lasts
+    max_uses: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    owner_user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
 
 
 class SafeguardingRecord(Base):

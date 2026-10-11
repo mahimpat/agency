@@ -10,16 +10,17 @@ child at the same address), one referral per family, and at most REFERRAL_MAX_PE
 """
 
 import logging
+import re
 import secrets
 from datetime import timedelta
 
 import stripe
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .config import (PLANS, REFERRAL_FRIEND_PERCENT, REFERRAL_HOLD_DAYS, REFERRAL_MAX_PER_YEAR, Settings)
 from .emails import send_email
-from .models import Referral, Subscription, User, now
+from .models import Referral, ReferralCode, Subscription, User, now
 
 log = logging.getLogger("letters.referrals")
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -41,18 +42,74 @@ def link_for(settings: Settings, db: Session, user: User) -> str:
     return f"{settings.base_url}/r/{code_for(db, user)}"
 
 
+def normalise(code: str) -> str:
+    return re.sub(r"[^A-Z0-9-]", "", (code or "").upper()).strip("-")[:24]
+
+
 def find_referrer(db: Session, code: str) -> User | None:
-    code = "".join(ch for ch in (code or "").upper() if ch.isalnum())[:16]
+    code = normalise(code).replace("-", "")[:16]
     return db.scalar(select(User).where(User.referral_code == code)) if code else None
 
 
+def find_custom(db: Session, code: str) -> ReferralCode | None:
+    code = normalise(code)
+    return db.scalar(select(ReferralCode).where(ReferralCode.code == code)) if code else None
+
+
+def uses(db: Session, rc: ReferralCode) -> int:
+    """Sign-ups with this code."""
+    return db.scalar(select(func.count()).select_from(Referral).where(Referral.code_id == rc.id)) or 0
+
+
+def custom_problem(db: Session, rc: ReferralCode) -> str:
+    if not rc.active:
+        return "That code isn't running any more."
+    if rc.expires_at and rc.expires_at < now():
+        return "That code has expired."
+    if rc.max_uses is not None and uses(db, rc) >= rc.max_uses:
+        return "That code has been fully used."
+    return ""
+
+
+def resolve(db: Session, code: str) -> tuple[User | None, ReferralCode | None, str]:
+    """What a code means: (family to reward or None, custom code or None, problem for the parent)."""
+    if not normalise(code):
+        return None, None, "Enter a code."
+    rc = find_custom(db, code)
+    if rc:
+        problem = custom_problem(db, rc)
+        if problem:
+            return None, None, problem
+        return (db.get(User, rc.owner_user_id) if rc.owner_user_id else None), rc, ""
+    user = find_referrer(db, code)
+    if user:
+        return user, None, ""
+    return None, None, "We don't recognise that code. Please check it and try again."
+
+
+def offer_text(percent: int, months: int) -> str:
+    if percent >= 100:
+        return "your first month free" if months == 1 else f"your first {months} months free"
+    return f"{percent}% off your first month" if months == 1 else f"{percent}% off your first {months} months"
+
+
+def offer_for_code(db: Session, code: str) -> str:
+    _, rc, problem = resolve(db, code)
+    if problem:
+        return ""
+    return offer_text(rc.percent_off, rc.months) if rc else offer_text(REFERRAL_FRIEND_PERCENT, 1)
+
+
 def record_signup(db: Session, friend: User, code: str) -> Referral | None:
-    """Called when a new account is created with an invite code in the session."""
-    referrer = find_referrer(db, code)
-    if not referrer or referrer.id == friend.id or friend.referred_by_id:
+    """A new family used an invite link or code. Only families who haven't paid before qualify."""
+    referrer, rc, problem = resolve(db, code)
+    if problem or (referrer and referrer.id == friend.id) or _referral(db, friend):
         return None
-    friend.referred_by_id = referrer.id
-    referral = Referral(referrer_id=referrer.id, friend_id=friend.id)
+    if any(sub.started_at for sub in friend.subscriptions):
+        return None
+    friend.referred_by_id = referrer.id if referrer else None
+    referral = Referral(referrer_id=referrer.id if referrer else None, friend_id=friend.id,
+                        code_id=rc.id if rc else None)
     db.add(referral)
     db.commit()
     return referral
@@ -70,15 +127,27 @@ def discount_applies(db: Session, friend: User) -> bool:
     return not any(sub.started_at for sub in friend.subscriptions)
 
 
-def coupon_id(settings: Settings) -> str:
-    """The Stripe coupon for the friend's discount, created the first time it's used."""
+def friend_offer(db: Session, friend: User) -> tuple[int, int]:
+    """(percent off, months) for this referred family."""
+    referral = _referral(db, friend)
+    rc = db.get(ReferralCode, referral.code_id) if referral and referral.code_id else None
+    return (rc.percent_off, rc.months) if rc else (REFERRAL_FRIEND_PERCENT, 1)
+
+
+def coupon_for(settings: Settings, db: Session, friend: User) -> str:
+    """The Stripe coupon for this family's discount, created the first time it's used. Coupons are
+    named by their terms, so changing a code's offer later makes a new coupon rather than altering one."""
+    percent, months = friend_offer(db, friend)
+    referral = _referral(db, friend)
+    rc = db.get(ReferralCode, referral.code_id) if referral and referral.code_id else None
     stripe.api_key = settings.stripe_secret_key
-    cid = f"referral-{REFERRAL_FRIEND_PERCENT}-once"
+    cid = f"code-{rc.code}-{percent}-{months}" if rc else f"referral-{percent}-once"
     try:
         stripe.Coupon.retrieve(cid)
     except stripe.InvalidRequestError:
-        stripe.Coupon.create(id=cid, percent_off=REFERRAL_FRIEND_PERCENT, duration="once",
-                             name=f"A friend's invite: {REFERRAL_FRIEND_PERCENT}% off your first month")
+        terms = {"duration": "once"} if months == 1 else {"duration": "repeating", "duration_in_months": months}
+        stripe.Coupon.create(id=cid, percent_off=percent, name=(f"{rc.code}: " if rc else "A friend's invite: ")
+                             + offer_text(percent, months), **terms)
     return cid
 
 
@@ -107,7 +176,7 @@ def _why_not(db: Session, referral: Referral, referrer: User | None) -> str:
     year_ago = now() - timedelta(days=365)
     rewarded = db.scalars(select(Referral).where(Referral.referrer_id == referrer.id, Referral.status == "rewarded",
                                                  Referral.rewarded_at >= year_ago)).all()
-    if len(rewarded) >= REFERRAL_MAX_PER_YEAR:
+    if not referral.code_id and len(rewarded) >= REFERRAL_MAX_PER_YEAR:  # custom codes: the admin set the terms
         return f"the yearly limit of {REFERRAL_MAX_PER_YEAR} rewards has been reached"
     return ""
 
@@ -125,6 +194,10 @@ def run_rewards(db: Session, settings: Settings) -> int:
                                             Referral.paid_at <= now() - timedelta(days=REFERRAL_HOLD_DAYS))).all()
     rewarded = 0
     for referral in due:
+        if referral.referrer_id is None:  # a custom code with no family to reward: counted, nothing to pay
+            referral.status, referral.note = "joined", "custom code, no reward set"
+            db.commit()
+            continue
         referrer = db.get(User, referral.referrer_id)
         reason = _why_not(db, referral, referrer)
         if reason:

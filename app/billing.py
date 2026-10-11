@@ -64,7 +64,8 @@ def checkout_url(settings: Settings, db: Session, user: User, sub: Subscription)
     # A family invited by a friend gets money off their first month. Stripe allows either a set
     # discount or customer-entered promotion codes, not both.
     from . import referrals
-    offer = ({"discounts": [{"coupon": referrals.coupon_id(settings)}]} if referrals.discount_applies(db, user)
+    offer = ({"discounts": [{"coupon": referrals.coupon_for(settings, db, user)}]}
+             if referrals.discount_applies(db, user)
              else {"allow_promotion_codes": True})
     session = stripe.checkout.Session.create(
         mode="subscription",

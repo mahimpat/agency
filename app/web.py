@@ -8,7 +8,7 @@ import json
 import logging
 import re
 import secrets
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, UploadFile
@@ -23,9 +23,10 @@ from letters import render
 
 from . import billing, gifts, google_auth, jobs, ratelimit, referrals
 from .seasonal import christmas_notice
-from .config import COMPANY, FIGURE_ORDER, GIFT_OPTIONS, GIFT_SEND_AHEAD_DAYS, PLANS, REFERRAL_FRIEND_PERCENT, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
+from .config import (COMPANY, FIGURE_ORDER, GIFT_OPTIONS, GIFT_SEND_AHEAD_DAYS, PLANS, PREVIEW_HOURS, PRODUCT,
+                     REFERRAL_FRIEND_PERCENT, REFERRAL_HOLD_DAYS, REPLY_UPLOADS_PER_MONTH, Settings)
 from .emails import send_email
-from .models import Child, Gift, Letter, Referral, Reply, SafeguardingRecord, Subscription, User, make_sessionmaker
+from .models import Child, Gift, Letter, Referral, ReferralCode, Reply, SafeguardingRecord, Subscription, User, make_sessionmaker
 from .models import now as models_now
 from .security import (csrf_ok, csrf_token, hash_password, make_reset_token, make_verify_token, read_reset_token,
                        read_unsubscribe_token, read_verify_token, verify_password)
@@ -100,7 +101,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     templates.env.globals.update(PREVIEW_HOURS=PREVIEW_HOURS, COMPANY=COMPANY, PRODUCT=PRODUCT, PLANS=PLANS, FIGURE_NAMES=FIGURE_NAMES,
                                  STATUS_LABELS=STATUS_LABELS, contact_email=settings.contact_email,
                                  legal=settings, POLICY_DATE="11 October 2026",
-                                 google_enabled=google_auth.enabled(settings))
+                                 google_enabled=google_auth.enabled(settings),
+                                 REFERRAL_FRIEND_PERCENT=REFERRAL_FRIEND_PERCENT, REFERRAL_HOLD_DAYS=REFERRAL_HOLD_DAYS)
 
     @app.exception_handler(Redirect)
     async def _redirect(request: Request, exc: Redirect):
@@ -162,8 +164,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             return templates.TemplateResponse(request, template, {
                 "user": user, "csrf": csrf_token(request.session), "flashes": flashes,
                 "redeeming": request.session.get("gift_code"),
-                "invited": bool(request.session.get("referral")) and not user,
-                "REFERRAL_FRIEND_PERCENT": REFERRAL_FRIEND_PERCENT,
+                "invite_offer": referrals.offer_for_code(db, request.session["referral"])
+                if request.session.get("referral") and not user else "",
                 "christmas": christmas_notice(models_now().date()), **context},
                 status_code=status_code)
         finally:
@@ -236,7 +238,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     @app.post("/signup", dependencies=[Depends(check_csrf)])
     def signup(request: Request, db: Session = Depends(db_session), name: str = Form(...),
                email: str = Form(...), password: str = Form(...), plan: str = Form("penpal"),
-               marketing: bool = Form(False), agree: bool = Form(False)):
+               marketing: bool = Form(False), agree: bool = Form(False), invite_code: str = Form("")):
         if limited(request, db, "signup_ip", client_ip(request)):
             return too_many(request)
         email = email.strip().lower()
@@ -249,8 +251,13 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             errors.append("Enter a valid email address.")
         if db.scalar(select(User).where(User.email == email)):
             errors.append("There's already an account with that email. Try logging in.")
+        if invite_code.strip():
+            problem = remember_code(request, db, invite_code)
+            if problem:
+                errors.append(f"Invite code: {problem}")
         if errors:
-            return page(request, "signup.html", 400, errors=errors, plan=plan, name=name, email=email)
+            return page(request, "signup.html", 400, errors=errors, plan=plan, name=name, email=email,
+                        invite_code=invite_code)
         user = User(email=email, name=name.strip()[:120], password_hash=hash_password(password),
                     marketing_opt_in=marketing, landing=(request.session.get("src") or {}).get("landing", ""),
                     **source_fields(request))
@@ -423,18 +430,39 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
 
     # --- referrals -----------------------------------------------------------
 
+    def remember_code(request: Request, db: Session, code: str) -> str:
+        """Keep a valid invite or partner code in the session until sign-up. Returns a problem, or ""."""
+        referrer, rc, problem = referrals.resolve(db, code)
+        if not problem:
+            request.session["referral"] = referrals.normalise(code)
+            # Partner codes show up under their own name in "Where families come from".
+            request.session.setdefault("src", {"source": rc.code.lower() if rc else "referral",
+                                               "campaign": "partner-code" if rc else "", "landing": "/r"})
+        return problem
+
     @app.get("/r/{code}")
     def invite_link(request: Request, code: str, db: Session = Depends(db_session)):
-        referrer = referrals.find_referrer(db, code)
-        if referrer and not current_user(request, db):
-            request.session["referral"] = referrer.referral_code
-            request.session.setdefault("src", {"source": "referral", "campaign": "", "landing": "/r"})
+        if not current_user(request, db):
+            remember_code(request, db, code)
         return RedirectResponse("/", status_code=303)
 
     def record_referral(request: Request, db: Session, user: User) -> None:
         code = request.session.pop("referral", None)
         if code:
             referrals.record_signup(db, user, code)
+
+    @app.post("/checkout/{sub_id}/code", dependencies=[Depends(check_csrf)])
+    def checkout_code(request: Request, sub_id: int, user: User = Depends(require_user),
+                      db: Session = Depends(db_session), code: str = Form("")):
+        """A family who didn't use a link can still type a friend's or partner's code before paying."""
+        if limited(request, db, "redeem_ip", client_ip(request)):
+            return too_many(request)
+        me = db.get(User, user.id)
+        _, _, problem = referrals.resolve(db, code)
+        if not problem and not referrals.record_signup(db, me, code):
+            problem = "Codes are for new families, and only one can be used."
+        flash(request, problem or f"Code applied: {referrals.offer_for_code(db, code)}.")
+        return RedirectResponse(f"/checkout/{sub_id}", status_code=303)
 
     # --- gifts ---------------------------------------------------------------
 
@@ -649,8 +677,13 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         sub = db.get(Subscription, sub_id)
         if not sub or sub.user_id != user.id:
             raise HTTPException(404)
+        me = db.get(User, user.id)
+        discount = referrals.discount_applies(db, me)
         return page(request, "checkout.html", sub=sub, trial_end=billing.gift_trial_end(sub),
-                    friend_discount=referrals.discount_applies(db, db.merge(user)))
+                    friend_offer=referrals.offer_text(*referrals.friend_offer(db, me)) if discount else "",
+                    can_add_code=not discount and not me.referred_by_id and not sub.gift_id
+                    and not any(x.started_at for x in me.subscriptions)
+                    and not db.scalar(select(Referral).where(Referral.friend_id == me.id)))
 
     @app.post("/checkout/{sub_id}", dependencies=[Depends(check_csrf)])
     def checkout(request: Request, sub_id: int, user: User = Depends(require_user),
@@ -1093,6 +1126,76 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         table = sorted(rows.items(), key=lambda kv: (-kv[1]["paying"] - kv[1]["gifts"], -kv[1]["signups"]))
         recent_referrals = db.scalars(select(Referral).order_by(Referral.created_at.desc()).limit(50)).all()
         return page(request, "sources.html", table=table, days=days, recent_referrals=recent_referrals)
+
+    def codes_page(request: Request, db: Session, status_code: int = 200, **extra) -> HTMLResponse:
+        codes = db.scalars(select(ReferralCode).order_by(ReferralCode.created_at.desc())).all()
+        rows = []
+        for rc in codes:
+            used = db.scalars(select(Referral).where(Referral.code_id == rc.id)).all()
+            owner = db.get(User, rc.owner_user_id) if rc.owner_user_id else None
+            rows.append({"rc": rc, "owner": owner, "signups": len(used),
+                         "paying": sum(1 for r in used if r.status in ("paid", "rewarded", "joined")),
+                         "rewards": sum(r.reward_pence for r in used), "problem": referrals.custom_problem(db, rc),
+                         "offer": referrals.offer_text(rc.percent_off, rc.months)})
+        return page(request, "codes.html", status_code, rows=rows, form=extra.pop("form", {"percent_off": 20, "months": 1}),
+                    **extra)
+
+    @app.get("/admin/codes", response_class=HTMLResponse)
+    def admin_codes(request: Request, admin: User = Depends(require_admin), db: Session = Depends(db_session)):
+        return codes_page(request, db)
+
+    @app.post("/admin/codes", dependencies=[Depends(check_csrf)])
+    def admin_code_create(request: Request, admin: User = Depends(require_admin), db: Session = Depends(db_session),
+                          code: str = Form(""), label: str = Form(""), percent_off: int = Form(0),
+                          months: int = Form(1), max_uses: str = Form(""), expires_on: str = Form(""),
+                          owner_email: str = Form("")):
+        form = dict(code=code, label=label, percent_off=percent_off, months=months, max_uses=max_uses,
+                    expires_on=expires_on, owner_email=owner_email)
+        clean = referrals.normalise(code)
+        errors = []
+        if not re.fullmatch(r"[A-Z0-9][A-Z0-9-]{2,23}", clean):
+            errors.append("Codes are 3 to 24 letters, numbers or hyphens, e.g. HOMEED-SARAH.")
+        elif referrals.find_custom(db, clean) or referrals.find_referrer(db, clean):
+            errors.append("That code is already in use.")
+        if not 1 <= percent_off <= 100:
+            errors.append("The discount must be between 1% and 100%.")
+        if not 1 <= months <= 12:
+            errors.append("The discount can last 1 to 12 months.")
+        uses_limit = None
+        if max_uses.strip():
+            if not max_uses.strip().isdigit() or int(max_uses) < 1:
+                errors.append("Maximum uses must be a whole number, or left empty for no limit.")
+            else:
+                uses_limit = int(max_uses)
+        expires = None
+        if expires_on.strip():
+            try:
+                expires = datetime.combine(date.fromisoformat(expires_on), datetime.max.time())
+            except ValueError:
+                errors.append("Choose a valid expiry date, or leave it empty.")
+        owner = None
+        if owner_email.strip():
+            owner = db.scalar(select(User).where(User.email == owner_email.strip().lower()))
+            if not owner:
+                errors.append("No account has that email. The person must sign up first, or leave it empty.")
+        if errors:
+            return codes_page(request, db, 400, errors=errors, form=form)
+        db.add(ReferralCode(code=clean, label=label.strip()[:120], percent_off=percent_off, months=months,
+                            max_uses=uses_limit, expires_at=expires, owner_user_id=owner.id if owner else None))
+        db.commit()
+        flash(request, f"Code {clean} created. Share {settings.base_url}/r/{clean} or the code itself.")
+        return RedirectResponse("/admin/codes", status_code=303)
+
+    @app.post("/admin/codes/{code_id}/toggle", dependencies=[Depends(check_csrf)])
+    def admin_code_toggle(request: Request, code_id: int, admin: User = Depends(require_admin),
+                          db: Session = Depends(db_session)):
+        rc = db.get(ReferralCode, code_id)
+        if not rc:
+            raise HTTPException(404)
+        rc.active = not rc.active
+        db.commit()
+        flash(request, f"{rc.code} is now {'on' if rc.active else 'off'}.")
+        return RedirectResponse("/admin/codes", status_code=303)
 
     @app.get("/admin/safeguarding", response_class=HTMLResponse)
     def safeguarding_log(request: Request, admin: User = Depends(require_admin), db: Session = Depends(db_session)):

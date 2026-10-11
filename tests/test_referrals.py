@@ -61,7 +61,7 @@ class ReferralTests(AppTestCase):
     def test_invite_link_banner_and_signup(self):
         self.assertTrue(self.code.isalnum())
         landing = self.friend.get(f"/r/{self.code}").text
-        self.assertIn("A friend invited you", landing)
+        self.assertIn("You've been invited", landing)
         self.friend_signup()
         ref = self.referral()
         db = self.db
@@ -81,7 +81,7 @@ class ReferralTests(AppTestCase):
     def test_bad_code_and_own_link_do_nothing(self):
         self.client.get(f"/r/{self.code}")  # the inviter, logged in
         self.friend.get("/r/NOPE99")
-        self.assertNotIn("A friend invited you", self.friend.get("/").text)
+        self.assertNotIn("You've been invited", self.friend.get("/").text)
 
     def test_friend_gets_discount_at_checkout_only_once(self):
         sub_id = self.friend_signup()
@@ -198,3 +198,148 @@ class ReferralTests(AppTestCase):
         self.assertIn("Recent referrals", page)
         self.assertIn("signed up", page)
         self.assertIn("referral", page)
+
+
+class CustomCodeTests(AppTestCase):
+    def setUp(self):
+        super().setUp()
+        self.admin = self.make_admin()
+
+    def create(self, **data):
+        fields = {"code": "homeed-sarah", "label": "Sarah's blog", "percent_off": "20", "months": "3",
+                  "max_uses": "", "expires_on": "", "owner_email": ""}
+        fields.update(data)
+        token = re.search(r'name="csrf" value="([^"]+)"', self.admin.get("/admin/codes").text).group(1)
+        return self.admin.post("/admin/codes", data={"csrf": token, **fields}, follow_redirects=False)
+
+    def new_family(self, code=None, typed=None, email="fam@example.com", postcode="M1 1AA"):
+        c = TestClient(self.app)
+        if code:
+            c.get(f"/r/{code}")
+        token = re.search(r'name="csrf" value="([^"]+)"', c.get("/signup").text).group(1)
+        r = c.post("/signup", data={"csrf": token, "name": "Kim", "email": email, "password": "a long password",
+                                    "agree": "true", "plan": "penpal", **({"invite_code": typed} if typed else {})},
+                   follow_redirects=False)
+        if r.status_code != 303:
+            return c, r
+        token = re.search(r'name="csrf" value="([^"]+)"', c.get("/children/new").text).group(1)
+        r = c.post("/children/new", data={"csrf": token, "first_name": "Ava", "age": "7", "recipient_name": "Ava",
+                                          "line1": "9 Other Road", "town": "Leeds", "postcode": postcode,
+                                          "plan": "penpal", "guardian": "true"}, follow_redirects=False)
+        return c, int(r.headers["location"].rsplit("/", 1)[1])
+
+    def referral(self, email="fam@example.com"):
+        db = self.db
+        user = db.query(User).filter_by(email=email).one()
+        r = db.query(Referral).filter_by(friend_id=user.id).one_or_none()
+        if r:
+            db.expunge(r)
+        source = user.source
+        db.close()
+        return r, source
+
+    def test_admin_only(self):
+        self.assertEqual(self.client.get("/admin/codes", follow_redirects=False).status_code, 303)  # to log in
+        self.signup()
+        self.assertEqual(self.client.get("/admin/codes").status_code, 404)  # a parent, not the admin
+
+    def test_create_validates(self):
+        self.assertEqual(self.create(code="x").status_code, 400)
+        self.assertIn("Codes are 3 to 24", self.create(code="x").text)
+        self.assertIn("between 1% and 100%", self.create(percent_off="0").text)
+        self.assertIn("1 to 12 months", self.create(months="13").text)
+        self.assertIn("No account has that email", self.create(owner_email="nobody@example.com").text)
+        self.assertEqual(self.create().status_code, 303)
+        self.assertIn("already in use", self.create().text)
+        page = self.admin.get("/admin/codes").text
+        self.assertIn("HOMEED-SARAH", page)
+        self.assertIn("20% off your first 3 months", page)
+
+    def test_link_signup_and_coupon(self):
+        self.create()
+        c = TestClient(self.app)
+        self.assertIn("20% off your first 3 months", c.get("/r/homeed-sarah").text)
+        c, sub_id = self.new_family(code="HOMEED-SARAH")
+        ref, source = self.referral()
+        self.assertIsNone(ref.referrer_id)
+        self.assertIsNotNone(ref.code_id)
+        self.assertEqual(source, "homeed-sarah")
+        self.assertIn("20% off your first 3 months", c.get(f"/checkout/{sub_id}").text)
+        db = self.db
+        user = db.query(User).filter_by(email="fam@example.com").one()
+        missing = stripe.InvalidRequestError("No such coupon", "id")
+        with mock.patch("stripe.Coupon.retrieve", side_effect=missing), mock.patch("stripe.Coupon.create") as create:
+            cid = referrals.coupon_for(self.settings, db, user)
+        db.close()
+        self.assertEqual(cid, "code-HOMEED-SARAH-20-3")
+        self.assertEqual((create.call_args.kwargs["duration"], create.call_args.kwargs["duration_in_months"]),
+                         ("repeating", 3))
+
+    def test_typed_code_at_signup(self):
+        self.create(code="PTA-STMARYS", percent_off="100", months="1")
+        _, bad = self.new_family(typed="NOT-A-CODE")
+        self.assertEqual(bad.status_code, 400)
+        self.assertIn("recognise that code", bad.text)
+        self.new_family(typed="pta-stmarys", email="fam2@example.com")
+        ref, _ = self.referral("fam2@example.com")
+        self.assertIsNotNone(ref)
+        self.assertEqual(referrals.offer_text(100, 1), "your first month free")
+
+    def test_code_box_at_checkout(self):
+        self.create()
+        c, sub_id = self.new_family()
+        page = c.get(f"/checkout/{sub_id}").text
+        self.assertIn("Have an invite code?", page)
+        token = re.search(r'name="csrf" value="([^"]+)"', page).group(1)
+        c.post(f"/checkout/{sub_id}/code", data={"csrf": token, "code": "homeed-sarah"})
+        page = c.get(f"/checkout/{sub_id}").text
+        self.assertIn("20% off your first 3 months", page)
+        self.assertNotIn("Have an invite code?", page)
+        self.assertIsNotNone(self.referral()[0])
+
+    def test_limits(self):
+        self.create(max_uses="1")
+        self.new_family(code="HOMEED-SARAH")
+        c, _ = self.new_family(typed="HOMEED-SARAH", email="fam2@example.com")
+        self.assertIn("fully used", _.text)
+        self.create(code="OLD-CODE", expires_on="2020-01-01")
+        self.assertIn("expired", self.new_family(typed="OLD-CODE", email="fam3@example.com")[1].text)
+        self.create(code="PAUSED")
+        db = self.db
+        from app.models import ReferralCode
+        code_id = db.query(ReferralCode).filter_by(code="PAUSED").one().id
+        db.close()
+        token = re.search(r'name="csrf" value="([^"]+)"', self.admin.get("/admin/codes").text).group(1)
+        self.admin.post(f"/admin/codes/{code_id}/toggle", data={"csrf": token})
+        self.assertIn("running any more", self.new_family(typed="PAUSED", email="fam4@example.com")[1].text)
+
+    def test_unowned_code_counts_without_reward(self):
+        self.create()
+        _, sub_id = self.new_family(code="HOMEED-SARAH")
+        self.activate(sub_id, stripe_id="sub_fam", event_suffix="fam")
+        db = self.db
+        db.query(Referral).one().paid_at = now() - timedelta(days=15)
+        db.commit()
+        db.close()
+        with mock.patch("stripe.Customer.create_balance_transaction") as credit:
+            referrals.run_rewards(self.db, self.settings)
+        self.assertFalse(credit.called)
+        self.assertEqual(self.referral()[0].status, "joined")
+        self.assertIn(">1</td>", self.admin.get("/admin/codes").text)
+
+    def test_owned_code_rewards_owner_without_yearly_cap(self):
+        owner_sub = self.signup(email="sarah@example.com")
+        self.activate(owner_sub, stripe_id="sub_sarah", event_suffix="sarah")
+        self.create(owner_email="sarah@example.com")
+        _, sub_id = self.new_family(code="HOMEED-SARAH")
+        self.activate(sub_id, stripe_id="sub_fam", event_suffix="fam")
+        db = self.db
+        db.query(Referral).one().paid_at = now() - timedelta(days=15)
+        db.commit()
+        db.close()
+        with mock.patch("stripe.Customer.create_balance_transaction") as credit, \
+                mock.patch("app.billing.ensure_customer", return_value="cus_sarah"), \
+                mock.patch("app.referrals.send_email"), mock.patch("app.referrals.REFERRAL_MAX_PER_YEAR", 0):
+            self.assertEqual(referrals.run_rewards(self.db, self.settings), 1)
+        self.assertEqual(credit.call_args.args[0], "cus_sarah")
+        self.assertEqual(self.referral()[0].status, "rewarded")

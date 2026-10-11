@@ -5,8 +5,8 @@
 <h1>Almost there</h1>
 <div class="card">
   <p><b>{{ PLANS[sub.plan].name }}</b> for {{ sub.child.first_name }}: {{ PLANS[sub.plan].price_label }}, postage included.</p>
-  {% if friend_discount %}
-  <div class="flash">A friend invited you: <b>{{ REFERRAL_FRIEND_PERCENT }}% off your first month</b>. It's applied automatically at payment.</div>
+  {% if friend_offer %}
+  <div class="flash">Your invite code gives you <b>{{ friend_offer }}</b>. It's applied automatically at payment.</div>
   {% endif %}
   {% if sub.gift_id %}
   <p class="small">{% if trial_end %}The gift has already paid for this month, so your first payment is on <b>{{ trial_end.strftime('%-d %B %Y') }}</b>, when it runs out.{% else %}Letters carry on straight away.{% endif %}</p>
@@ -25,6 +25,14 @@
   <div class="flash">Please confirm your email first: open the link we sent to <b>{{ user.email }}</b>, then come back here.
     <form method="post" action="/verify/resend" style="margin:8px 0 0"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small" type="submit">Send the link again</button></form>
   </div>
+  {% endif %}
+  {% if can_add_code %}
+  <details style="margin:0 0 14px"><summary class="small">Have an invite code?</summary>
+    <form method="post" action="/checkout/{{ sub.id }}/code" style="display:flex;gap:8px;margin-top:10px">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="text" name="code" aria-label="Invite code" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" required>
+      <button class="btn ghost small" type="submit">Apply</button>
+    </form></details>
   {% endif %}
   <form method="post" action="/checkout/{{ sub.id }}">
     <input type="hidden" name="csrf" value="{{ csrf }}">
