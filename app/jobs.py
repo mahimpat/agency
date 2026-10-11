@@ -10,6 +10,7 @@ rotation in a wrong state.
 
 import json
 import logging
+import re
 import tempfile
 from dataclasses import dataclass, field
 from datetime import timedelta
@@ -20,7 +21,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from letters import mail, pdf, pipeline, render
+from letters import llm, mail, pdf, pipeline, render
 
 from .config import (FIGURE_ORDER, LETTERS_PER_FIGURE, PARENT_REWRITES_PER_MONTH, PLANS, PREVIEW_HOURS,
                      REPLY_WAIT_DAYS, RETENTION_DAYS, Settings)
@@ -62,12 +63,40 @@ def _live_letters(child: Child) -> list[Letter]:
     return sorted((l for l in child.letters if l.status not in DEAD), key=lambda l: (l.created_at, l.id))
 
 
+def min_age(figure: str) -> int:
+    """A fact sheet can set "## Minimum age" for pen pals whose history needs older readers."""
+    match = re.search(r"^## Minimum age\s+(\d+)", llm.load_text("figures", figure), re.MULTILINE)
+    return int(match.group(1)) if match else 0
+
+
+def eligible_figures(age: int) -> list[str]:
+    return [f for f in FIGURE_ORDER if age >= min_age(f)]
+
+
+def _next_figure(previous: str | None, age: int) -> str:
+    """The pen pal after `previous` in FIGURE_ORDER that suits this child's age (wrapping round)."""
+    eligible = eligible_figures(age)
+    if previous not in FIGURE_ORDER:
+        return eligible[0]
+    start = FIGURE_ORDER.index(previous)
+    for step in range(1, len(FIGURE_ORDER) + 1):
+        candidate = FIGURE_ORDER[(start + step) % len(FIGURE_ORDER)]
+        if candidate in eligible:
+            return candidate
+    return eligible[0]
+
+
 def current_figure(child: Child) -> tuple[str, list[Letter]]:
-    """The child's current pen pal, and that pen pal's letters in this stint (oldest first)."""
+    """The child's current pen pal, and that pen pal's letters in this stint (oldest first).
+    A stint starts with an introduction and ends with a farewell; the next pen pal follows in order."""
     letters = _live_letters(child)
-    farewells = [i for i, l in enumerate(letters) if l.kind == "farewell"]
-    figure = FIGURE_ORDER[len(farewells) % len(FIGURE_ORDER)]
-    stint = letters[farewells[-1] + 1:] if farewells else letters
+    farewell_at = max((i for i, l in enumerate(letters) if l.kind == "farewell"), default=None)
+    stint = letters[farewell_at + 1:] if farewell_at is not None else letters
+    started = [l for l in stint if l.kind in STORY_KINDS]
+    if started:
+        figure = started[0].figure
+    else:
+        figure = _next_figure(letters[farewell_at].figure if farewell_at is not None else None, child.age)
     return figure, [l for l in stint if l.figure == figure]
 
 

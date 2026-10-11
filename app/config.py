@@ -18,10 +18,12 @@ PLANS = {
 
 # Each child spends a few months with one pen pal, then meets the next.
 # Starts with UK curriculum favourites; the first pen pal is a fossil hunter, because dinosaurs.
+# Mixed so that science, engineering, exploration, leaders and the arts take turns.
 FIGURE_ORDER = [
-    "mary-anning", "isambard-kingdom-brunel", "ada-lovelace", "florence-nightingale",
-    "charles-darwin", "mary-seacole", "william-shakespeare", "einstein",
-    "amelia-earhart", "leonardo-da-vinci", "cleopatra",
+    "mary-anning", "isambard-kingdom-brunel", "ada-lovelace", "grace-darling", "neil-armstrong",
+    "florence-nightingale", "charles-darwin", "elizabeth-i", "george-stephenson", "mary-seacole",
+    "isaac-newton", "william-shakespeare", "walter-tull", "al-khwarizmi", "emmeline-pankhurst",
+    "einstein", "amelia-earhart", "leonardo-da-vinci", "cleopatra",
 ]
 LETTERS_PER_FIGURE = 3
 REPLY_WAIT_DAYS = 21  # after this, an unused reply credit becomes a follow-up letter

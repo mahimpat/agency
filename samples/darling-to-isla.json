@@ -1,0 +1,22 @@
+{
+  "figure": "grace-darling",
+  "child": "Isla",
+  "letter": {
+    "greeting": "Dear Isla,",
+    "body": [
+      "My name is Grace Darling, and I live in a lighthouse on a little island in the sea, off the coast of Northumberland. I am told this letter will travel nearly two hundred years to reach you!",
+      "Every night, my family keeps the lamp burning bright, so ships can see the rocks and stay safe. Outside my window, puffins pop in and out of their burrows, and seals sleep on the rocks.",
+      "One stormy morning, I saw people stuck on a rock after their ship broke apart. My father and I rowed our little boat through the big waves to help them. My arms ached, but we brought nine people safely back to the lighthouse.",
+      "I hear you love the seaside too. I think we would be good friends."
+    ],
+    "signoff": "Your friend at the lighthouse,\nGrace",
+    "postscript": "Have you ever seen a puffin? If not, draw me what you think one looks like!",
+    "real_history": [
+      "Grace Darling (born 1815) lived at Longstone Lighthouse on the Farne Islands, where her father was the lighthouse keeper.",
+      "On 7 September 1838, the steamship Forfarshire hit rocks in a storm. Grace and her father rowed out in a small boat and rescued nine people.",
+      "The rescue made Grace famous across Britain. People wrote poems and songs about her and painted her portrait.",
+      "The Farne Islands are still home to puffins and seals today.",
+      "Storytelling: Grace never wrote to children in the future, but the facts in this letter are true."
+    ]
+  }
+}

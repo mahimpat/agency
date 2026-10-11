@@ -1,6 +1,6 @@
 # Letters from History
 
-**History writes back.** Children get real paper letters from historical figures that are written for them. UK pen pals include Mary Anning, Isambard Kingdom Brunel, Ada Lovelace, Florence Nightingale, Charles Darwin, Mary Seacole and William Shakespeare, alongside Einstein, Amelia Earhart, Leonardo da Vinci and Cleopatra. When a child writes back, the next letter answers their questions.
+**History writes back.** Children get real paper letters from historical figures that are written for them. There are 19 pen pals, led by UK curriculum favourites: Mary Anning, Isambard Kingdom Brunel, Ada Lovelace, Grace Darling, Neil Armstrong, Florence Nightingale, Charles Darwin, Elizabeth I, George Stephenson, Mary Seacole, Isaac Newton, William Shakespeare, Walter Tull (8+), Al-Khwarizmi and Emmeline Pankhurst (8+), plus Einstein, Amelia Earhart, Leonardo da Vinci and Cleopatra. A fact sheet can set a minimum age, and younger children skip that pen pal. When a child writes back, the next letter answers their questions.
 
 AI agents write each letter, fact-check it, render it on era-appropriate stationery and mail it. This repo is the **demand-test kit**: everything needed to find out whether parents will pay before building the full product.
 

@@ -273,6 +273,16 @@ class LetterFlowTests(AppTestCase):
         self.assertNotIn("Smith", json.dumps(child))
         self.assertNotIn("Example Street", json.dumps(child))
 
+    def test_younger_children_skip_pen_pals_with_a_minimum_age(self):
+        self.assertIn("walter-tull", jobs.eligible_figures(9))
+        young = jobs.eligible_figures(6)
+        self.assertNotIn("walter-tull", young)
+        self.assertNotIn("emmeline-pankhurst", young)
+        before_tull = FIGURE_ORDER[FIGURE_ORDER.index("walter-tull") - 1]
+        self.assertEqual(jobs._next_figure(before_tull, 9), "walter-tull")
+        self.assertNotIn(jobs._next_figure(before_tull, 6), ("walter-tull", "emmeline-pankhurst"))
+        self.assertEqual(jobs._next_figure(FIGURE_ORDER[-1], 9), FIGURE_ORDER[0])  # wraps round
+
     def test_reply_photo_is_read_deleted_and_answered(self):
         sub_id = self.signup()
         self.activate(sub_id)

@@ -106,6 +106,37 @@ BEETLE_SKETCH = """<svg class="sketch" viewBox="0 0 120 140" aria-hidden="true">
 <path d="M35 64 l-18 -8 M34 82 l-20 2 M37 100 l-16 14 M85 64 l18 -8 M86 82 l20 2 M83 100 l16 14" stroke-width="1"/>
 </g></svg>"""
 
+LIGHTHOUSE_SKETCH = """<svg class="sketch tall" viewBox="0 0 120 150" aria-hidden="true">
+<g fill="none" stroke="currentColor" stroke-linecap="round">
+<path d="M48 128 L54 40 H66 L72 128 Z" stroke-width="1.5"/>
+<path d="M52 40 h16 v-12 h-16 z M50 28 h20 M60 28 v-8 M54 20 h12" stroke-width="1.3"/>
+<path d="M51 70 h18 M50 96 h20" stroke-width=".8"/>
+<path d="M66 34 L104 24 M66 34 L104 44 M54 34 L16 24 M54 34 L16 44" stroke-width=".6" stroke-dasharray="3 3"/>
+<path d="M8 136 q 14 -8 28 0 t 28 0 t 28 0 t 28 0" stroke-width="1"/>
+<path d="M14 146 q 12 -6 24 0 t 24 0 t 24 0 t 24 0" stroke-width=".7"/>
+</g></svg>"""
+
+ROCKET_SKETCH = """<svg class="sketch" viewBox="0 0 220 120" aria-hidden="true">
+<g fill="none" stroke="currentColor" stroke-linecap="round">
+<rect x="40" y="52" width="90" height="26" rx="12" stroke-width="1.5"/>
+<path d="M118 52 v-34 h10 v34" stroke-width="1.4"/>
+<path d="M114 18 h18" stroke-width="1.4"/>
+<circle cx="70" cy="92" r="20" stroke-width="1.5"/><circle cx="70" cy="92" r="3" stroke-width="1"/>
+<circle cx="138" cy="96" r="12" stroke-width="1.4"/>
+<path d="M70 72 v40 M50 92 h40 M56 78 l28 28 M84 78 l-28 28" stroke-width=".6"/>
+<path d="M30 78 L140 78 M20 112 H200" stroke-width="1"/>
+<path d="M124 12 q -6 -8 2 -10 q 8 -2 4 -8" stroke-width=".7" stroke-dasharray="2 3"/>
+</g></svg>"""
+
+MOON_SKETCH = """<svg class="sketch tall" viewBox="0 0 140 140" aria-hidden="true">
+<g fill="none" stroke="currentColor" stroke-linecap="round">
+<circle cx="70" cy="70" r="48" stroke-width="1.5"/>
+<circle cx="52" cy="54" r="9" stroke-width=".8"/><circle cx="84" cy="82" r="13" stroke-width=".8"/>
+<circle cx="80" cy="44" r="5" stroke-width=".8"/><circle cx="50" cy="92" r="6" stroke-width=".8"/>
+<path d="M18 120 q 10 -14 22 -4 l6 -8 l6 8" stroke-width="1"/>
+<path d="M8 128 H132" stroke-width=".7"/>
+</g></svg>"""
+
 THEMES = {
     "einstein": {
         "name": "Albert Einstein",
@@ -155,6 +186,38 @@ THEMES = {
     "william-shakespeare": {
         "name": "William Shakespeare", "place": "Bankside, London", "class": "parchment",
         "margin_note": "", "flourish": "",
+    },
+    "elizabeth-i": {
+        "name": "Elizabeth I, Queen of England", "place": "The Palace of Greenwich", "class": "parchment",
+        "margin_note": "", "flourish": "",
+    },
+    "grace-darling": {
+        "name": "Grace Darling", "place": "Longstone Lighthouse, Farne Islands", "class": "victorian",
+        "margin_note": LIGHTHOUSE_SKETCH, "flourish": "",
+    },
+    "george-stephenson": {
+        "name": "George Stephenson", "place": "Tapton House, Chesterfield", "class": "victorian",
+        "margin_note": ROCKET_SKETCH, "flourish": "",
+    },
+    "neil-armstrong": {
+        "name": "Neil Armstrong", "place": "Houston, Texas", "class": "typed",
+        "margin_note": MOON_SKETCH, "flourish": "",
+    },
+    "isaac-newton": {
+        "name": "Isaac Newton", "place": "Trinity College, Cambridge", "class": "parchment",
+        "margin_note": "", "flourish": "",
+    },
+    "al-khwarizmi": {
+        "name": "Al-Khwarizmi", "place": "The House of Wisdom, Baghdad", "class": "parchment",
+        "margin_note": '<div class="translated">Translated from the Arabic</div>', "flourish": "",
+    },
+    "walter-tull": {
+        "name": "Walter Tull", "place": "Northampton", "class": "victorian",
+        "margin_note": "", "flourish": "",
+    },
+    "emmeline-pankhurst": {
+        "name": "Emmeline Pankhurst", "place": "London", "class": "typed",
+        "margin_note": '<div class="pencil" style="color:#5b2a6e">Votes for Women</div>', "flourish": "",
     },
     "leonardo-da-vinci": {
         "name": "Leonardo da Vinci",
@@ -261,6 +324,7 @@ body { margin: 0; background: #d9d4c8; }
 .victorian .signature { color: #2b1f14; }
 .victorian .sketch { color: #5a4630; opacity: .4; bottom: 0.25in; }
 .sketch.ammonite { width: 1.15in; right: 0.55in; }
+.sketch.tall { width: 0.85in; right: 0.4in; bottom: 0.25in; }
 
 /* Back page: an archive index card with the real history, and room to write back */
 .back { display: flex; flex-direction: column; overflow: hidden; background: #fbfaf6; font-family: 'Typewriter', 'Courier New', monospace; color: #26231f; font-size: 11.5pt; line-height: 1.55; }
