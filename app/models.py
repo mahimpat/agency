@@ -23,6 +23,9 @@ class User(Base):
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     stripe_customer_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
     marketing_opt_in: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    # Google account ID for "Sign in with Google" (the stable "sub" claim, not the email).
+    google_sub: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     children: Mapped[list["Child"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -130,11 +133,27 @@ class ProcessedEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
 
 
-def make_sessionmaker(database_url: str) -> sessionmaker:
+class RateEvent(Base):
+    """One attempt at a rate-limited action (login, sign-up, upload...). Old rows are pruned daily."""
+    __tablename__ = "rate_events"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    key: Mapped[str] = mapped_column(String(200), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now, index=True)
+
+
+class JobLock(Base):
+    """Stops two daily runs overlapping (e.g. the scheduler and "Run now" at the same moment)."""
+    __tablename__ = "job_locks"
+    name: Mapped[str] = mapped_column(String(50), primary_key=True)
+    acquired_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+
+
+def make_sessionmaker(database_url: str, create_tables: bool = True) -> sessionmaker:
     # Hosted Postgres (Supabase, Render, Railway...) often hands out postgres:// URLs.
     if database_url.startswith(("postgres://", "postgresql://")):
         database_url = "postgresql+psycopg://" + database_url.split("://", 1)[1]
     connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
-    engine = create_engine(database_url, connect_args=connect_args)
-    Base.metadata.create_all(engine)
+    engine = create_engine(database_url, connect_args=connect_args, pool_pre_ping=True)
+    if create_tables:
+        Base.metadata.create_all(engine)
     return sessionmaker(bind=engine, expire_on_commit=False)

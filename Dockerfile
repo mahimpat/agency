@@ -10,7 +10,8 @@ ENV CHROME=/usr/bin/chromium \
 
 WORKDIR /srv
 COPY . .
-RUN pip install --no-cache-dir ".[postgres]"
+RUN pip install --no-cache-dir ".[postgres,s3,monitoring]"
 
 EXPOSE 8000
-CMD ["sh", "-c", "uvicorn app.web:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
+# Apply database migrations, then start the web app.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.web:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]

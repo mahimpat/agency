@@ -25,8 +25,16 @@ FIGURE_ORDER = [
 ]
 LETTERS_PER_FIGURE = 3
 REPLY_WAIT_DAYS = 21  # after this, an unused reply credit becomes a follow-up letter
+# Data minimisation: letter text, files and children's reply words are cleared after this many days.
+RETENTION_DAYS = int(os.environ.get("RETENTION_DAYS", "365"))
 PREVIEW_HOURS = 48  # parents who preview letters have this long before a letter posts automatically
 # Cost guards: every rewrite or uploaded reply means paid AI calls, so both are capped per child.
+# (limit, window in seconds) for each action, per IP address and per account/email.
+RATE_LIMITS = {
+    "login_ip": (20, 15 * 60), "login_email": (10, 15 * 60),
+    "signup_ip": (5, 60 * 60), "forgot_ip": (5, 60 * 60), "forgot_email": (3, 60 * 60),
+    "verify_resend": (3, 60 * 60), "upload_user": (10, 60 * 60), "changes_user": (10, 60 * 60),
+}
 PARENT_REWRITES_PER_MONTH = int(os.environ.get("PARENT_REWRITES_PER_MONTH", "2"))
 REPLY_UPLOADS_PER_MONTH = int(os.environ.get("REPLY_UPLOADS_PER_MONTH", "4"))
 
@@ -61,6 +69,22 @@ class Settings:
     company_number: str = field(default_factory=lambda: os.environ.get("COMPANY_NUMBER", ""))
     company_address: str = field(default_factory=lambda: os.environ.get("COMPANY_ADDRESS", ""))
     ico_number: str = field(default_factory=lambda: os.environ.get("ICO_NUMBER", ""))
+    # Files: local DATA_DIR unless an S3-compatible bucket is set (Supabase Storage, Cloudflare R2, AWS S3).
+    storage_bucket: str = field(default_factory=lambda: os.environ.get("STORAGE_BUCKET", ""))
+    storage_endpoint: str = field(default_factory=lambda: os.environ.get("STORAGE_ENDPOINT", ""))
+    storage_region: str = field(default_factory=lambda: os.environ.get("STORAGE_REGION", ""))
+    storage_access_key: str = field(default_factory=lambda: os.environ.get("STORAGE_ACCESS_KEY", ""))
+    storage_secret_key: str = field(default_factory=lambda: os.environ.get("STORAGE_SECRET_KEY", ""))
+    # "Sign in with Google" (optional): OAuth client from Google Cloud Console.
+    google_client_id: str = field(default_factory=lambda: os.environ.get("GOOGLE_CLIENT_ID", ""))
+    google_client_secret: str = field(default_factory=lambda: os.environ.get("GOOGLE_CLIENT_SECRET", ""))
+    # Error alerts (optional). Never sends request bodies or local variables, so no children's data.
+    sentry_dsn: str = field(default_factory=lambda: os.environ.get("SENTRY_DSN", ""))
+    # Brute-force and bot protection on login, sign-up, password reset and uploads.
+    rate_limits: bool = field(default_factory=lambda: _flag("RATE_LIMITS", True))
+    # Create tables at start-up. On for SQLite (development); production Postgres uses Alembic migrations.
+    auto_create_tables: bool | None = field(default_factory=lambda: (
+        _flag("AUTO_CREATE_TABLES", False) if "AUTO_CREATE_TABLES" in os.environ else None))
     # A scheduler calls POST /internal/run-due with "Authorization: Bearer <CRON_SECRET>" once a day.
     cron_secret: str = field(default_factory=lambda: os.environ.get("CRON_SECRET", ""))
     hosting_provider: str = field(default_factory=lambda: os.environ.get("HOSTING_PROVIDER", ""))
@@ -73,6 +97,8 @@ class Settings:
             self.secret_key = "dev-only-insecure-key"
         if not self.database_url:
             self.database_url = f"sqlite:///{self.data_dir / 'app.db'}"
+        if self.auto_create_tables is None:
+            self.auto_create_tables = self.database_url.startswith("sqlite")
         for sub in ("uploads", "letters"):
             (self.data_dir / sub).mkdir(parents=True, exist_ok=True)
 

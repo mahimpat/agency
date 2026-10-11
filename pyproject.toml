@@ -13,10 +13,13 @@ dependencies = [
   "stripe>=12",
   "python-multipart>=0.0.9",
   "itsdangerous>=2.2",
+  "alembic>=1.13",
 ]
 
 [project.optional-dependencies]
 postgres = ["psycopg[binary]>=3.2"]
+s3 = ["boto3>=1.34"]
+monitoring = ["sentry-sdk>=2.0"]
 dev = ["httpx>=0.27"]
 
 [project.scripts]
@@ -33,4 +36,4 @@ packages = ["letters", "letters.prompts", "letters.figures", "letters.fonts", "a
 "letters.prompts" = ["*.md"]
 "letters.figures" = ["*.md"]
 "letters.fonts" = ["*.woff2", "*.md"]
-app = ["templates/*.html", "static/*"]
+app = ["templates/*.html", "static/*.css", "static/fonts/*"]

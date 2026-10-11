@@ -49,3 +49,14 @@ def read_reset_token(secret_key: str, token: str, max_age: int = 3600) -> dict |
         return _reset_serializer(secret_key).loads(token, max_age=max_age)
     except (BadSignature, SignatureExpired):
         return None
+
+
+def make_verify_token(secret_key: str, user_id: int, email: str) -> str:
+    return URLSafeTimedSerializer(secret_key, salt="verify-email").dumps({"u": user_id, "e": email})
+
+
+def read_verify_token(secret_key: str, token: str, max_age: int = 7 * 24 * 3600) -> dict | None:
+    try:
+        return URLSafeTimedSerializer(secret_key, salt="verify-email").loads(token, max_age=max_age)
+    except (BadSignature, SignatureExpired):
+        return None

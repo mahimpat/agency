@@ -10,20 +10,24 @@ rotation in a wrong state.
 
 import json
 import logging
+import tempfile
 from dataclasses import dataclass, field
 from datetime import timedelta
 from pathlib import Path
 from typing import Callable
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from letters import mail, pdf, pipeline, render
 
 from .config import (FIGURE_ORDER, LETTERS_PER_FIGURE, PARENT_REWRITES_PER_MONTH, PLANS, PREVIEW_HOURS,
-                     REPLY_WAIT_DAYS, Settings)
+                     REPLY_WAIT_DAYS, RETENTION_DAYS, Settings)
+from . import ratelimit
 from .emails import send_email
-from .models import Child, Letter, Reply, Subscription, now
+from .models import Child, JobLock, Letter, Reply, Subscription, now
+from .storage import get_storage
 
 log = logging.getLogger("letters.jobs")
 
@@ -48,6 +52,7 @@ class RunSummary:
     letters_sent: int = 0
     to_review: int = 0
     sent_to_parents: int = 0
+    skipped: bool = False  # another run was already in progress
     errors: list[str] = field(default_factory=list)
 
 
@@ -87,10 +92,12 @@ def history_text(stint: list[Letter], limit: int = 3) -> str:
 # --- Steps ------------------------------------------------------------------
 
 def read_new_replies(db: Session, settings: Settings, child: Child, services: Services, summary: RunSummary) -> None:
+    storage = get_storage(settings)
     for reply in [r for r in child.replies if r.status == "new"]:
         try:
             if reply.photo_path:
-                result = services.read_reply(photo=reply.photo_path)
+                with storage.local_path(reply.photo_path) as photo:
+                    result = services.read_reply(photo=str(photo))
             else:
                 result = services.read_reply(text=reply.typed_text)
             # Always re-apply the rule-based safeguards here, whatever read the letter.
@@ -101,7 +108,7 @@ def read_new_replies(db: Session, settings: Settings, child: Child, services: Se
         reply.transcription_json = result.model_dump_json()
         held = result.needs_human or not result.legible
         if reply.photo_path and not held:  # privacy: photos are kept only until they've been read...
-            Path(reply.photo_path).unlink(missing_ok=True)  # ...or, if held, until a person has reviewed them
+            storage.delete(reply.photo_path)  # ...or, if held, until a person has reviewed them
             reply.photo_path = None
         if held:
             reply.status = "held"
@@ -128,15 +135,22 @@ def alert_reviewer(settings: Settings, reply: Reply, result: pipeline.ChildReply
                + ("\nIf a child may be in immediate danger, call 999.\n" if urgent else ""))
 
 
+def _make_pdf(settings: Settings, letter: Letter, html: str, services: Services) -> int:
+    storage = get_storage(settings)
+    key = f"letters/{letter.child_id}/letter-{letter.id}.pdf"
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "letter.pdf"
+        pages = services.to_pdf(html, path)
+        storage.put(key, path.read_bytes(), "application/pdf")
+    letter.pdf_path = key
+    return pages
+
+
 def _save_files(settings: Settings, letter: Letter, html: str, services: Services) -> None:
-    folder = settings.letters_dir / str(letter.child_id)
-    folder.mkdir(parents=True, exist_ok=True)
-    html_path = folder / f"letter-{letter.id}.html"
-    html_path.write_text(html, encoding="utf-8")
-    letter.html_path = str(html_path)
-    pdf_path = folder / f"letter-{letter.id}.pdf"
-    pages = services.to_pdf(html, pdf_path)
-    letter.pdf_path = str(pdf_path)
+    key = f"letters/{letter.child_id}/letter-{letter.id}.html"
+    get_storage(settings).put(key, html.encode("utf-8"), "text/html")
+    letter.html_path = key
+    pages = _make_pdf(settings, letter, html, services)
     if pages != 2:
         letter.note = (letter.note + f" PDF has {pages} pages (expected 2); check the layout.").strip()
 
@@ -225,13 +239,13 @@ def parent_rewrite(db: Session, letter: Letter, note: str) -> None:
 def send_letter(db: Session, settings: Settings, letter: Letter, services: Services | None = None,
                 summary: RunSummary | None = None) -> None:
     services = services or Services()
+    storage = get_storage(settings)
     child = letter.child
     try:
-        if not letter.pdf_path or not Path(letter.pdf_path).exists():
-            html = Path(letter.html_path).read_text(encoding="utf-8")
-            letter.pdf_path = str(Path(letter.html_path).with_suffix(".pdf"))
-            services.to_pdf(html, Path(letter.pdf_path))
-        result = services.send(Path(letter.pdf_path), child.address(), live=settings.live_mail)
+        if not letter.pdf_path or not storage.exists(letter.pdf_path):
+            _make_pdf(settings, letter, storage.get(letter.html_path).decode("utf-8"), services)
+        with storage.local_path(letter.pdf_path) as pdf_file:
+            result = services.send(pdf_file, child.address(), live=settings.live_mail)
     except Exception as e:  # noqa: BLE001
         letter.status = "failed"
         letter.note = (letter.note + f" Sending failed: {e}").strip()
@@ -271,9 +285,73 @@ def reject_letter(db: Session, letter: Letter) -> None:
     db.commit()
 
 
+LOCK_NAME = "run_due"
+STALE_LOCK = timedelta(hours=2)  # a crashed run's lock is taken over after this
+
+
+def _acquire_lock(db: Session) -> bool:
+    db.execute(delete(JobLock).where(JobLock.name == LOCK_NAME, JobLock.acquired_at < now() - STALE_LOCK))
+    db.commit()
+    try:
+        db.add(JobLock(name=LOCK_NAME))
+        db.commit()
+        return True
+    except IntegrityError:
+        db.rollback()
+        return False
+
+
+def _release_lock(db: Session) -> None:
+    db.execute(delete(JobLock).where(JobLock.name == LOCK_NAME))
+    db.commit()
+
+
 def run_due(db: Session, settings: Settings, services: Services | None = None) -> RunSummary:
-    services = services or Services()
+    """Run once at a time: if another run holds the lock, this one does nothing."""
+    if not _acquire_lock(db):
+        log.warning("run_due skipped: another run is in progress")
+        return RunSummary(skipped=True)
+    try:
+        summary = _run_due(db, settings, services or Services())
+    finally:
+        _release_lock(db)
+    if summary.errors and settings.admin_email:
+        send_email(settings, settings.admin_email, f"Daily run finished with {len(summary.errors)} error(s)",
+                   "\n".join(summary.errors[:50]) + f"\n\nCheck {settings.base_url}/admin")
+    return summary
+
+
+def apply_retention(db: Session, settings: Settings) -> int:
+    """Clear old letters and replies: keep only what the rotation needs (pen pal, type, dates).
+    Held replies are left for the safeguarding lead. Returns how many records were cleared."""
+    storage = get_storage(settings)
+    cutoff = now() - timedelta(days=RETENTION_DAYS)
+    cleared = 0
+    old_letters = db.scalars(select(Letter).where(Letter.created_at < cutoff, Letter.letter_json.is_not(None),
+                                                  Letter.status.not_in(["needs_review", "awaiting_parent", "held"]))).all()
+    for letter in old_letters:
+        for key in (letter.pdf_path, letter.html_path):
+            if key:
+                storage.delete(key)
+        letter.pdf_path = letter.html_path = letter.letter_json = None
+        letter.checks_json = "[]"
+        letter.note = ""
+        cleared += 1
+    old_replies = db.scalars(select(Reply).where(Reply.created_at < cutoff, Reply.status != "held")).all()
+    for reply in old_replies:
+        if reply.photo_path:
+            storage.delete(reply.photo_path)
+        if reply.typed_text or reply.transcription_json or reply.photo_path:
+            reply.typed_text, reply.transcription_json, reply.photo_path, reply.note = "", None, None, ""
+            cleared += 1
+    db.commit()
+    return cleared
+
+
+def _run_due(db: Session, settings: Settings, services: Services) -> RunSummary:
     summary = RunSummary()
+    ratelimit.prune(db)
+    apply_retention(db, settings)
     # Letters whose parent preview window has ended are posted, as promised.
     overdue = db.scalars(select(Letter).where(Letter.status == "awaiting_parent", Letter.preview_deadline <= now())).all()
     for letter in overdue:

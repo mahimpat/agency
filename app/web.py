@@ -20,13 +20,14 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from letters import render
 
-from . import billing, jobs
+from . import billing, google_auth, jobs, ratelimit
 from .config import COMPANY, FIGURE_ORDER, PLANS, PREVIEW_HOURS, PRODUCT, REPLY_UPLOADS_PER_MONTH, Settings
 from .emails import send_email
 from .models import Child, Letter, Reply, Subscription, User, make_sessionmaker
 from .models import now as models_now
-from .security import (csrf_ok, csrf_token, hash_password, make_reset_token, read_reset_token,
-                       verify_password)
+from .security import (csrf_ok, csrf_token, hash_password, make_reset_token, make_verify_token, read_reset_token,
+                       read_verify_token, verify_password)
+from .storage import content_type, get_storage
 
 log = logging.getLogger("letters.web")
 HERE = Path(__file__).parent
@@ -40,6 +41,20 @@ STATUS_LABELS = {
 }
 
 
+def init_error_alerts(settings: Settings) -> None:
+    """Optional Sentry error alerts, set up so that no children's data can be sent:
+    no request bodies, no cookies or IP addresses, and no local variables from stack frames."""
+    if not settings.sentry_dsn:
+        return
+    try:
+        import sentry_sdk
+    except ImportError:
+        log.warning("SENTRY_DSN is set but sentry-sdk isn't installed: pip install '.[monitoring]'")
+        return
+    sentry_sdk.init(dsn=settings.sentry_dsn, send_default_pii=False, max_request_body_size="never",
+                    include_local_variables=False, traces_sample_rate=0)
+
+
 class Redirect(Exception):
     def __init__(self, url: str):
         self.url = url
@@ -47,7 +62,9 @@ class Redirect(Exception):
 
 def create_app(settings: Settings | None = None, services: jobs.Services | None = None) -> FastAPI:
     settings = settings or Settings()
-    SessionLocal = make_sessionmaker(settings.database_url)
+    init_error_alerts(settings)
+    SessionLocal = make_sessionmaker(settings.database_url, create_tables=settings.auto_create_tables)
+    storage = get_storage(settings)
     app = FastAPI(title=PRODUCT, docs_url=None, redoc_url=None, openapi_url=None)
     app.state.settings = settings
     app.state.SessionLocal = SessionLocal
@@ -58,7 +75,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     templates = Jinja2Templates(directory=HERE / "templates")
     templates.env.globals.update(PREVIEW_HOURS=PREVIEW_HOURS, COMPANY=COMPANY, PRODUCT=PRODUCT, PLANS=PLANS, FIGURE_NAMES=FIGURE_NAMES,
                                  STATUS_LABELS=STATUS_LABELS, contact_email=settings.contact_email,
-                                 legal=settings, POLICY_DATE="11 October 2026")
+                                 legal=settings, POLICY_DATE="11 October 2026",
+                                 google_enabled=google_auth.enabled(settings))
 
     @app.exception_handler(Redirect)
     async def _redirect(request: Request, exc: Redirect):
@@ -112,6 +130,24 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         request.session.clear()
         request.session["uid"] = user.id
 
+    def client_ip(request: Request) -> str:
+        return request.client.host if request.client else "unknown"
+
+    def limited(request: Request, db: Session, action: str, who: str) -> bool:
+        """True if this attempt is over the limit (and should be refused)."""
+        return settings.rate_limits and not ratelimit.allow(db, action, who)
+
+    def too_many(request: Request) -> HTMLResponse:
+        return page(request, "message.html", 429, title="Please wait a little",
+                    message="There have been too many attempts. Please wait a few minutes and try again.")
+
+    def send_verification(user: User) -> None:
+        token = make_verify_token(settings.secret_key, user.id, user.email)
+        send_email(settings, user.email, "Please confirm your email for Letters from History",
+                   f"Hello {user.name},\n\nPlease confirm your email address by opening this link:\n"
+                   f"{settings.base_url}/verify/{token}\n\nWe need this before you can subscribe, so we know "
+                   "letters and preview emails reach the right person.\n\nLetters from History")
+
     # --- public pages -------------------------------------------------------
 
     @app.get("/", response_class=HTMLResponse)
@@ -147,6 +183,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     def signup(request: Request, db: Session = Depends(db_session), name: str = Form(...),
                email: str = Form(...), password: str = Form(...), plan: str = Form("penpal"),
                marketing: bool = Form(False), agree: bool = Form(False)):
+        if limited(request, db, "signup_ip", client_ip(request)):
+            return too_many(request)
         email = email.strip().lower()
         errors = []
         if not agree:
@@ -163,6 +201,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
                     marketing_opt_in=marketing)
         db.add(user)
         db.commit()
+        send_verification(user)
         login(request, user)
         return RedirectResponse(f"/children/new?plan={plan}", status_code=303)
 
@@ -173,11 +212,92 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     @app.post("/login", dependencies=[Depends(check_csrf)])
     def login_post(request: Request, db: Session = Depends(db_session), email: str = Form(...),
                    password: str = Form(...)):
+        if limited(request, db, "login_ip", client_ip(request)) or limited(request, db, "login_email", email.strip()):
+            return too_many(request)
         user = db.scalar(select(User).where(User.email == email.strip().lower()))
         if not user or not verify_password(password, user.password_hash):
             return page(request, "login.html", 400, errors=["That email and password don't match."], email=email)
         login(request, user)
         return RedirectResponse("/admin" if user.is_admin else "/account", status_code=303)
+
+    # --- Sign in with Google ---------------------------------------------------
+
+    @app.get("/auth/google")
+    def google_start(request: Request, plan: str = "penpal"):
+        if not google_auth.enabled(settings):
+            raise HTTPException(404)
+        request.session["google_plan"] = plan if plan in PLANS else "penpal"
+        return RedirectResponse(google_auth.authorization_url(settings, request.session), status_code=303)
+
+    @app.get("/auth/google/callback")
+    def google_callback(request: Request, db: Session = Depends(db_session), code: str = "", state: str = "",
+                        error: str = ""):
+        if not google_auth.enabled(settings):
+            raise HTTPException(404)
+        expected = request.session.pop("google_state", None)
+        if error or not code or not expected or not secrets.compare_digest(state, expected):
+            flash(request, "Google sign-in didn't complete. Please try again.")
+            return RedirectResponse("/login", status_code=303)
+        if limited(request, db, "login_ip", client_ip(request)):
+            return too_many(request)
+        try:
+            profile = google_auth.fetch_profile(settings, code)
+        except RuntimeError:
+            log.exception("Google sign-in failed")
+            flash(request, "We couldn't sign you in with Google just now. Please try again.")
+            return RedirectResponse("/login", status_code=303)
+        if not profile["email"] or not profile["email_verified"]:
+            flash(request, "Your Google account's email isn't verified, so please sign up with email and a password.")
+            return RedirectResponse("/signup", status_code=303)
+        user = db.scalar(select(User).where(User.google_sub == profile["sub"]))
+        if not user:
+            # Link to an existing account with the same (Google-verified) email.
+            user = db.scalar(select(User).where(User.email == profile["email"]))
+            if user and user.google_sub and user.google_sub != profile["sub"]:
+                flash(request, "That email is linked to a different Google account. Please log in with your password.")
+                return RedirectResponse("/login", status_code=303)
+            if user:
+                user.google_sub = profile["sub"]
+        if user:
+            if not user.email_verified_at:
+                user.email_verified_at = models_now()
+            db.commit()
+            login(request, user)
+            return RedirectResponse("/admin" if user.is_admin else "/account", status_code=303)
+        # New parent: they still confirm the privacy policy and terms before an account exists.
+        plan = request.session.get("google_plan", "penpal")
+        request.session["google_profile"] = profile
+        request.session["google_plan"] = plan
+        return RedirectResponse("/signup/google", status_code=303)
+
+    @app.get("/signup/google", response_class=HTMLResponse)
+    def google_signup_form(request: Request):
+        profile = request.session.get("google_profile")
+        if not profile:
+            return RedirectResponse("/signup", status_code=303)
+        return page(request, "signup_google.html", profile=profile)
+
+    @app.post("/signup/google", dependencies=[Depends(check_csrf)])
+    def google_signup(request: Request, db: Session = Depends(db_session), name: str = Form(""),
+                      agree: bool = Form(False), marketing: bool = Form(False)):
+        profile = request.session.get("google_profile")
+        if not profile:
+            return RedirectResponse("/signup", status_code=303)
+        if not agree:
+            return page(request, "signup_google.html", 400, profile=profile,
+                        errors=["Please confirm you've read the privacy policy and terms."])
+        if limited(request, db, "signup_ip", client_ip(request)):
+            return too_many(request)
+        plan = request.session.get("google_plan", "penpal")
+        if db.scalar(select(User).where((User.google_sub == profile["sub"]) | (User.email == profile["email"]))):
+            flash(request, "You already have an account. Please sign in.")
+            return RedirectResponse("/login", status_code=303)
+        user = User(email=profile["email"], name=(name.strip() or profile["name"] or "there")[:120], password_hash="",
+                    google_sub=profile["sub"], email_verified_at=models_now(), marketing_opt_in=marketing)
+        db.add(user)
+        db.commit()
+        login(request, user)
+        return RedirectResponse(f"/children/new?plan={plan}", status_code=303)
 
     @app.post("/logout", dependencies=[Depends(check_csrf)])
     def logout(request: Request):
@@ -190,6 +310,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
 
     @app.post("/forgot", dependencies=[Depends(check_csrf)])
     def forgot(request: Request, db: Session = Depends(db_session), email: str = Form(...)):
+        if limited(request, db, "forgot_ip", client_ip(request)) or limited(request, db, "forgot_email", email.strip()):
+            return too_many(request)
         user = db.scalar(select(User).where(User.email == email.strip().lower()))
         if user:
             token = make_reset_token(settings.secret_key, user.id, user.password_hash)
@@ -217,6 +339,29 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         login(request, user)
         flash(request, "Your password has been changed.")
         return RedirectResponse("/account", status_code=303)
+
+    @app.get("/verify/{token}")
+    def verify_email(request: Request, token: str, db: Session = Depends(db_session)):
+        data = read_verify_token(settings.secret_key, token)
+        user = db.get(User, data["u"]) if data else None
+        if not user or user.email != data["e"]:
+            return page(request, "message.html", 400, title="That link has expired",
+                        message="Log in and we'll send you a new confirmation link.")
+        if not user.email_verified_at:
+            user.email_verified_at = models_now()
+            db.commit()
+        flash(request, "Thank you, your email is confirmed.")
+        return RedirectResponse("/account" if request.session.get("uid") == user.id else "/login", status_code=303)
+
+    @app.post("/verify/resend", dependencies=[Depends(check_csrf)])
+    def resend_verification(request: Request, user: User = Depends(require_user), db: Session = Depends(db_session)):
+        if user.email_verified_at:
+            return RedirectResponse("/account", status_code=303)
+        if limited(request, db, "verify_resend", str(user.id)):
+            return too_many(request)
+        send_verification(user)
+        flash(request, f"We've sent a new confirmation link to {user.email}.")
+        return RedirectResponse(request.headers.get("referer") or "/account", status_code=303)
 
     # --- parent account -----------------------------------------------------
 
@@ -262,6 +407,47 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         db.commit()
         return RedirectResponse(f"/checkout/{sub.id}", status_code=303)
 
+    CHILD_FIELDS = ("first_name", "interests", "avoid", "recipient_name", "line1", "line2", "town", "postcode")
+
+    def _own_child(db: Session, user: User, child_id: int) -> Child:
+        child = db.get(Child, child_id)
+        if not child or child.user_id != user.id:
+            raise HTTPException(404)
+        return child
+
+    @app.get("/children/{child_id}/edit", response_class=HTMLResponse)
+    def child_edit_form(request: Request, child_id: int, user: User = Depends(require_user),
+                        db: Session = Depends(db_session)):
+        child = _own_child(db, user, child_id)
+        form = {f: getattr(child, f) for f in CHILD_FIELDS} | {"age": child.age, "parent_preview": child.parent_preview}
+        return page(request, "child_form.html", editing=child, form=form, plan=None)
+
+    @app.post("/children/{child_id}/edit", dependencies=[Depends(check_csrf)])
+    def child_edit(request: Request, child_id: int, user: User = Depends(require_user),
+                   db: Session = Depends(db_session), first_name: str = Form(...), age: int = Form(...),
+                   interests: str = Form(""), avoid: str = Form(""), recipient_name: str = Form(...),
+                   line1: str = Form(...), line2: str = Form(""), town: str = Form(...), postcode: str = Form(...),
+                   parent_preview: bool = Form(False)):
+        child = _own_child(db, user, child_id)
+        form = dict(first_name=first_name, age=age, interests=interests, avoid=avoid, recipient_name=recipient_name,
+                    line1=line1, line2=line2, town=town, postcode=postcode, parent_preview=parent_preview)
+        if not 4 <= age <= 13:
+            return page(request, "child_form.html", 400, editing=child, form=form, plan=None,
+                        errors=["Letters are written for children aged 5 to 12."])
+        child.first_name = first_name.strip()[:60]
+        child.age = age
+        child.interests = interests[:500]
+        child.avoid = avoid[:500]
+        child.recipient_name = recipient_name.strip()[:120]
+        child.line1 = line1.strip()[:200]
+        child.line2 = line2.strip()[:200]
+        child.town = town.strip()[:100]
+        child.postcode = postcode.strip().upper()[:12]
+        child.parent_preview = parent_preview
+        db.commit()
+        flash(request, f"Saved. Letters that haven't been posted yet will use {child.first_name}'s new details.")
+        return RedirectResponse("/account", status_code=303)
+
     @app.get("/checkout/{sub_id}", response_class=HTMLResponse)
     def checkout_page(request: Request, sub_id: int, user: User = Depends(require_user),
                       db: Session = Depends(db_session)):
@@ -279,6 +465,9 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if sub.status not in ("pending", "canceled", "incomplete_expired"):
             flash(request, "That subscription is already active.")
             return RedirectResponse("/account", status_code=303)
+        if not user.email_verified_at:
+            flash(request, f"Please confirm your email first: open the link we sent to {user.email}.")
+            return RedirectResponse(f"/checkout/{sub_id}", status_code=303)
         try:
             url = billing.checkout_url(settings, db, db.merge(user), sub)
         except Exception:  # noqa: BLE001
@@ -305,6 +494,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if not child.subscription or PLANS[child.subscription.plan]["reply"] == 0:
             flash(request, "Replies are part of the Pen Pal from History plan.")
             return RedirectResponse("/account", status_code=303)
+        if limited(request, db, "upload_user", str(user.id)):
+            return too_many(request)
         month_ago = models_now() - timedelta(days=30)
         if sum(1 for r in child.replies if r.created_at >= month_ago) >= REPLY_UPLOADS_PER_MONTH:
             flash(request, f"You've sent {REPLY_UPLOADS_PER_MONTH} letters for {child.first_name} this month, which "
@@ -320,9 +511,9 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             if photo.content_type not in PHOTO_TYPES or len(data) > MAX_UPLOAD:
                 flash(request, "Please upload a JPG, PNG or WebP photo under 10 MB.")
                 return RedirectResponse("/account", status_code=303)
-            path = settings.uploads_dir / f"{secrets.token_hex(16)}{PHOTO_TYPES[photo.content_type]}"
-            path.write_bytes(data)
-            reply.photo_path = str(path)
+            key = f"uploads/{secrets.token_hex(16)}{PHOTO_TYPES[photo.content_type]}"
+            storage.put(key, data, photo.content_type)
+            reply.photo_path = key
         elif not text:
             flash(request, "Add a photo of the letter, or type it in.")
             return RedirectResponse("/account", status_code=303)
@@ -340,9 +531,10 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             raise HTTPException(404)
         if not user.is_admin and letter.status not in ("sent", "awaiting_parent"):
             raise HTTPException(404)
-        if not letter.pdf_path or not Path(letter.pdf_path).exists():
+        if not letter.pdf_path or not storage.exists(letter.pdf_path):
             raise HTTPException(404)
-        return FileResponse(letter.pdf_path, media_type="application/pdf")
+        return Response(storage.get(letter.pdf_path), media_type="application/pdf",
+                        headers={"Cache-Control": "private, no-store"})
 
     # --- parent preview -----------------------------------------------------
 
@@ -356,9 +548,9 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     def letter_html(letter_id: int, user: User = Depends(require_user), db: Session = Depends(db_session)):
         letter = db.get(Letter, letter_id)
         allowed = user.is_admin or (letter and letter.child.user_id == user.id and letter.status in ("sent", "awaiting_parent"))
-        if not letter or not allowed or not letter.html_path or not Path(letter.html_path).exists():
+        if not letter or not allowed or not letter.html_path or not storage.exists(letter.html_path):
             raise HTTPException(404)
-        return HTMLResponse(Path(letter.html_path).read_text(encoding="utf-8"),
+        return HTMLResponse(storage.get(letter.html_path).decode("utf-8"),
                             headers={"Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; "
                                      "font-src data:; img-src data:; script-src 'unsafe-inline'"})
 
@@ -387,6 +579,8 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     def parent_changes(request: Request, letter_id: int, user: User = Depends(require_user),
                        db: Session = Depends(db_session), note: str = Form("")):
         letter = _parent_letter(db, user, letter_id)
+        if limited(request, db, "changes_user", str(user.id)):
+            return too_many(request)
         note = note.strip()[:500]
         if not note:
             flash(request, "Tell us what you'd like changed, so the new letter gets it right.")
@@ -441,11 +635,11 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         for child in user.children:
             for reply in child.replies:
                 if reply.photo_path:
-                    Path(reply.photo_path).unlink(missing_ok=True)
+                    storage.delete(reply.photo_path)
             for letter in child.letters:
-                for p in (letter.pdf_path, letter.html_path):
-                    if p:
-                        Path(p).unlink(missing_ok=True)
+                for key in (letter.pdf_path, letter.html_path):
+                    if key:
+                        storage.delete(key)
         db.delete(user)
         db.commit()
         request.session.clear()
@@ -472,7 +666,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if not settings.cron_secret or not secrets.compare_digest(request.headers.get("authorization", ""), expected):
             raise HTTPException(404)
         summary = jobs.run_due(db, settings, app.state.services)
-        return {"letters_written": summary.letters_written, "letters_sent": summary.letters_sent,
+        return {"skipped": summary.skipped, "letters_written": summary.letters_written, "letters_sent": summary.letters_sent,
                 "to_review": summary.to_review, "replies_read": summary.replies_read, "errors": summary.errors}
 
     # --- admin --------------------------------------------------------------
@@ -531,7 +725,7 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
             raise HTTPException(404)
         reply.status = "ready" if action == "release" else "dismissed"
         if reply.photo_path:  # reviewed: the photo is no longer needed
-            Path(reply.photo_path).unlink(missing_ok=True)
+            storage.delete(reply.photo_path)
             reply.photo_path = None
         db.commit()
         flash(request, f"Reply {reply.id} {'released for an answer' if action == 'release' else 'dismissed'}.")
@@ -540,13 +734,17 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
     @app.get("/admin/replies/{reply_id}/photo")
     def held_photo(reply_id: int, admin: User = Depends(require_admin), db: Session = Depends(db_session)):
         reply = db.get(Reply, reply_id)
-        if not reply or reply.status != "held" or not reply.photo_path or not Path(reply.photo_path).exists():
+        if not reply or reply.status != "held" or not reply.photo_path or not storage.exists(reply.photo_path):
             raise HTTPException(404)
-        return FileResponse(reply.photo_path, headers={"Cache-Control": "no-store"})
+        return Response(storage.get(reply.photo_path), media_type=content_type(reply.photo_path),
+                        headers={"Cache-Control": "private, no-store"})
 
     @app.post("/admin/run", dependencies=[Depends(check_csrf)])
     def run_now(request: Request, admin: User = Depends(require_admin), db: Session = Depends(db_session)):
         summary = jobs.run_due(db, settings, app.state.services)
+        if summary.skipped:
+            flash(request, "Another run is already in progress. Try again in a few minutes.")
+            return RedirectResponse("/admin", status_code=303)
         flash(request, f"Run finished: {summary.letters_written} written, {summary.letters_sent} sent, "
                        f"{summary.to_review} to review, {summary.replies_read} replies read"
                        + (f", {len(summary.errors)} errors: {'; '.join(summary.errors)[:300]}" if summary.errors else ""))

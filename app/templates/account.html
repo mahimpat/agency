@@ -2,6 +2,12 @@
 {% block title %}My account · {{ PRODUCT }}{% endblock %}
 {% block content %}
 <h1>Hello, {{ user.name }}</h1>
+{% if not user.email_verified_at %}
+<div class="flash" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+  <span>Please confirm your email: open the link we sent to <b>{{ user.email }}</b>. We need this before you can subscribe.</span>
+  <form method="post" action="/verify/resend" style="margin:0"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small" type="submit">Send it again</button></form>
+</div>
+{% endif %}
 
 {% for child in children %}
 {% set sub = child.subscription %}
@@ -15,7 +21,7 @@
       {% else %}<span class="pill">{{ sub.status|replace('_', ' ') }}</span>{% endif %}
     {% endif %}
   </div>
-  <p class="small muted">Letters go to {{ child.recipient_name }}, {{ child.line1 }}, {{ child.town }} {{ child.postcode }}.</p>
+  <p class="small muted">Letters go to {{ child.recipient_name }}, {{ child.line1 }}, {{ child.town }} {{ child.postcode }}. <a href="/children/{{ child.id }}/edit">Edit details</a></p>
   {% set waiting = child.letters|selectattr('status', 'equalto', 'awaiting_parent')|list %}
   {% for l in waiting %}
   <div class="flash" style="margin:12px 0">

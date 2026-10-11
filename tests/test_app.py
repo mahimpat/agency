@@ -183,6 +183,15 @@ class BillingTests(AppTestCase):
         db.close()
         with mock.patch("stripe.Customer.create", return_value=mock.Mock(id="cus_1")) as cust, \
              mock.patch("stripe.checkout.Session.create", return_value=mock.Mock(url="https://checkout.stripe.com/x")) as cs:
+            # Not until the email address is confirmed.
+            r = self.client.post(f"/checkout/{sub_id}", data={"csrf": self.csrf("/account")}, follow_redirects=False)
+            self.assertEqual(r.headers["location"], f"/checkout/{sub_id}")
+            cs.assert_not_called()
+            # Confirm through the emailed link, then checkout works.
+            with mock.patch("app.web.send_email") as send:
+                self.client.post("/verify/resend", data={"csrf": self.csrf("/account")})
+            link = re.search(r"/verify/(\S+)", send.call_args.args[3]).group(1)
+            self.assertEqual(self.client.get(f"/verify/{link}", follow_redirects=False).status_code, 303)
             r = self.client.post(f"/checkout/{sub_id}", data={"csrf": self.csrf("/account")}, follow_redirects=False)
         self.assertEqual(r.headers["location"], "https://checkout.stripe.com/x")
         params = cs.call_args.kwargs

@@ -32,7 +32,7 @@
 <h2>2. What we collect</h2>
 <table>
   <tr><th>What</th><th>Details</th><th>Where it comes from</th></tr>
-  <tr><td>Your account</td><td>Your first name, email address, password (stored only as a secure, one-way hash), and whether you'd like news and offers</td><td>You</td></tr>
+  <tr><td>Your account</td><td>Your first name, email address, password (stored only as a secure, one-way hash), and whether you'd like news and offers. If you sign in with Google, Google tells us your name, email address, that the email is verified, and an account ID. We don't get your Google password or anything else from your Google account</td><td>You, or Google if you choose to sign in with Google</td></tr>
   <tr><td>Your child's details</td><td>First name, age, interests, and anything you'd like letters to avoid</td><td>You (the parent or guardian)</td></tr>
   <tr><td>Delivery address</td><td>The name on the envelope and the postal address</td><td>You</td></tr>
   <tr><td>Your child's replies</td><td>A photo of a handwritten letter, or text you type in, and the written-out words we keep from it</td><td>You</td></tr>
@@ -86,6 +86,8 @@
   <tr><td>Royal Mail</td><td>Delivering letters (through Stannp)</td><td>The envelope</td></tr>
   <tr><td>{{ filled(legal.hosting_provider, "hosting and database provider") }}</td><td>Running our website and storing our database</td><td>The information in this policy</td></tr>
   <tr><td>{{ filled(legal.email_provider, "email provider") }}</td><td>Sending service emails</td><td>Your name and email</td></tr>
+  {% if legal.sentry_dsn %}<tr><td>Sentry</td><td>Alerting us to technical errors</td><td>Technical error details only. Set up so that no form contents, children's details, cookies or IP addresses are sent</td></tr>{% endif %}
+  <tr><td>Google (only if you choose "Continue with Google")</td><td>Signing you in</td><td>Google confirms who you are to us. Google's own privacy policy applies to your Google account</td></tr>
 </table>
 <p>We will also share information if the law requires it, or to protect a child's safety. If {{ legal.company_legal_name }} is ever sold or merged, your information would pass to the new owner under this policy, and we would tell you first.</p>
 
@@ -96,9 +98,10 @@
 <table>
   <tr><th>Information</th><th>How long</th></tr>
   <tr><td>Photos of replies</td><td>Deleted as soon as they've been read (normally within a day). Photos of replies held for a safety review are deleted once a person has reviewed them</td></tr>
-  <tr><td>Your account, your child's details, letters, reply words and fact-check records</td><td>While your account is open. When you delete your account, they're deleted straight away (and from backups within 30 days)</td></tr>
+  <tr><td>Your account and your child's details</td><td>While your account is open. When you delete your account, they're deleted straight away (and from backups within 30 days)</td></tr>
+  <tr><td>Letters, the words of your child's replies, and fact-check records</td><td>12 months, then cleared automatically (we keep only which pen pal wrote and when, so the pen pals continue in the right order). Deleted straight away if you delete your account</td></tr>
   <tr><td>Payment and invoice records</td><td>Six years, as UK tax law requires (held by Stripe and in our accounts)</td></tr>
-  <tr><td>Server logs</td><td>Up to 30 days</td></tr>
+  <tr><td>Server logs and sign-in attempt records (used to block password guessing)</td><td>Up to 30 days (sign-in attempt records: 1 day)</td></tr>
   <tr><td>Record of your marketing choice</td><td>Until you unsubscribe, then a note that you unsubscribed, so we don't email you again</td></tr>
 </table>
 

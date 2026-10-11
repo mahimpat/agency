@@ -90,6 +90,17 @@ Production settings that matter:
 
 Keep the region in the UK or EU, and name your providers in `HOSTING_PROVIDER` and `EMAIL_PROVIDER` so the privacy policy lists them.
 
+## 5b. Optional extras (recommended)
+
+- **Sign in with Google**
+  1. In [Google Cloud Console](https://console.cloud.google.com/), go to APIs & Services, then OAuth consent screen. Set it up for "External" users, with app name "Letters from History", your support email, and links to `/privacy` and `/terms`. Only the default scopes are needed: `openid`, `email` and `profile`.
+  2. Credentials → Create OAuth client ID → Web application. Authorised redirect URI: `https://YOUR-DOMAIN/auth/google/callback` (and `http://localhost:8000/auth/google/callback` for testing).
+  3. Put the ID and secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. The "Continue with Google" button appears automatically.
+- **File storage off the server:** create a private bucket (e.g. Supabase Storage → New bucket, *not* public). Create S3 access keys, then set the `STORAGE_*` variables. Letter PDFs and held reply photos then survive server rebuilds.
+- **Error alerts:** create a free [Sentry](https://sentry.io) project (EU data region) and set `SENTRY_DSN`. The app sends no form contents, children's details, cookies or IP addresses. Add Sentry to your supplier list.
+- **Uptime check:** point a free monitor (e.g. UptimeRobot) at `https://YOUR-DOMAIN/healthz`.
+- **Database migrations** run automatically when the Docker container starts (`alembic upgrade head`). After changing `app/models.py`, run `alembic revision --autogenerate -m "what changed"`, review the generated file, and commit it.
+
 ## 6. Legal and company details
 
 1. Fill in `COMPANY_LEGAL_NAME`, `COMPANY_NUMBER`, `COMPANY_ADDRESS`, `ICO_NUMBER` and `CONTACT_EMAIL`. Until you do, the privacy policy and terms show highlighted placeholders.

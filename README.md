@@ -46,6 +46,16 @@ python -m app.manage make-admin you@example.com
 
 See `docs/launch-guide.md` for Stripe, Stannp, hosting and going live.
 
+Built in for launch:
+- email verification before payment, and optional Sign in with Google;
+- rate limits on login, sign-up, password reset and uploads;
+- a lock so two daily runs can't overlap;
+- Alembic migrations;
+- local or S3-compatible file storage;
+- optional Sentry error alerts (no personal data sent);
+- self-hosted fonts;
+- automatic 12-month data retention.
+
 ## Setup (letter pipeline on its own)
 
 ```bash
