@@ -64,6 +64,8 @@ th { font-weight: 600; border-bottom: 1.2pt solid #26221d; }
 .legend span { display: inline-block; margin-right: 5mm; font-size: 8.5pt; }
 .legend i { display: inline-block; width: 3mm; height: 3mm; border: 0.8pt solid; vertical-align: -0.4mm; margin-right: 1.5mm; }
 
+.tight table { font-size: 8.8pt; margin-bottom: 3mm; } .tight th, .tight td { padding: 1.4mm 2mm; }
+.tight .lede { margin-bottom: 3mm; } .tight li { margin-bottom: .6mm; font-size: 9.6pt; } .tight h3 { margin-top: 3mm; }
 .letters-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; }
 .letters-grid figure { margin: 0; }
 .letters-grid img { width: 100%; border: 0.6pt solid #d6cbb5; box-shadow: 0 1.5mm 4mm -2mm rgba(40,30,15,.35); display: block; }
@@ -156,10 +158,10 @@ th { font-weight: 600; border-bottom: 1.2pt solid #26221d; }
 </section>
 
 <!-- 5. Pen pals and letter types -->
-<section>
+<section class="tight">
   <p class="kicker">The product</p>
   <h2>Our pen pals</h2>
-  <p class="lede">Eleven pen pals at launch, led by figures UK children meet in the history curriculum. Each has a verified fact sheet: the only facts a letter may use, plus "handle with care" rules.</p>
+  <p class="lede">Nineteen pen pals at launch, led by figures UK children meet in the history curriculum. Each has a verified fact sheet: the only facts a letter may use, plus "handle with care" rules. Two are for ages 8 and over, and younger children skip them automatically.</p>
   <table>
     <tr><th>#</th><th>Pen pal</th><th>Writes from</th><th>Children discover</th></tr>
     <tr><td>1</td><td><b>Mary Anning</b></td><td>Lyme Regis, 1820s-30s</td><td>Fossils, ichthyosaurs, the Jurassic Coast</td></tr>
@@ -169,7 +171,8 @@ th { font-weight: 600; border-bottom: 1.2pt solid #26221d; }
     <tr><td>5</td><td><b>Charles Darwin</b></td><td>Down House, Kent</td><td>HMS Beagle, Galápagos, observation</td></tr>
     <tr><td>6</td><td><b>Mary Seacole</b></td><td>London, 1857-60</td><td>Jamaica, travel, healing, courage</td></tr>
     <tr><td>7</td><td><b>William Shakespeare</b></td><td>Bankside, 1599-1608</td><td>The Globe, plays, words we still use</td></tr>
-    <tr><td>8-11</td><td>Einstein · Amelia Earhart · Leonardo da Vinci · Cleopatra</td><td>Their own eras</td><td>Space, flight, inventions, ancient Egypt</td></tr>
+    <tr><td>8-15</td><td>Grace Darling · Neil Armstrong · Elizabeth I · George Stephenson · Isaac Newton · Al-Khwarizmi · Walter Tull (8+) · Emmeline Pankhurst (8+)</td><td>1580s-1970</td><td>Lighthouses, the Moon, Tudors, railways, gravity, algebra, football, votes for women</td></tr>
+    <tr><td>16-19</td><td>Einstein · Amelia Earhart · Leonardo da Vinci · Cleopatra</td><td>Their own eras</td><td>Space, flight, inventions, ancient Egypt</td></tr>
   </table>
   <div class="grid2">
     <div>
@@ -356,12 +359,14 @@ th { font-weight: 600; border-bottom: 1.2pt solid #26221d; }
       <table>
         <tr><td><span class="pill ok">done</span></td><td>Parent accounts, child profiles, reply uploads, data export and deletion</td></tr>
         <tr><td><span class="pill ok">done</span></td><td>Stripe subscriptions (£7/£12), billing portal, payment webhooks</td></tr>
-        <tr><td><span class="pill ok">done</span></td><td>AI writer, fact-checker and reply reader; 11 pen pals; era stationery</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>AI writer, fact-checker and reply reader; 19 pen pals; era stationery</td></tr>
         <tr><td><span class="pill ok">done</span></td><td>Layered safeguarding and safeguarding policy</td></tr>
         <tr><td><span class="pill ok">done</span></td><td>Admin review, parent preview, cost limits</td></tr>
         <tr><td><span class="pill ok">done</span></td><td>Stannp UK print-and-post integration (test proofs by default)</td></tr>
         <tr><td><span class="pill ok">done</span></td><td>Privacy policy and terms (Forem Innovations), launch guide</td></tr>
-        <tr><td><span class="pill ok">done</span></td><td>43 automated tests covering accounts, billing, letters, safety and preview</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>Email verification, Sign in with Google, rate limits, security headers, migrations, 12-month data retention</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>Safeguarding records, pausing a child, lost-letter resends, connection check</td></tr>
+        <tr><td><span class="pill ok">done</span></td><td>67 automated tests covering accounts, billing, letters, safety, preview and release features</td></tr>
       </table>
       <p class="small muted">Tech: Python (FastAPI), Postgres (Supabase, London) or SQLite, Claude by Anthropic, Stripe, Stannp, Chromium for print PDFs, Docker.</p>
     </div>
@@ -373,7 +378,7 @@ th { font-weight: 600; border-bottom: 1.2pt solid #26221d; }
         <tr><td><span class="pill todo">to do</span></td><td>Company details, ICO registration, data processing terms with suppliers</td></tr>
         <tr><td><span class="pill todo">to do</span></td><td>Solicitor review of privacy policy and terms</td></tr>
         <tr><td><span class="pill todo">to do</span></td><td>Name a Safeguarding Lead and deputy; training and DBS checks</td></tr>
-        <tr><td><span class="pill todo">to do</span></td><td>Database migrations (Alembic) before real customer data</td></tr>
+        <tr><td><span class="pill todo">to do</span></td><td>Letter-quality test run (about 30 letters) and teacher review of the 19 fact sheets</td></tr>
       </table>
       <h3>The plan</h3>
       <ol>
