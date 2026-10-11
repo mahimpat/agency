@@ -53,13 +53,26 @@ P.S. {{ data.postscript }}</div>
 {% endfor %}
 
 <h2 style="margin-top:32px">Children's letters held for a person ({{ held_replies|length }})</h2>
-<p class="small muted">These replies mentioned something a person should read before any automatic answer. Contact the parent if needed.</p>
+<div class="card small" style="background:#fff7f5;border-color:#efc3be">
+  <b>Safeguarding steps</b> (full policy: docs/safeguarding.md)
+  <ol style="margin:8px 0 0">
+    <li><b>Immediate danger to a child:</b> call <b>999</b> now.</li>
+    <li><b>Worried about harm, abuse or neglect:</b> contact the child's local council children's services (find them at gov.uk/report-child-abuse-to-local-council). You can also get advice from the <b>NSPCC helpline: 0808 800 5000</b>.</li>
+    <li><b>Lower-level worries</b> (e.g. bullying, sadness): contact the parent kindly by email or phone, unless you think the parent may be part of the problem. If so, follow step 2 instead.</li>
+    <li>Never reply to the child about a disclosure yourself, and never promise to keep a secret.</li>
+    <li>Write down what you saw, what you did and when, in the reply's note in your records.</li>
+  </ol>
+  <p style="margin:8px 0 0">"Write an answer" only for false alarms (e.g. "my brother hit me with a pillow in a game"). The answer is still checked before posting.</p>
+</div>
 {% for r in held_replies %}
 {% set t = replies[r.id] %}
 <section class="card">
   <b>Reply #{{ r.id }} from {{ r.child.first_name }} ({{ r.child.age }}) to {{ FIGURE_NAMES.get(r.figure, r.figure) }}</b>
+  {% if t %}<span class="pill {% if t.risk_level in ['urgent', 'high'] %}bad{% else %}warn{% endif %}" style="margin-left:8px">{{ t.risk_level }}</span>
+  {% if t.concerns %}<span class="small muted"> {{ t.concerns|join(', ') }}</span>{% endif %}{% endif %}
   <p class="issue">{{ r.note }}</p>
   {% if t %}<div class="letter-preview">{{ t.text }}</div>{% endif %}
+  {% if r.photo_path %}<p class="small"><a href="/admin/replies/{{ r.id }}/photo" target="_blank">View the original photo</a> (deleted once you release or dismiss this reply)</p>{% endif %}
   <p class="small">Parent: {{ r.child.user.name }} · <a href="mailto:{{ r.child.user.email }}">{{ r.child.user.email }}</a></p>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
     <form method="post" action="/admin/replies/{{ r.id }}/release"><input type="hidden" name="csrf" value="{{ csrf }}">

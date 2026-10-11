@@ -57,6 +57,55 @@ BIRD_SKETCH = """<svg class="sketch" viewBox="0 0 220 160" aria-hidden="true">
 <path d="M40 128 C 70 118, 100 126, 128 120" stroke-width=".6" stroke-dasharray="2 4"/>
 </g></svg>"""
 
+def _ammonite() -> str:
+    """An ammonite: a spiral shell with ribs, drawn like a pencil field sketch."""
+    import math
+    cx = cy = 60
+    points, ribs = [], []
+    for i in range(0, 241):
+        theta = i * 0.06
+        r = 2 + 3.1 * theta
+        x, y = cx + r * math.cos(theta), cy + r * math.sin(theta)
+        points.append(f"{x:.1f} {y:.1f}")
+        if i % 8 == 0 and theta > 3:
+            r2 = r - 3.1 * math.pi * 2 * 0.45
+            ribs.append(f"M{x:.1f} {y:.1f} L{cx + r2 * math.cos(theta):.1f} {cy + r2 * math.sin(theta):.1f}")
+    return ('<svg class="sketch ammonite" viewBox="0 0 120 120" aria-hidden="true"><g fill="none" '
+            'stroke="currentColor" stroke-linecap="round">'
+            f'<path d="M{" L".join(points)}" stroke-width="1.5"/>'
+            f'<path d="{" ".join(ribs)}" stroke-width=".7"/></g></svg>')
+
+
+AMMONITE_SKETCH = _ammonite()
+
+BRIDGE_SKETCH = """<svg class="sketch" viewBox="0 0 240 120" aria-hidden="true">
+<g fill="none" stroke="currentColor" stroke-linecap="round">
+<path d="M10 104 C 30 80, 34 70, 40 60 L 40 104 M230 104 C 210 80, 206 70, 200 60 L 200 104" stroke-width="1.2"/>
+<path d="M34 40 h12 v26 h-12 z M194 40 h12 v26 h-12 z" stroke-width="1.4"/>
+<path d="M40 42 C 90 96, 150 96, 200 42" stroke-width="1.6"/>
+<path d="M40 70 L 200 70" stroke-width="1.4"/>
+<path d="M60 58 v12 M80 70 v-6 M100 70 v-3 M120 70 v-2 M140 70 v-3 M160 70 v-6 M180 58 v12" stroke-width=".7"/>
+<path d="M70 116 q 50 -10 100 0" stroke-width=".6" stroke-dasharray="3 4"/>
+</g></svg>"""
+
+PUNCHCARD_SKETCH = """<svg class="sketch" viewBox="0 0 200 110" aria-hidden="true">
+<g fill="none" stroke="currentColor" stroke-linecap="round">
+<rect x="10" y="20" width="170" height="70" rx="3" stroke-width="1.4" transform="rotate(-4 95 55)"/>
+<g fill="currentColor" stroke="none" transform="rotate(-4 95 55)">
+<circle cx="30" cy="35" r="3"/><circle cx="50" cy="35" r="3"/><circle cx="90" cy="35" r="3"/><circle cx="130" cy="35" r="3"/>
+<circle cx="40" cy="55" r="3"/><circle cx="70" cy="55" r="3"/><circle cx="110" cy="55" r="3"/><circle cx="150" cy="55" r="3"/>
+<circle cx="30" cy="75" r="3"/><circle cx="80" cy="75" r="3"/><circle cx="120" cy="75" r="3"/><circle cx="160" cy="75" r="3"/></g>
+</g></svg>"""
+
+BEETLE_SKETCH = """<svg class="sketch" viewBox="0 0 120 140" aria-hidden="true">
+<g fill="none" stroke="currentColor" stroke-linecap="round">
+<ellipse cx="60" cy="80" rx="26" ry="36" stroke-width="1.5"/>
+<path d="M60 44 v72" stroke-width="1"/>
+<ellipse cx="60" cy="38" rx="14" ry="10" stroke-width="1.3"/>
+<path d="M54 30 q -8 -14 -18 -16 M66 30 q 8 -14 18 -16" stroke-width="1"/>
+<path d="M35 64 l-18 -8 M34 82 l-20 2 M37 100 l-16 14 M85 64 l18 -8 M86 82 l20 2 M83 100 l16 14" stroke-width="1"/>
+</g></svg>"""
+
 THEMES = {
     "einstein": {
         "name": "Albert Einstein",
@@ -78,6 +127,34 @@ THEMES = {
         "class": "papyrus",
         "margin_note": '<div class="translated">Translated from the Greek</div>',
         "flourish": "",
+    },
+    "mary-anning": {
+        "name": "Mary Anning", "place": "Lyme Regis, Dorset", "class": "victorian",
+        "margin_note": AMMONITE_SKETCH, "flourish": "",
+    },
+    "isambard-kingdom-brunel": {
+        "name": "Isambard Kingdom Brunel", "place": "Westminster, London", "class": "victorian",
+        "margin_note": BRIDGE_SKETCH, "flourish": "",
+    },
+    "ada-lovelace": {
+        "name": "Ada Lovelace", "place": "London", "class": "victorian",
+        "margin_note": PUNCHCARD_SKETCH, "flourish": "",
+    },
+    "florence-nightingale": {
+        "name": "Florence Nightingale", "place": "London", "class": "victorian",
+        "margin_note": "", "flourish": "",
+    },
+    "mary-seacole": {
+        "name": "Mary Seacole", "place": "London", "class": "victorian",
+        "margin_note": "", "flourish": "",
+    },
+    "charles-darwin": {
+        "name": "Charles Darwin", "place": "Down House, Kent", "class": "victorian",
+        "margin_note": BEETLE_SKETCH, "flourish": "",
+    },
+    "william-shakespeare": {
+        "name": "William Shakespeare", "place": "Bankside, London", "class": "parchment",
+        "margin_note": "", "flourish": "",
     },
     "leonardo-da-vinci": {
         "name": "Leonardo da Vinci",
@@ -171,6 +248,19 @@ body { margin: 0; background: #d9d4c8; }
 .parchment .signature { color: #4a2c14; }
 .sketch { position: absolute; right: 0.4in; bottom: 0.3in; width: 1.7in; color: #6b4524; opacity: .45; transform: rotate(-6deg); }
 .mirror { font-family: 'Hand', cursive; font-size: 1.25em; transform: scaleX(-1); text-align: right; margin-top: 0.15in; color: #6b4524; }
+
+/* 5. Victorian Britain: steel-nib ink on cream laid writing paper */
+.victorian { color: #2b1f14; font-family: 'Fell', Georgia, serif; font-size: calc(var(--size) * 1.1); line-height: 1.5;
+  background:
+    url("GRAIN"),
+    repeating-linear-gradient(90deg, rgba(120,100,70,.07) 0 1px, transparent 1px 0.95in),
+    repeating-linear-gradient(0deg, rgba(120,100,70,.045) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 65%, rgba(140,110,60,.16) 100%),
+    #f5edd9; }
+.victorian .place { font-family: 'FellItalic', Georgia, serif; }
+.victorian .signature { color: #2b1f14; }
+.victorian .sketch { color: #5a4630; opacity: .4; bottom: 0.25in; }
+.sketch.ammonite { width: 1.15in; right: 0.55in; }
 
 /* Back page: an archive index card with the real history, and room to write back */
 .back { display: flex; flex-direction: column; overflow: hidden; background: #fbfaf6; font-family: 'Typewriter', 'Courier New', monospace; color: #26231f; font-size: 11.5pt; line-height: 1.55; }

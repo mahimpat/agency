@@ -75,6 +75,19 @@ body { margin: 0; background: #d9d4c8; }
 .sketch { position: absolute; right: 0.4in; bottom: 0.3in; width: 1.7in; color: #6b4524; opacity: .45; transform: rotate(-6deg); }
 .mirror { font-family: 'Hand', cursive; font-size: 1.25em; transform: scaleX(-1); text-align: right; margin-top: 0.15in; color: #6b4524; }
 
+/* 5. Victorian Britain: steel-nib ink on cream laid writing paper */
+.victorian { color: #2b1f14; font-family: 'Fell', Georgia, serif; font-size: calc(var(--size) * 1.1); line-height: 1.5;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .28  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    repeating-linear-gradient(90deg, rgba(120,100,70,.07) 0 1px, transparent 1px 0.95in),
+    repeating-linear-gradient(0deg, rgba(120,100,70,.045) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 65%, rgba(140,110,60,.16) 100%),
+    #f5edd9; }
+.victorian .place { font-family: 'FellItalic', Georgia, serif; }
+.victorian .signature { color: #2b1f14; }
+.victorian .sketch { color: #5a4630; opacity: .4; bottom: 0.25in; }
+.sketch.ammonite { width: 1.15in; right: 0.55in; }
+
 /* Back page: an archive index card with the real history, and room to write back */
 .back { display: flex; flex-direction: column; overflow: hidden; background: #fbfaf6; font-family: 'Typewriter', 'Courier New', monospace; color: #26231f; font-size: 11.5pt; line-height: 1.55; }
 .card { background: #fffef9; border: 1px solid #d9d2c0; box-shadow: 0 1px 0 #ece6d6; padding: 0.28in 0.35in 0.2in; }

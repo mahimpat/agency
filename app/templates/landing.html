@@ -96,6 +96,8 @@ h2 { font-size: clamp(34px, 4.6vw, 48px); line-height: 1.1; margin: 0 0 12px; }
   background: repeating-linear-gradient(135deg, #b8322b 0 9px, transparent 9px 13px, #1f3f7a 13px 22px, transparent 22px 26px); }
 .m-papyrus { --fade: #e2cd99; background: linear-gradient(90deg, rgba(0,0,0,.03), transparent 30%, rgba(0,0,0,.04) 70%, transparent),
   repeating-linear-gradient(0deg, rgba(120,85,35,.08) 0 1px, transparent 1px 5px), #e4d09e; font-family: 'IM Fell English', serif; color: #2a1b0e; font-size: 13.5px; }
+.m-vict { --fade: #f5edd9; background: repeating-linear-gradient(0deg, rgba(120,100,70,.05) 0 1px, transparent 1px 3px), #f5edd9;
+  font-family: 'IM Fell English', serif; color: #2b1f14; font-size: 13.5px; }
 .m-parch { --fade: #eddcb6; background: radial-gradient(circle at 20% 25%, rgba(150,100,40,.12), transparent 35%), #eddcb6;
   font-family: 'IM Fell English', serif; font-style: italic; color: #4a2c14; font-size: 13.5px; }
 .swatch b { display: block; margin-top: 14px; font-size: 17px; }
@@ -206,7 +208,7 @@ footer { padding: 36px 0 48px; color: var(--ink-soft); font-size: 14.5px; text-a
     <div>
       <p class="kicker">Real letters through your child's letterbox</p>
       <h1>History writes back.</h1>
-      <p class="lede">Einstein, Amelia Earhart, Cleopatra and Leonardo da Vinci write letters to your child about the things your child loves. When your child writes back, the next letter <em>answers them</em>.</p>
+      <p class="lede">Mary Anning, Isambard Kingdom Brunel, Ada Lovelace, Florence Nightingale and more write letters to your child about the things your child loves. When your child writes back, the next letter <em>answers them</em>.</p>
       <div class="hero-cta">
         <a class="btn" href="/signup">Start their letters</a>
         <a class="btn ghost" href="#pen-pals">See the letters</a>
@@ -246,19 +248,19 @@ footer { padding: 36px 0 48px; color: var(--ink-soft); font-size: 14.5px; text-a
 <section id="pen-pals">
   <div class="wrap">
     <h2>Every pen pal writes on their own paper</h2>
-    <p class="sub">Einstein types. Amelia writes on airmail paper. Cleopatra writes on papyrus. Leonardo leaves a line of mirror writing to decode. Tap one to see a full letter.</p>
+    <p class="sub">Mary Anning writes on Victorian paper with a fossil sketched in the margin. Einstein types. Amelia writes on airmail paper. Leonardo leaves a line of mirror writing to decode. Tap one to see a full letter.</p>
     <div class="swatches">
-      <a class="swatch reveal" href="/samples/einstein-to-maya.pdf" target="_blank" rel="noopener">
+      <a class="swatch reveal" href="/samples/anning-to-oliver.pdf" target="_blank" rel="noopener" >
+        <div class="mini m-vict"><div class="to">Dear Oliver,</div>My name is Mary Anning, and I am writing to you from Lyme Regis, a little town by the sea in Dorset. I hunt for fossils…</div>
+        <b>Mary Anning</b><span>Fossils, dinosaurs and the seaside</span>
+      </a>
+      <a class="swatch reveal" href="/samples/einstein-to-maya.pdf" target="_blank" rel="noopener" style="--d:60ms">
         <div class="mini m-typed"><div class="to">Dear Maya,</div>A most curious thing happened this morning. I sat down at my desk here in Princeton to think about the universe, and instead my pen began writing to you…</div>
         <b>Albert Einstein</b><span>Space, light and big questions</span>
       </a>
-      <a class="swatch reveal" href="/samples/earhart-to-leo.pdf" target="_blank" rel="noopener" style="--d:60ms">
+      <a class="swatch reveal" href="/samples/earhart-to-leo.pdf" target="_blank" rel="noopener" style="--d:120ms">
         <div class="mini m-air"><div class="to">Dear Leo,</div>Thank you for your wonderful letter! A red Lego plane, just like my red plane? That made me smile all the way up to the clouds…</div>
         <b>Amelia Earhart</b><span>Flight, courage and adventure</span>
-      </a>
-      <a class="swatch reveal" href="/samples/cleopatra-to-sofia.pdf" target="_blank" rel="noopener" style="--d:120ms">
-        <div class="mini m-papyrus"><div class="to">Greetings, Sofia,</div>I am Cleopatra, Queen of Egypt, and I write to you from my palace in Alexandria, where the sea breeze smells of salt…</div>
-        <b>Cleopatra</b><span>Ancient Egypt and the Nile</span>
       </a>
       <a class="swatch reveal" href="/samples/leonardo-to-sam.pdf" target="_blank" rel="noopener" style="--d:180ms">
         <div class="mini m-parch"><div class="to">Dear Sam,</div>Forgive the ink spots on this page. I write quickly when an idea is chasing me, and this morning one chased me all the way across Milan…</div>

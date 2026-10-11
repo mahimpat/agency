@@ -450,9 +450,19 @@ def create_app(settings: Settings | None = None, services: jobs.Services | None 
         if not reply or reply.status != "held" or action not in ("release", "dismiss"):
             raise HTTPException(404)
         reply.status = "ready" if action == "release" else "dismissed"
+        if reply.photo_path:  # reviewed: the photo is no longer needed
+            Path(reply.photo_path).unlink(missing_ok=True)
+            reply.photo_path = None
         db.commit()
         flash(request, f"Reply {reply.id} {'released for an answer' if action == 'release' else 'dismissed'}.")
         return RedirectResponse("/admin", status_code=303)
+
+    @app.get("/admin/replies/{reply_id}/photo")
+    def held_photo(reply_id: int, admin: User = Depends(require_admin), db: Session = Depends(db_session)):
+        reply = db.get(Reply, reply_id)
+        if not reply or reply.status != "held" or not reply.photo_path or not Path(reply.photo_path).exists():
+            raise HTTPException(404)
+        return FileResponse(reply.photo_path, headers={"Cache-Control": "no-store"})
 
     @app.post("/admin/run", dependencies=[Depends(check_csrf)])
     def run_now(request: Request, admin: User = Depends(require_admin), db: Session = Depends(db_session)):

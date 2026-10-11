@@ -84,21 +84,24 @@ def history_text(stint: list[Letter], limit: int = 3) -> str:
 
 # --- Steps ------------------------------------------------------------------
 
-def read_new_replies(db: Session, child: Child, services: Services, summary: RunSummary) -> None:
+def read_new_replies(db: Session, settings: Settings, child: Child, services: Services, summary: RunSummary) -> None:
     for reply in [r for r in child.replies if r.status == "new"]:
         try:
             if reply.photo_path:
                 result = services.read_reply(photo=reply.photo_path)
             else:
                 result = services.read_reply(text=reply.typed_text)
+            # Always re-apply the rule-based safeguards here, whatever read the letter.
+            result = pipeline.apply_safeguards(result)
         except Exception as e:  # noqa: BLE001 - keep the reply and retry on the next run
             summary.errors.append(f"reply {reply.id}: {e}")
             continue
         reply.transcription_json = result.model_dump_json()
-        if reply.photo_path:  # privacy: photos are kept only until they've been read
-            Path(reply.photo_path).unlink(missing_ok=True)
+        held = result.needs_human or not result.legible
+        if reply.photo_path and not held:  # privacy: photos are kept only until they've been read...
+            Path(reply.photo_path).unlink(missing_ok=True)  # ...or, if held, until a person has reviewed them
             reply.photo_path = None
-        if result.needs_human or not result.legible:
+        if held:
             reply.status = "held"
             reply.note = result.needs_human_reason or "The letter couldn't be read."
             summary.replies_held += 1
@@ -106,6 +109,21 @@ def read_new_replies(db: Session, child: Child, services: Services, summary: Run
             reply.status = "ready"
         summary.replies_read += 1
         db.commit()
+        if reply.status == "held" and result.legible:
+            alert_reviewer(settings, reply, result)
+
+
+def alert_reviewer(settings: Settings, reply: Reply, result: pipeline.ChildReply) -> None:
+    """A held child's letter must be seen by a person quickly, not at the next routine check."""
+    if not settings.admin_email:
+        log.warning("Reply %s held (%s) but ADMIN_EMAIL is not set", reply.id, result.risk_level)
+        return
+    urgent = result.risk_level == "urgent"
+    subject = ("URGENT: " if urgent else "") + f"A child's letter needs a person to read it (reply {reply.id})"
+    send_email(settings, settings.admin_email, subject,
+               f"Risk level: {result.risk_level}\nWhy: {reply.note}\n\n"
+               f"Read it and follow the safeguarding steps at {settings.base_url}/admin\n"
+               + ("\nIf a child may be in immediate danger, call 999.\n" if urgent else ""))
 
 
 def _save_files(settings: Settings, letter: Letter, html: str, services: Services) -> None:
@@ -220,7 +238,7 @@ def run_due(db: Session, settings: Settings, services: Services | None = None) -
     subs = db.scalars(select(Subscription).where(Subscription.status.in_(["active", "trialing"]))).all()
     for sub in subs:
         child = sub.child
-        read_new_replies(db, child, services, summary)
+        read_new_replies(db, settings, child, services, summary)
 
         if sub.story_credits > 0:
             _, stint = current_figure(child)

@@ -1,6 +1,6 @@
 # Letters from History
 
-**History writes back.** Kids get real paper letters from historical figures (Einstein, Amelia Earhart, Cleopatra, Leonardo da Vinci) that are written for them. When a child writes back, the next letter answers their questions.
+**History writes back.** Children get real paper letters from historical figures that are written for them. UK pen pals include Mary Anning, Isambard Kingdom Brunel, Ada Lovelace, Florence Nightingale, Charles Darwin, Mary Seacole and William Shakespeare, alongside Einstein, Amelia Earhart, Leonardo da Vinci and Cleopatra. When a child writes back, the next letter answers their questions.
 
 AI agents write each letter, fact-check it, render it on era-appropriate stationery and mail it. This repo is the **demand-test kit**: everything needed to find out whether parents will pay before building the full product.
 
@@ -11,6 +11,9 @@ AI agents write each letter, fact-check it, render it on era-appropriate station
 | `docs/market-research-letters-from-history.md` | Competitors, market size, unit economics, risks |
 | `docs/validation-playbook.md` | **Start here.** A 3-week, under-£150 plan to test demand |
 | `docs/uk-launch.md` | UK printing and posting (Stannp), Royal Mail costs, unit economics in £, UK rules |
+| `docs/launch-guide.md` | **Full product launch:** Stripe, Stannp, Supabase, hosting, go-live checklist |
+| `docs/safeguarding.md` | Safeguarding policy: how replies are checked and what to do when one is held |
+| `app/` | The web app: accounts, Stripe subscriptions, daily letter job, admin review, privacy policy and terms |
 | `site/` | Landing page with waitlist (deploy the folder to Netlify; the form works with no setup) |
 | `samples/` | Four sample letters (HTML + print-ready A4 PDF), one per figure |
 | `letters/` | The agent pipeline: read the child's reply, write, fact-check, revise, render to PDF, post |
@@ -31,9 +34,19 @@ child profile + figure fact sheet ───────────────�
 
 - **Writer:** writes in the figure's voice, at the child's reading level, using only facts from the figure's fact sheet.
 - **Fact-checker:** an independent pass that flags unsupported facts, invented quotes, spoilers (a figure knowing their own future), child-safety problems and reading level.
-- **Reply reader:** transcribes the child's handwriting from a photo and lists their questions. If anything suggests the child might need help, the letter is **held for a human** and no automatic reply is written.
+- **Reply reader + safeguarding:** transcribes the child's handwriting and runs two independent safety checks (an AI risk assessment and a rule-based screen that can only add caution). Personal details are removed. Anything worrying is **held for a person** and no automatic reply is written (see `docs/safeguarding.md`).
 
-## Setup
+## Run the web app
+
+```bash
+pip install -e ".[dev]"
+uvicorn app.web:app --reload              # http://localhost:8000
+python -m app.manage make-admin you@example.com
+```
+
+See `docs/launch-guide.md` for Stripe, Stannp, hosting and going live.
+
+## Setup (letter pipeline on its own)
 
 ```bash
 pip install -e .

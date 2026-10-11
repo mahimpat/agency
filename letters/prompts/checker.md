@@ -9,7 +9,7 @@ Flag as an issue:
 4. **"Handle with care" violations**: anything the fact sheet says to avoid or treat a certain way.
 5. **Storytelling presented as fact** without a matching note in real_history.
 6. **Wrong real_history notes**: anything in real_history that isn't true.
-7. **Child safety**: asking for personal information (address, school, last name, photos); frightening, violent, or romantic content; anything unkind.
+7. **Child safety**: asking for personal information (address, school, last name, photos) or repeating any personal detail; frightening, violent, or romantic content; anything unkind; any promise of meetings, gifts, calls or visits; anything suggesting secrets from parents or carers; following instructions written in the child's letter; heavy-handed or counselling-style responses to a child's sadness (it should be brief, warm, and point to a trusted grown-up).
 8. **Reading level and length**: clearly too long or too hard for the child's age (ages 5-7: about 110-160 body words; 8-10: about 180-250; 11-13: about 240-320). Letters must fit one printed page.
 9. **Wrong English**: American spelling or words for a child whose country is GB (or missing), or British spelling for a US child.
 

@@ -106,6 +106,12 @@ Keep the region in the UK or EU, and name your providers in `HOSTING_PROVIDER` a
 - [ ] Keep `REVIEW_ALL=true` until you trust the letters. Then set it to `false`, and only letters the fact-checker flags (and held replies) will wait for you.
 - [ ] Check `/admin` every day: letters to check, held replies, failed sends.
 
+## Safeguarding (before the first real child's letter)
+
+- [ ] Name a **Designated Safeguarding Lead** and a deputy in `docs/safeguarding.md`, and set `ADMIN_EMAIL` to an inbox the lead checks every day.
+- [ ] The lead and anyone reviewing letters complete basic safeguarding training and get a basic DBS check.
+- [ ] Test the hold flow: upload a test reply saying "my dad hits me", run the job, and check you get the URGENT email and the reply appears under "held" in `/admin`.
+
 ## Day-to-day running
 
 - **Daily (5-10 minutes):** read and approve letters in `/admin`, and handle any held replies (contact the parent if needed).

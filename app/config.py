@@ -17,7 +17,12 @@ PLANS = {
 }
 
 # Each child spends a few months with one pen pal, then meets the next.
-FIGURE_ORDER = ["einstein", "amelia-earhart", "leonardo-da-vinci", "cleopatra"]
+# Starts with UK curriculum favourites; the first pen pal is a fossil hunter, because dinosaurs.
+FIGURE_ORDER = [
+    "mary-anning", "isambard-kingdom-brunel", "ada-lovelace", "florence-nightingale",
+    "charles-darwin", "mary-seacole", "william-shakespeare", "einstein",
+    "amelia-earhart", "leonardo-da-vinci", "cleopatra",
+]
 LETTERS_PER_FIGURE = 3
 REPLY_WAIT_DAYS = 21  # after this, an unused reply credit becomes a follow-up letter
 

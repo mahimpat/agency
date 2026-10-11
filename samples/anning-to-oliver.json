@@ -1,0 +1,22 @@
+{
+  "figure": "mary-anning",
+  "child": "Oliver",
+  "letter": {
+    "greeting": "Dear Oliver,",
+    "body": [
+      "My name is Mary Anning, and I am writing to you from Lyme Regis, a little town by the sea in Dorset. I am told this letter will travel nearly two hundred years to reach you!",
+      "I hunt for fossils. After winter storms, rocks tumble down from the cliffs, and inside them I find the bones of creatures that lived long, long ago. When I was about twelve, I dug out the skeleton of a huge sea reptile called an ichthyosaur. Its name means fish-lizard!",
+      "I hear you love dinosaurs. So do I! My ichthyosaurs swam in the sea at the same time as the dinosaurs. On the beach I often find ammonites, which are curly shells turned to stone. I have drawn one for you.",
+      "My dog Tray comes fossil hunting with me. He is very patient while I dig."
+    ],
+    "signoff": "Your friend from the seashore,\nMary",
+    "postscript": "If you found a fossil on the beach, what would you hope it was?",
+    "real_history": [
+      "Mary Anning (born 1799) was a fossil hunter from Lyme Regis in Dorset, on the coast now called the Jurassic Coast.",
+      "Around 1811, her brother Joseph found the skull of an ichthyosaur, and Mary, aged about 12, found the rest of the skeleton.",
+      "Ichthyosaurs were sea reptiles that lived at the same time as the dinosaurs, but they were not dinosaurs themselves.",
+      "Scientists of her day often didn't give Mary credit for her discoveries. Today she is remembered as one of the greatest fossil hunters.",
+      "Storytelling: Mary never wrote to children in the future, but she really did have a dog called Tray who came fossil hunting with her."
+    ]
+  }
+}

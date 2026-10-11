@@ -293,10 +293,33 @@ class LetterFlowTests(AppTestCase):
         self.assertNotIn("reply", [w["kind"] for w in self.services.written])
         admin = self.make_admin()
         self.assertIn("mentions being hurt", admin.get("/admin").text)
+        self.assertIn("0808 800 5000", admin.get("/admin").text)  # safeguarding steps shown to the reviewer
         self.admin_post(admin, "/admin/replies/1/release")
         self.services.reply_result = None
         self.run_job()
         self.assertEqual(self.services.written[-1]["kind"], "reply")
+
+    def test_rule_screen_holds_a_reply_the_ai_missed_keeps_photo_and_alerts_urgently(self):
+        # The (fake) AI says this letter is fine; the rule-based screen must still hold it.
+        self.services.reply_result = pipeline.ChildReply(
+            legible=True, text="my dad hits me", questions=[], shared_news=[], needs_human=False,
+            needs_human_reason="", risk_level="urgent")
+        self.settings.admin_email = "safeguarding@example.com"
+        sub_id = self.signup()
+        self.activate(sub_id)
+        self.run_job()
+        self.client.post("/children/1/reply", data={"csrf": self.csrf("/account")},
+                         files={"photo": ("l.jpg", b"\xff\xd8jpeg", "image/jpeg")})
+        with mock.patch("app.jobs.send_email") as send:
+            self.run_job()
+        self.assertTrue(send.call_args.args[2].startswith("URGENT"))
+        self.assertIn("999", send.call_args.args[3])
+        self.assertEqual(len(list(self.settings.uploads_dir.iterdir())), 1)  # kept for the reviewer
+        admin = self.make_admin()
+        self.assertEqual(admin.get("/admin/replies/1/photo").status_code, 200)
+        self.assertEqual(self.client.get("/admin/replies/1/photo").status_code, 404)  # parents can't
+        self.admin_post(admin, "/admin/replies/1/dismiss")
+        self.assertEqual(list(self.settings.uploads_dir.iterdir()), [])  # deleted after review
 
     def test_no_reply_in_time_becomes_follow_up_and_reject_returns_credit(self):
         sub_id = self.signup()
