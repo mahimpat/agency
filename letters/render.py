@@ -442,7 +442,7 @@ def render_html(
     <p>Write here or on any paper you like. Then ask a grown-up to take a photo of it and upload it in your Letters from History account. {escape(first_name)}'s next letter will answer you.</p>
     <div class="lines"></div>
   </div>
-  <div class="fine">Letters from History · Written with the help of AI, from verified historical facts, and checked for accuracy before printing.</div>
+  <div class="fine">Letters from History · An imaginative letter written today with the help of AI, from verified historical facts, and checked for accuracy before printing. Not affiliated with or endorsed by any historical figure's estate.</div>
 </section>
 {FIT_SCRIPT}
 </body></html>

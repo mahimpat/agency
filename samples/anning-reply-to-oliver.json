@@ -1,0 +1,22 @@
+{
+  "figure": "mary-anning",
+  "child": "Oliver",
+  "letter": {
+    "greeting": "Dear Oliver,",
+    "body": [
+      "Thank you for your letter! You found a stone shaped like a curly shell on the beach at Charmouth? Then I am almost certain it is an ammonite. Charmouth is just along the shore from my house, and I find ammonites there too. That shell belonged to a sea creature that lived millions of years ago.",
+      "You asked if I have ever found a real dinosaur. Here is the truth: not quite! I find creatures that lived at the same time as the dinosaurs, but in the sea. When I was about twelve, I dug out a huge ichthyosaur, a fish-lizard. Later I found a plesiosaur, with a neck so long you would hardly believe it. And once I found a flying reptile called a pterosaur.",
+      "Your dog is called Biscuit? My dog Tray comes fossil hunting with me, and he is very patient while I dig. Perhaps Biscuit could guard your ammonite.",
+      "Keep looking after storms, when new stones fall from the cliffs. But always stay far from the cliff edge, and watch the tide."
+    ],
+    "signoff": "Your friend from the seashore,\nMary",
+    "postscript": "Could you draw your ammonite for me and count its curls?",
+    "real_history": [
+      "Ammonites were sea creatures with curled shells. Their fossils are common on the beaches at Lyme Regis and Charmouth in Dorset.",
+      "Around 1811, Mary Anning, aged about 12, dug out most of an ichthyosaur skeleton. Her brother Joseph had found its skull.",
+      "In 1823 she found the first complete plesiosaur skeleton, and in 1828 the first pterosaur found in Britain.",
+      "Ichthyosaurs and plesiosaurs lived at the same time as dinosaurs, but they were sea reptiles, not dinosaurs.",
+      "Storytelling: Mary never wrote to children in the future, but she really did have a dog called Tray who came fossil hunting with her."
+    ]
+  }
+}
